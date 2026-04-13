@@ -1,0 +1,51 @@
+{% load static %}
+{% for article in articles %}
+<div class="article-preview">
+  <div class="article-meta">
+    <a href="{% url 'profile' username=article.author.username %}">
+      <img src="{% if article.author.image %}{{ article.author.image }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}" alt="{{ article.author.username }}">
+    </a>
+    <div class="info">
+      <a href="{% url 'profile' username=article.author.username %}" class="author">{{ article.author.username }}</a>
+      <span class="date">{{ article.created|date:"F j, Y" }}</span>
+    </div>
+    {% include "partials/favorite_button.html" %}
+  </div>
+  <a href="{% url 'article_detail' slug=article.slug %}" class="preview-link">
+    <h1>{{ article.title }}</h1>
+    <p>{{ article.summary }}</p>
+    <span>Read more...</span>
+    {% if article.tags.all %}
+    <ul class="tag-list">
+      {% for tag in article.tags.all %}
+      <li class="tag-default tag-pill tag-outline">{{ tag.name }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </a>
+</div>
+{% empty %}
+<div class="article-preview">
+  {% if active_tab == 'following' %}
+  <p class="empty-feed-message">Your feed is empty. Check out the <a href="/">Global Feed</a>!</p>
+  {% else %}
+  <p class="empty-feed-message">No articles are here... yet.</p>
+  {% endif %}
+</div>
+{% endfor %}
+
+{% if pages|length > 1 %}
+<nav>
+  <ul class="pagination">
+    {% for p in pages %}
+    <li class="page-item{% if p == page %} active{% endif %}">
+      <button class="page-link"
+         hx-get="{% if active_tag %}{% url 'tag' tag=active_tag %}{% else %}/{% endif %}?{% if active_tab == 'following' %}feed=following&{% endif %}page={{ p }}"
+         hx-target="#feed-content" hx-push-url="true">
+        {{ p }}
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}

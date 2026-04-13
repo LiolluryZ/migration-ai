@@ -1,0 +1,7 @@
+{% if user.is_authenticated and user != profile_user %}
+<button class="btn btn-sm{% if is_following %} btn-secondary{% else %} btn-outline-secondary{% endif %} action-btn"
+        hx-post="{% url 'follow' username=profile_user.username %}"
+        hx-target="this" hx-swap="outerHTML">
+  <i class="ion-plus-round"></i>&nbsp;{% if is_following %}Unfollow{% else %}Follow{% endif %} {{ profile_user.username }}
+</button>
+{% endif %}

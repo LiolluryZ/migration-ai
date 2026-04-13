@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="article-page">
+  <div class="banner">
+    <div class="container">
+      <h1>Article not found</h1>
+    </div>
+  </div>
+  <div class="container page">
+    <div class="row article-content">
+      <div class="col-md-12">
+        <ul class="error-messages">
+          <li>Article "{{ slug }}" was not found.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

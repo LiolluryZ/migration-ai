@@ -1,0 +1,33 @@
+<div class="feed-toggle">
+  <ul class="nav nav-pills outline-active">
+    {% if user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link{% if active_tab == 'following' %} active{% endif %}"
+         href="/?feed=following"
+         hx-get="/?feed=following"
+         hx-target="#feed-content" hx-push-url="true">
+        Your Feed
+      </a>
+    </li>
+    {% endif %}
+    <li class="nav-item">
+      <a class="nav-link{% if active_tab == 'global' %} active{% endif %}"
+         href="/"
+         hx-get="/"
+         hx-target="#feed-content" hx-push-url="true">
+        Global Feed
+      </a>
+    </li>
+    {% if active_tab == 'tag' %}
+    <li class="nav-item">
+      <a class="nav-link active" href="{% url 'tag' tag=active_tag %}">
+        <i class="ion-pound"></i> {{ active_tag }}
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</div>
+
+<div id="article-list">
+  {% include "partials/article_list.html" %}
+</div>

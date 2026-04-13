@@ -1,0 +1,11 @@
+{% if user.is_authenticated %}
+<button class="btn btn-sm{% if article.is_favorite %} btn-primary{% else %} btn-outline-primary{% endif %} pull-xs-right"
+        hx-post="{% url 'article_favorite' slug=article.slug %}"
+        hx-target="this" hx-swap="outerHTML">
+  <i class="ion-heart"></i>&nbsp;{% if article.is_favorite %}Unfavorite{% else %}Favorite{% endif %} <span class="counter">({{ article.num_favorites }})</span>
+</button>
+{% else %}
+<button class="btn btn-sm btn-outline-primary pull-xs-right" onclick="window.location.href='{% url 'login' %}'">
+  <i class="ion-heart"></i>&nbsp;Favorite <span class="counter">({{ article.num_favorites }})</span>
+</button>
+{% endif %}

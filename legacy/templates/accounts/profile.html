@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="user-info">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-md-10 offset-md-1">
+          <img src="{% if profile_user.image %}{{ profile_user.image }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}" class="user-img" alt="{{ profile_user.username }}">
+          <h4>{{ profile_user.username }}</h4>
+          <p>{{ profile_user.bio|default:"" }}</p>
+          {% if is_self %}
+            <a href="{% url 'settings' %}" class="btn btn-sm btn-outline-secondary action-btn">
+              <i class="ion-gear-a"></i>&nbsp;Edit Profile Settings
+            </a>
+          {% else %}
+            {% include "partials/follow_button.html" %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-md-10 offset-md-1">
+        <div class="articles-toggle">
+          <ul class="nav nav-pills outline-active">
+            <li class="nav-item">
+              <a class="nav-link{% if tab == 'my' %} active{% endif %}"
+                 href="{% url 'profile' username=profile_user.username %}"
+                 hx-get="{% url 'profile' username=profile_user.username %}"
+                 hx-target=".profile-page" hx-select=".profile-page" hx-swap="outerHTML" hx-push-url="true">
+                My Articles
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link{% if tab == 'favorites' %} active{% endif %}"
+                 href="{% url 'profile_favorites' username=profile_user.username %}"
+                 hx-get="{% url 'profile_favorites' username=profile_user.username %}"
+                 hx-target=".profile-page" hx-select=".profile-page" hx-swap="outerHTML" hx-push-url="true">
+                Favorited Articles
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        {% include "partials/article_list.html" %}
+
+        {% if pages|length > 1 %}
+        <nav>
+          <ul class="pagination">
+            {% for p in pages %}
+            <li class="page-item{% if p == page %} active{% endif %}">
+              <button class="page-link"
+                 hx-get="{% if tab == 'favorites' %}{% url 'profile_favorites' username=profile_user.username %}{% else %}{% url 'profile' username=profile_user.username %}{% endif %}?page={{ p }}"
+                 hx-target=".profile-page" hx-select=".profile-page" hx-swap="outerHTML" hx-push-url="true">
+                {{ p }}
+              </button>
+            </li>
+            {% endfor %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

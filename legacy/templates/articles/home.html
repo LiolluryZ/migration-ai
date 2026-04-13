@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="home-page">
+  {% if not user.is_authenticated %}
+  <div class="banner">
+    <div class="container">
+      <h1><img src="{% static 'images/conduit-logo.svg' %}" alt="conduit" style="height:3.5rem"></h1>
+      <p>A place to share your knowledge.</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-9">
+        <div id="feed-content">
+          {% include "partials/feed_content.html" %}
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="sidebar">
+          <p>Popular Tags</p>
+          <div class="tag-list">
+            {% for tag in tags %}
+            <a href="{% url 'tag' tag=tag.name %}"
+               hx-get="{% url 'tag' tag=tag.name %}"
+               hx-target="#feed-content" hx-push-url="true"
+               class="tag-default tag-pill">
+              {{ tag.name }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

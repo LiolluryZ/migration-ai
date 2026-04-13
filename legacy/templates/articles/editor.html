@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="editor-page">
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-10 offset-md-1 col-xs-12">
+
+        {% if form.non_field_errors %}
+        <ul class="error-messages">
+          {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post" id="editor-form" novalidate>
+          {% csrf_token %}
+          <fieldset>
+            <fieldset class="form-group">
+              {{ form.title }}
+              {% for error in form.title.errors %}<p class="error-messages">{{ error }}</p>{% endfor %}
+            </fieldset>
+            <fieldset class="form-group">
+              {{ form.description }}
+              {% for error in form.description.errors %}<p class="error-messages">{{ error }}</p>{% endfor %}
+            </fieldset>
+            <fieldset class="form-group">
+              {{ form.body }}
+              {% for error in form.body.errors %}<p class="error-messages">{{ error }}</p>{% endfor %}
+            </fieldset>
+            <fieldset class="form-group">
+              <input type="text" class="form-control" placeholder="Enter tags" id="tag-input">
+              <input type="hidden" name="tags" id="tag-hidden" value="{{ form.tags.value|default:'' }}">
+              <div class="tag-list" id="tag-list"></div>
+            </fieldset>
+            <button class="btn btn-lg btn-primary pull-xs-right" type="submit">Publish Article</button>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var tags = [];
+  var tagInput = document.getElementById('tag-input');
+  var tagHidden = document.getElementById('tag-hidden');
+  var tagList = document.getElementById('tag-list');
+
+  // Initialize from existing tags (when editing)
+  var initial = tagHidden.value.trim();
+  if (initial) {
+    initial.split(',').forEach(function(t) {
+      t = t.trim();
+      if (t) tags.push(t);
+    });
+    renderTags();
+  }
+
+  function renderTags() {
+    tagList.innerHTML = '';
+    tags.forEach(function(tag, i) {
+      var pill = document.createElement('span');
+      pill.className = 'tag-default tag-pill';
+      var icon = document.createElement('i');
+      icon.className = 'ion-close-round';
+      icon.style.cursor = 'pointer';
+      icon.addEventListener('click', function() {
+        tags.splice(i, 1);
+        syncHidden();
+        renderTags();
+      });
+      pill.appendChild(icon);
+      pill.appendChild(document.createTextNode(' ' + tag));
+      tagList.appendChild(pill);
+    });
+  }
+
+  function syncHidden() {
+    tagHidden.value = tags.join(',');
+  }
+
+  tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      var val = tagInput.value.trim();
+      if (val && tags.indexOf(val) === -1) {
+        tags.push(val);
+        syncHidden();
+        renderTags();
+      }
+      tagInput.value = '';
+    }
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% load static %}
+{% for comment in comments %}
+<div class="card">
+  <div class="card-block">
+    <p class="card-text">{{ comment.content }}</p>
+  </div>
+  <div class="card-footer">
+    <a href="{% url 'profile' username=comment.author.username %}" class="comment-author">
+      <img src="{% if comment.author.image %}{{ comment.author.image }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}" class="comment-author-img" alt="{{ comment.author.username }}">
+    </a>
+    &nbsp;
+    <a href="{% url 'profile' username=comment.author.username %}" class="comment-author">{{ comment.author.username }}</a>
+    <span class="date-posted">{{ comment.created|date:"F j, Y" }}</span>
+    {% if user == comment.author or user == article.author %}
+    <span class="mod-options">
+      <i class="ion-trash-a"
+         hx-post="{% url 'comment_delete' slug=article.slug comment_id=comment.id %}"
+         hx-target="#comment-list" hx-swap="innerHTML"></i>
+    </span>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
