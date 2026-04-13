@@ -1,0 +1,42 @@
+{
+  "source": {
+    "directory": "",
+    "tech_stack": "",
+    "framework": "",
+    "language": "",
+    "package_manager": "",
+    "orm": "",
+    "test_framework": "",
+    "exclude_patterns": ["node_modules/", "vendor/", ".git/", "dist/", "build/", "__pycache__/", ".idea/", ".vscode/"]
+  },
+  "target": {
+    "directory": "",
+    "tech_stack": "",
+    "framework": "",
+    "language": "",
+    "package_manager": "",
+    "orm": "",
+    "test_framework": ""
+  },
+  "database": {
+    "type": "",
+    "migration_directory": "",
+    "model_directory": ""
+  },
+  "testing": {
+    "api_test_format": "http",
+    "e2e_framework": "playwright",
+    "base_url_legacy": "http://localhost:3000",
+    "base_url_target": "http://localhost:3001",
+    "visual_viewports": [
+      { "width": 1920, "height": 1080, "label": "desktop" },
+      { "width": 768, "height": 1024, "label": "tablet" },
+      { "width": 375, "height": 812, "label": "mobile" }
+    ],
+    "visual_tolerance_threshold": 0.1,
+    "performance_degradation_threshold_percent": 10
+  },
+  "credentials": {
+    "test_users": []
+  }
+}

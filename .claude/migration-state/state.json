@@ -1,0 +1,51 @@
+{
+  "project": {
+    "name": "",
+    "source_tech": "",
+    "target_tech": "",
+    "source_directory": "",
+    "target_directory": "",
+    "initialized_at": null
+  },
+  "current_phase": null,
+  "phases": {
+    "phase0": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase1": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase2": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase3": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase4": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase5": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase6": { "status": "pending", "started_at": null, "completed_at": null }
+  },
+  "agents": {
+    "01-cartographe":                { "status": "pending", "phase": 0, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "02-analyseur-routes":           { "status": "pending", "phase": 0, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "03-inventaire-db":              { "status": "pending", "phase": 0, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "04-metriques":                  { "status": "pending", "phase": 0, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "05-extracteur-regles":          { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "06-extracteur-workflows":       { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "07-extracteur-rbac":            { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "08-documenteur":                { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "09-generateur-tests-api":       { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "10-generateur-tests-e2e":       { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "11-golden-file":                { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "12-recorder-http":              { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "13-navigateur-visuel":          { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "14-comparateur-visuel":         { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "15-couverture-metier":          { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "16-mappeur-techno":             { "status": "pending", "phase": 3, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "17-planificateur":              { "status": "pending", "phase": 3, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "18-traducteur":                 { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "19-validateur-conformite":      { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "20-comparateur-reponses":       { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "21-revieweur-migration":        { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "22-audit-final":                { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "23-detecteur-features-fantomes":{ "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "24-comparateur-surface-api":    { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" }
+  },
+  "migration_modules": [],
+  "module_progress": {},
+  "blockers": [],
+  "human_validations_pending": [],
+  "log": []
+}
