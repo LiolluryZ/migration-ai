@@ -1,0 +1,1111 @@
+{
+  "generated_at": "2026-04-13T11:30:00Z",
+  "agent": "05-extracteur-regles",
+  "confidence": 94,
+  "status": "completed",
+  "modules_analyzed": ["helpers", "config", "accounts", "articles", "comments", "templates", "tests_e2e"],
+  "modules_remaining": [],
+  "summary": {
+    "total_rules": 54,
+    "by_type": { "validation": 12, "calculation": 2, "authorization": 12, "workflow": 3, "transformation": 14, "constraint": 11 },
+    "by_domain": { "rendering": 4, "error_handling": 1, "authentication": 7, "i18n": 1, "security": 3, "user_management": 5, "social": 3, "pagination": 3, "articles": 9, "tags": 3, "favorites": 1, "comments": 5, "ui": 10, "navigation": 1 },
+    "requiring_human_validation": 0,
+    "inconsistencies_found": 2
+  },
+  "rules": [
+    {
+      "id": "BR-001",
+      "domain": "rendering",
+      "module": "helpers",
+      "summary": "La presence du header HTTP HX-Request=true determine si la reponse doit etre un fragment HTML partiel (HTMX) ou une page complete. Ce mecanisme conditionne le rendu de toutes les vues.",
+      "formal_expression": "is_htmx(request) := request.headers['HX-Request'] == 'true'",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "helpers/htmx.py", "function": "is_htmx", "line_start": 4, "line_end": 5, "code_snippet": "def is_htmx(request: HttpRequest) -> bool:\n    return request.headers.get(\"HX-Request\") == \"true\"" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Header absent ou valeur differente de 'true'", "expected_behavior": "Retourne False, la vue rend la page complete" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 70,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-002",
+      "domain": "error_handling",
+      "module": "helpers",
+      "summary": "Les violations de contrainte d'unicite en base de donnees sont parsees pour extraire le nom du champ en erreur, permettant d'afficher un message d'erreur metier specifique (ex: 'email already taken'). Supporte SQLite et PostgreSQL.",
+      "formal_expression": "clean_integrity_error(error) -> field_name | null",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "helpers/exceptions.py", "function": "clean_integrity_error", "line_start": 27, "line_end": 36, "code_snippet": "def clean_integrity_error(error: Exception) -> str | None:\n    try:\n        if UniqueViolation is not None and isinstance(error.__cause__, UniqueViolation):\n            return error.__cause__.args[0].split(\":\")[1].split(\"(\")[1].split(\")\")[0]\n        if isinstance(error.__cause__, SQLiteIntegrityError):\n            return error.__cause__.args[0].split(\": \")[1].split(\".\")[1]\n        return None\n    except Exception:\n        return None" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Format d'erreur non reconnu (ni PostgreSQL ni SQLite)", "expected_behavior": "Retourne None silencieusement" },
+        { "description": "Message d'erreur SQLite malformed", "expected_behavior": "Retourne None (catch-all Exception)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 75,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-003",
+      "domain": "authentication",
+      "module": "helpers",
+      "summary": "Pour tout utilisateur authentifie, le contexte expose en JSON les champs username, email, bio et image. Pour un utilisateur non authentifie, le contexte expose null. Cela alimente window.__conduit_debug__ dans le frontend.",
+      "formal_expression": "IF user.is_authenticated THEN expose {username, email, bio, image} ELSE expose null",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "helpers/context_processors.py", "function": "conduit_context", "line_start": 4, "line_end": 20, "code_snippet": "def conduit_context(request):\n    if request.user.is_authenticated:\n        user_data = {\n            \"username\": request.user.username,\n            \"email\": request.user.email,\n            \"bio\": request.user.bio or None,\n            \"image\": request.user.image or None,\n        }\n        return {\"conduit_user_json\": json.dumps(user_data), \"conduit_authenticated\": True}\n    return {\"conduit_user_json\": \"null\", \"conduit_authenticated\": False}" }
+      ],
+      "dependencies": ["BR-001"],
+      "edge_cases": [
+        { "description": "bio ou image vide (string vide)", "expected_behavior": "Converti en None via 'or None'" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 80,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-004",
+      "domain": "security",
+      "module": "config",
+      "summary": "[NON MIGRÉE] AUTH_PASSWORD_VALIDATORS est configuré dans settings.py mais n'est PAS effectivement appliqué lors de l'inscription ni du changement de mot de passe. Décision humaine (2026-04-13): comportement intentionnel à reproduire — aucune validation de complexité de mot de passe dans la cible.",
+      "formal_expression": null,
+      "migration_status": "excluded",
+      "migration_decision": "Règle non effective dans le legacy. Décision: ne pas appliquer de validators de mot de passe dans la cible. Validé le 2026-04-13.",
+      "type": "validation",
+      "source_locations": [
+        { "file": "config/settings.py", "function": "AUTH_PASSWORD_VALIDATORS", "line_start": 117, "line_end": 122, "code_snippet": "AUTH_PASSWORD_VALIDATORS = [\n    {\"NAME\": \"django.contrib.auth.password_validation.UserAttributeSimilarityValidator\"},\n    {\"NAME\": \"django.contrib.auth.password_validation.MinimumLengthValidator\"},\n    {\"NAME\": \"django.contrib.auth.password_validation.CommonPasswordValidator\"},\n    {\"NAME\": \"django.contrib.auth.password_validation.NumericPasswordValidator\"},\n]" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Mot de passe identique au username ou email", "expected_behavior": "Rejete par UserAttributeSimilarityValidator" },
+        { "description": "Mot de passe de moins de 8 caracteres", "expected_behavior": "Rejete par MinimumLengthValidator" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 100,
+      "requires_human_validation": false,
+      "validation_question": null,
+      "human_decision": { "date": "2026-04-13", "decision": "non_migrate", "rationale": "Regle configuree mais non effective dans le legacy. Comportement voulu : pas de restriction sur les mots de passe." }
+    },
+    {
+      "id": "BR-005",
+      "domain": "authentication",
+      "module": "config",
+      "summary": "Les utilisateurs non authentifies sont rediriges vers /login lorsqu'ils tentent d'acceder a une page protegee par @login_required.",
+      "formal_expression": "IF NOT authenticated AND route.requires_auth THEN redirect('/login')",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "config/settings.py", "function": "LOGIN_URL", "line_start": 155, "line_end": 155, "code_snippet": "LOGIN_URL = \"/login\"" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-006",
+      "domain": "i18n",
+      "module": "config",
+      "summary": "L'application utilise l'anglais americain comme langue par defaut et le fuseau horaire UTC pour toutes les dates/heures.",
+      "formal_expression": "LANGUAGE_CODE = 'en-us' AND TIME_ZONE = 'UTC' AND USE_TZ = True",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "config/settings.py", "function": "settings", "line_start": 134, "line_end": 137, "code_snippet": "LANGUAGE_CODE = \"en-us\"\nTIME_ZONE = \"UTC\"\nUSE_I18N = True\nUSE_TZ = True" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-007",
+      "domain": "user_management",
+      "module": "accounts",
+      "summary": "Le modele User utilise l'email comme identifiant de connexion (USERNAME_FIELD), pas le username. L'email est obligatoire et unique. Le username est un champ affiche, egalement unique, max 60 caracteres.",
+      "formal_expression": "USERNAME_FIELD = 'email'; email: unique, required; username: unique, max_length=60, required",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "apps/accounts/models.py", "function": "User", "line_start": 30, "line_end": 44, "code_snippet": "class User(AbstractUser):\n    email = models.EmailField('Email Address', unique=True)\n    username = models.CharField(max_length=60, unique=True)\n    EMAIL_FIELD = 'email'\n    USERNAME_FIELD = 'email'\n    REQUIRED_FIELDS: list[str] = []" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "REQUIRED_FIELDS est vide — seul email et password sont requis via createsuperuser", "expected_behavior": "Le username doit etre fourni separement" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-008",
+      "domain": "user_management",
+      "module": "accounts",
+      "summary": "Les champs first_name et last_name de AbstractUser sont supprimes du modele User. Seuls username, email, bio et image sont utilises.",
+      "formal_expression": "User.first_name = None; User.last_name = None",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "apps/accounts/models.py", "function": "User", "line_start": 32, "line_end": 33, "code_snippet": "first_name = None\nlast_name = None" }
+      ],
+      "dependencies": ["BR-007"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-009",
+      "domain": "user_management",
+      "module": "accounts",
+      "summary": "Le champ bio est un texte libre optionnel (default vide). Le champ image est une URL optionnelle (pas un upload fichier).",
+      "formal_expression": "bio: text, blank=True, default=''; image: URL, null=True, blank=True, max_length=200",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/accounts/models.py", "function": "User", "line_start": 37, "line_end": 38, "code_snippet": "bio = models.TextField(blank=True)\nimage = models.URLField(null=True, blank=True)" }
+      ],
+      "dependencies": ["BR-007"],
+      "edge_cases": [
+        { "description": "Image n'est pas un fichier uploade mais un lien URL externe", "expected_behavior": "Validation URLField standard Django" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-010",
+      "domain": "social",
+      "module": "accounts",
+      "summary": "La relation de suivi (follow) entre utilisateurs est asymetrique : A peut suivre B sans que B suive A. C'est une relation ManyToMany self-referentielle avec symmetrical=False.",
+      "formal_expression": "followers: ManyToMany('self', symmetrical=False); is_following(A, B) := A in B.followers",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "apps/accounts/models.py", "function": "User", "line_start": 40, "line_end": 40, "code_snippet": "followers = models.ManyToManyField('self', blank=True, symmetrical=False)" },
+        { "file": "apps/accounts/models.py", "function": "is_following", "line_start": 51, "line_end": 52, "code_snippet": "def is_following(self, other_user: User) -> bool:\n    return other_user.followers.filter(pk=self.id).exists() if self.is_authenticated else False" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Utilisateur non authentifie", "expected_behavior": "is_following retourne toujours False" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-011",
+      "domain": "authentication",
+      "module": "accounts",
+      "summary": "L'authentification se fait par email + password. En cas d'echec, un message generique 'Invalid email or password.' est affiche (pas de distinction entre email inconnu et mauvais mot de passe).",
+      "formal_expression": "authenticate(email, password) -> user | None; IF None THEN error('Invalid email or password.')",
+      "type": "workflow",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "login_view", "line_start": 17, "line_end": 27, "code_snippet": "user = authenticate(email=form.cleaned_data['email'], password=form.cleaned_data['password'])\nif user is not None:\n    login(request, user)\n    return redirect('home')\nform.add_error(None, 'Invalid email or password.')" }
+      ],
+      "dependencies": ["BR-007"],
+      "edge_cases": [
+        { "description": "Email valide mais password incorrect", "expected_behavior": "Meme message generique" },
+        { "description": "Email inexistant", "expected_behavior": "Meme message generique" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-012",
+      "domain": "authentication",
+      "module": "accounts",
+      "summary": "Apres un login reussi, l'utilisateur est redirige vers la page d'accueil ('home').",
+      "formal_expression": "IF login_success THEN redirect('home')",
+      "type": "workflow",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "login_view", "line_start": 23, "line_end": 24, "code_snippet": "login(request, user)\nreturn redirect('home')" }
+      ],
+      "dependencies": ["BR-011"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-013",
+      "domain": "user_management",
+      "module": "accounts",
+      "summary": "L'inscription requiert username, email et password. Les champs email et username doivent etre uniques. En cas de doublon email: 'This email has already been taken.' En cas de doublon username: 'This username has already been taken.' Sinon erreur generique.",
+      "formal_expression": "register(username, email, password); IF duplicate(email) THEN error('email taken'); IF duplicate(username) THEN error('username taken')",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "register_view", "line_start": 30, "line_end": 52, "code_snippet": "user = User.objects.create_user(email=..., username=..., password=...)\n...\nexcept IntegrityError as err:\n    field = clean_integrity_error(err)\n    if field == 'email': form.add_error('email', 'This email has already been taken.')\n    elif field == 'username': form.add_error('username', 'This username has already been taken.')" },
+        { "file": "apps/accounts/forms.py", "function": "RegisterForm", "line_start": 14, "line_end": 17, "code_snippet": "class RegisterForm(forms.Form):\n    username = forms.CharField(max_length=60, ...)\n    email = forms.EmailField(...)\n    password = forms.CharField(...)" }
+      ],
+      "dependencies": ["BR-002", "BR-007"],
+      "edge_cases": [
+        { "description": "IntegrityError non reconnue (ni email ni username)", "expected_behavior": "Message generique 'Registration failed.'" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-014",
+      "domain": "authentication",
+      "module": "accounts",
+      "summary": "Apres une inscription reussie, l'utilisateur est automatiquement connecte (login) et redirige vers la page d'accueil.",
+      "formal_expression": "IF register_success THEN auto_login(user) AND redirect('home')",
+      "type": "workflow",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "register_view", "line_start": 40, "line_end": 42, "code_snippet": "login(request, user)\nreturn redirect('home')" }
+      ],
+      "dependencies": ["BR-013"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-015",
+      "domain": "user_management",
+      "module": "accounts",
+      "summary": "La page des parametres permet de modifier image, username, bio, email. Le mot de passe est optionnel : s'il est fourni, il est mis a jour et l'utilisateur est re-connecte (pour maintenir la session). Apres sauvegarde, redirection vers le profil.",
+      "formal_expression": "settings_update(image?, username, bio?, email, password?); IF password THEN set_password(password) AND re-login; redirect('profile', username)",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "settings_view", "line_start": 55, "line_end": 69, "code_snippet": "form = SettingsForm(request.POST, instance=request.user)\nif form.is_valid():\n    user = form.save(commit=False)\n    password = form.cleaned_data.get('password')\n    if password:\n        user.set_password(password)\n    user.save()\n    if password:\n        login(request, user)\n    return redirect('profile', username=user.username)" },
+        { "file": "apps/accounts/forms.py", "function": "SettingsForm", "line_start": 19, "line_end": 35, "code_snippet": "class SettingsForm(forms.ModelForm):\n    password = forms.CharField(required=False, ...)\n    class Meta:\n        model = User\n        fields = ['image', 'username', 'bio', 'email']" }
+      ],
+      "dependencies": ["BR-007", "BR-009"],
+      "edge_cases": [
+        { "description": "Mot de passe non fourni", "expected_behavior": "Seuls les autres champs sont mis a jour, pas de re-login" },
+        { "description": "Username ou email deja pris par un autre", "expected_behavior": "Validation ModelForm standard Django (IntegrityError possible)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-016",
+      "domain": "authentication",
+      "module": "accounts",
+      "summary": "La deconnexion necessite une requete POST (pas GET). Apres deconnexion, redirection vers la page d'accueil.",
+      "formal_expression": "logout: require_POST; THEN redirect('home')",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "logout_view", "line_start": 72, "line_end": 74, "code_snippet": "@require_POST\ndef logout_view(request):\n    logout(request)\n    return redirect('home')" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Requete GET sur /logout", "expected_behavior": "Retourne HTTP 405 Method Not Allowed" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-017",
+      "domain": "pagination",
+      "module": "accounts",
+      "summary": "Les profils affichent 10 articles par page (ARTICLES_PER_PAGE = 10). La page est determinee par le parametre GET 'page'. Les valeurs invalides ou absentes donnent page 1.",
+      "formal_expression": "page = int(request.GET['page']) or 1; offset = (page - 1) * 10; LIMIT 10",
+      "type": "calculation",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "_profile_view", "line_start": 12, "line_end": 12, "code_snippet": "ARTICLES_PER_PAGE = 10" },
+        { "file": "apps/accounts/views.py", "function": "_profile_view", "line_start": 87, "line_end": 102, "code_snippet": "page = int(request.GET.get('page', 1))\nexcept (ValueError, TypeError):\n    page = 1\noffset = (page - 1) * ARTICLES_PER_PAGE\n...\ntotal_pages = (total + ARTICLES_PER_PAGE - 1) // ARTICLES_PER_PAGE" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "page=0 ou page negative", "expected_behavior": "Accepte tel quel (offset negatif, Django retourne vide)" },
+        { "description": "page='abc' ou absent", "expected_behavior": "Fallback a page=1" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-018",
+      "domain": "social",
+      "module": "accounts",
+      "summary": "Le profil a deux onglets : 'my' (articles ecrits par l'utilisateur) et 'favorites' (articles favoris de l'utilisateur). Les articles sont tries par date de creation decroissante.",
+      "formal_expression": "IF tab='my' THEN articles.filter(author=profile_user) ELIF tab='favorites' THEN articles.filter(favorites=profile_user); ORDER BY -created",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "_profile_view", "line_start": 95, "line_end": 99, "code_snippet": "if tab == 'favorites':\n    queryset = queryset.filter(favorites=profile_user)\nelse:\n    queryset = queryset.filter(author=profile_user)\nqueryset = queryset.order_by('-created')" }
+      ],
+      "dependencies": ["BR-017"],
+      "edge_cases": [
+        { "description": "Utilisateur sans articles", "expected_behavior": "Liste vide, pas de pagination" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-019",
+      "domain": "social",
+      "module": "accounts",
+      "summary": "Follow/unfollow est un toggle : si l'utilisateur suit deja, il se desabonne ; sinon il s'abonne. Un utilisateur ne peut pas se suivre lui-meme. Necessite authentification et methode POST.",
+      "formal_expression": "IF profile_user == current_user THEN no-op (is_following=False); ELIF already_following THEN unfollow; ELSE follow",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "follow_view", "line_start": 126, "line_end": 145, "code_snippet": "@login_required\n@require_POST\ndef follow_view(request, username):\n    profile_user = get_object_or_404(User, username=username)\n    if profile_user != request.user:\n        if profile_user.followers.filter(pk=request.user.id).exists():\n            profile_user.followers.remove(request.user)\n            is_following = False\n        else:\n            profile_user.followers.add(request.user)\n            is_following = True\n    else:\n        is_following = False" }
+      ],
+      "dependencies": ["BR-010", "BR-001"],
+      "edge_cases": [
+        { "description": "Utilisateur tente de se suivre lui-meme", "expected_behavior": "Ignore silencieusement, is_following=False" },
+        { "description": "Requete HTMX", "expected_behavior": "Retourne le partial follow_button.html au lieu de rediriger" },
+        { "description": "Requete non-HTMX", "expected_behavior": "Redirection vers la page de profil" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-020",
+      "domain": "authentication",
+      "module": "accounts",
+      "summary": "La page des parametres (settings) et le follow necessitent une authentification. Les utilisateurs non connectes sont rediriges vers /login.",
+      "formal_expression": "settings_view: @login_required; follow_view: @login_required",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "settings_view", "line_start": 55, "line_end": 55, "code_snippet": "@login_required\ndef settings_view(request):" },
+        { "file": "apps/accounts/views.py", "function": "follow_view", "line_start": 126, "line_end": 127, "code_snippet": "@login_required\n@require_POST\ndef follow_view(request, username):" }
+      ],
+      "dependencies": ["BR-005"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-021",
+      "domain": "user_management",
+      "module": "accounts",
+      "summary": "Profil inexistant (username inconnu) retourne une page 404 dediee (profile_404.html) avec le username en contexte, au lieu d'une erreur generique.",
+      "formal_expression": "IF User.DoesNotExist THEN render('profile_404.html', status=404)",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/accounts/views.py", "function": "_profile_view", "line_start": 82, "line_end": 84, "code_snippet": "try:\n    profile_user = User.objects.get(username=username)\nexcept User.DoesNotExist:\n    return render(request, 'accounts/profile_404.html', {'username': username}, status=404)" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-022",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "Le titre d'un article est obligatoire, unique et limite a 150 caracteres. Le summary et le content sont optionnels (blank=True, default vide).",
+      "formal_expression": "title: varchar(150), unique, required; summary: text, optional, default=''; content: text, optional, default=''",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/articles/models.py", "function": "Article", "line_start": 30, "line_end": 33, "code_snippet": "title = models.CharField(max_length=150, unique=True, blank=False)\nsummary = models.TextField(blank=True)\ncontent = models.TextField(blank=True)" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Titre duplique", "expected_behavior": "IntegrityError (unique constraint)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-023",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "Le slug est genere automatiquement a partir du titre via slugify() uniquement a la creation (quand pk est None). Il n'est PAS regenere lors des mises a jour.",
+      "formal_expression": "IF NOT article.pk THEN article.slug = slugify(article.title)",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/articles/models.py", "function": "Article.save", "line_start": 43, "line_end": 45, "code_snippet": "def save(self, *args, **kwargs) -> None:\n    if not self.pk:\n        self.slug = slugify(self.title)\n    super().save(*args, **kwargs)" }
+      ],
+      "dependencies": ["BR-022"],
+      "edge_cases": [
+        { "description": "Titre modifie apres creation", "expected_behavior": "Le slug reste l'ancien (celui de la creation)" },
+        { "description": "Titres differents produisant le meme slug", "expected_behavior": "IntegrityError car slug est unique" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-024",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "Le champ created est auto-rempli a la creation (auto_now_add) et indexe. Le champ updated est auto-mis a jour a chaque sauvegarde (auto_now). Les deux sont des DateTimeField.",
+      "formal_expression": "created: auto_now_add=True, db_index=True; updated: auto_now=True",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "apps/articles/models.py", "function": "Article", "line_start": 35, "line_end": 36, "code_snippet": "created = models.DateTimeField(auto_now_add=True, db_index=True)\nupdated = models.DateTimeField(auto_now=True)" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-025",
+      "domain": "favorites",
+      "module": "articles",
+      "summary": "Chaque article a un compteur de favoris (num_favorites) et un indicateur boolean (is_favorite) calcules par annotation SQL. Pour les utilisateurs non authentifies, is_favorite est toujours False.",
+      "formal_expression": "num_favorites = COUNT(article.favorites); is_favorite = EXISTS(user IN article.favorites) IF authenticated ELSE False",
+      "type": "calculation",
+      "source_locations": [
+        { "file": "apps/articles/models.py", "function": "ArticleQuerySet.with_favorites", "line_start": 13, "line_end": 22, "code_snippet": "def with_favorites(self, user) -> Self:\n    return self.annotate(\n        num_favorites=models.Count('favorites'),\n        is_favorite=(\n            models.Exists(get_user_model().objects.filter(pk=user.id, favorites=models.OuterRef('pk')))\n            if user.is_authenticated\n            else models.Value(False, output_field=models.BooleanField())\n        ),\n    )" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Utilisateur non authentifie", "expected_behavior": "is_favorite = False, num_favorites est toujours calcule" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-026",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "La page d'accueil a 3 onglets de feed : 'global' (tous les articles), 'following' (articles des auteurs suivis), 'tag' (filtrage par tag). Le feed par defaut est 'global'.",
+      "formal_expression": "IF feed='following' THEN articles.filter(author__in=user.following); ELIF tag THEN articles.filter(tags__name=tag); ELSE all articles",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "_build_feed", "line_start": 18, "line_end": 45, "code_snippet": "feed = request.GET.get('feed')\n...\nif feed == 'following' and not request.user.is_authenticated:\n    return redirect('login')\nif feed == 'following' and request.user.is_authenticated:\n    followed_authors = User.objects.filter(followers=request.user)\n    queryset = queryset.filter(author__in=followed_authors)\n    active_tab = 'following'\nelif tag:\n    queryset = queryset.filter(tags__name=tag)\n    active_tab = 'tag'\nelse:\n    active_tab = 'global'" }
+      ],
+      "dependencies": ["BR-010"],
+      "edge_cases": [
+        { "description": "Utilisateur non authentifie demande feed='following'", "expected_behavior": "Redirection vers /login" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-027",
+      "domain": "tags",
+      "module": "articles",
+      "summary": "La liste de tous les tags est cachee pendant 5 minutes (300 secondes). Le cache est invalide ('all_tags' supprime) a chaque sauvegarde d'article.",
+      "formal_expression": "tags = cache.get_or_set('all_tags', Tag.objects.all, timeout=300); ON article_save: cache.delete('all_tags')",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "_build_feed", "line_start": 51, "line_end": 51, "code_snippet": "tags = cache.get_or_set('all_tags', Tag.objects.all, timeout=300)" },
+        { "file": "apps/articles/views.py", "function": "_save_article_form", "line_start": 106, "line_end": 106, "code_snippet": "cache.delete('all_tags')" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Suppression d'un article", "expected_behavior": "Le cache n'est PAS invalide (potentiel bug : tags orphelins visibles jusqu'a expiration)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-028",
+      "domain": "pagination",
+      "module": "articles",
+      "summary": "Le feed d'accueil pagine les articles par 10 par page, tries par date de creation decroissante. Meme logique de pagination que le profil.",
+      "formal_expression": "articles.order_by('-created'); LIMIT 10 OFFSET (page-1)*10",
+      "type": "calculation",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "_build_feed", "line_start": 14, "line_end": 14, "code_snippet": "ARTICLES_PER_PAGE = 10" },
+        { "file": "apps/articles/views.py", "function": "_build_feed", "line_start": 44, "line_end": 48, "code_snippet": "queryset = queryset.order_by('-created')\ntotal = queryset.count()\narticles = list(queryset[offset : offset + ARTICLES_PER_PAGE])" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": ["BR-017"],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-029",
+      "domain": "rendering",
+      "module": "articles",
+      "summary": "Les requetes HTMX sur la page d'accueil retournent uniquement le partial feed_content.html (contenu du feed). Les requetes normales retournent la page complete home.html.",
+      "formal_expression": "IF is_htmx(request) THEN render('partials/feed_content.html') ELSE render('articles/home.html')",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "_build_feed", "line_start": 60, "line_end": 62, "code_snippet": "if is_htmx(request):\n    return render(request, 'partials/feed_content.html', context)\nreturn render(request, 'articles/home.html', context)" }
+      ],
+      "dependencies": ["BR-001"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-030",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "Article inexistant (slug inconnu) retourne une page 404 dediee (detail_404.html) avec le slug en contexte. Les commentaires de l'article sont affiches tries par date decroissante.",
+      "formal_expression": "IF Article.DoesNotExist THEN render('detail_404.html', status=404); comments.order_by('-created')",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "article_detail_view", "line_start": 71, "line_end": 89, "code_snippet": "try:\n    article = Article.objects.with_favorites(request.user)...get(slug=slug)\nexcept Article.DoesNotExist:\n    return render(request, 'articles/detail_404.html', {'slug': slug}, status=404)\ncomments = article.comment_set.select_related('author').order_by('-created')" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-031",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "Le formulaire d'article utilise des noms de champs differents du modele : form.description -> model.summary, form.body -> model.content. Ce mapping est une specificite du spec RealWorld.",
+      "formal_expression": "form.title -> article.title; form.description -> article.summary; form.body -> article.content; form.tags -> comma-separated tag names",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "_save_article_form", "line_start": 93, "line_end": 96, "code_snippet": "article.title = form.cleaned_data['title']\narticle.summary = form.cleaned_data.get('description', '')\narticle.content = form.cleaned_data.get('body', '')" },
+        { "file": "apps/articles/forms.py", "function": "ArticleForm", "line_start": 4, "line_end": 25, "code_snippet": "class ArticleForm(forms.Form):\n    title = forms.CharField(max_length=150, ...)\n    description = forms.CharField(required=False, ...)\n    body = forms.CharField(required=False, ...)\n    tags = forms.CharField(required=False, widget=forms.HiddenInput())" }
+      ],
+      "dependencies": ["BR-022"],
+      "edge_cases": [
+        { "description": "description ou body vides", "expected_behavior": "Defaut a string vide" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-032",
+      "domain": "tags",
+      "module": "articles",
+      "summary": "Les tags sont envoyes comme une chaine separee par des virgules. A la sauvegarde, tous les tags existants sont d'abord supprimes (clear), puis les nouveaux sont ajoutes un par un apres strip des espaces. Les tags vides sont ignores.",
+      "formal_expression": "article.tags.clear(); FOR tag_name IN tags.split(',') IF tag_name.strip() THEN article.tags.add(tag_name.strip())",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "_save_article_form", "line_start": 98, "line_end": 105, "code_snippet": "tag_string = form.cleaned_data.get('tags', '')\narticle.tags.clear()\nif tag_string:\n    for tag_name in tag_string.split(','):\n        tag_name = tag_name.strip()\n        if tag_name:\n            article.tags.add(tag_name)" }
+      ],
+      "dependencies": ["BR-027"],
+      "edge_cases": [
+        { "description": "Chaine de tags vide", "expected_behavior": "Tous les tags sont supprimes (clear), aucun ajoute" },
+        { "description": "Virgules consecutives ou espaces", "expected_behavior": "Tags vides ignores grace au strip + if" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-033",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "La creation d'article necessite l'authentification. L'auteur est automatiquement defini comme l'utilisateur courant. Apres creation, redirection vers le detail de l'article.",
+      "formal_expression": "@login_required; article.author = request.user; redirect('article_detail', slug)",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "article_create_view", "line_start": 108, "line_end": 115, "code_snippet": "@login_required\ndef article_create_view(request):\n    if request.method == 'POST':\n        form = ArticleForm(request.POST)\n        if form.is_valid():\n            article = Article(author=request.user)\n            _save_article_form(form, article)\n            return redirect('article_detail', slug=article.slug)" }
+      ],
+      "dependencies": ["BR-023", "BR-031"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-034",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "L'edition d'un article necessite l'authentification ET etre l'auteur de l'article. Un utilisateur ne peut modifier que ses propres articles. Le slug sert d'identifiant URL.",
+      "formal_expression": "@login_required; get_object_or_404(Article, slug=slug, author=request.user)",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "article_edit_view", "line_start": 118, "line_end": 119, "code_snippet": "@login_required\ndef article_edit_view(request, slug):\n    article = get_object_or_404(Article, slug=slug, author=request.user)" }
+      ],
+      "dependencies": ["BR-022"],
+      "edge_cases": [
+        { "description": "Utilisateur tente d'editer un article d'un autre", "expected_behavior": "404 Not Found (pas 403 Forbidden)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-035",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "La suppression d'un article necessite l'authentification, la methode POST et etre l'auteur. Apres suppression, redirection vers la page d'accueil.",
+      "formal_expression": "@login_required AND @require_POST AND author=request.user; article.delete(); redirect('home')",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "article_delete_view", "line_start": 131, "line_end": 135, "code_snippet": "@login_required\n@require_POST\ndef article_delete_view(request, slug):\n    article = get_object_or_404(Article, slug=slug, author=request.user)\n    article.delete()\n    return redirect('home')" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Suppression en cascade", "expected_behavior": "Les commentaires de l'article sont supprimes automatiquement (ON DELETE CASCADE)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-036",
+      "domain": "articles",
+      "module": "articles",
+      "summary": "Le favori est un toggle : si deja en favori, on retire ; sinon on ajoute. Necessite authentification et POST. Le compteur est recalcule apres l'operation. HTMX retourne le partial favorite_button.html.",
+      "formal_expression": "IF article.favorites.filter(user).exists() THEN remove(user) ELSE add(user); re-annotate with_favorites",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/articles/views.py", "function": "article_favorite_view", "line_start": 138, "line_end": 151, "code_snippet": "@login_required\n@require_POST\ndef article_favorite_view(request, slug):\n    article = get_object_or_404(Article, slug=slug)\n    if article.favorites.filter(id=request.user.id).exists():\n        article.favorites.remove(request.user)\n    else:\n        article.favorites.add(request.user)\n    article = Article.objects.with_favorites(request.user)...get(pk=article.pk)" }
+      ],
+      "dependencies": ["BR-025", "BR-001"],
+      "edge_cases": [
+        { "description": "Auteur favori son propre article", "expected_behavior": "Autorise (pas de restriction)" },
+        { "description": "Requete HTMX", "expected_behavior": "Retourne le partial favorite_button.html" },
+        { "description": "Requete non-HTMX", "expected_behavior": "Redirection vers le detail de l'article" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-037",
+      "domain": "security",
+      "module": "articles",
+      "summary": "Le contenu Markdown est rendu en HTML via la librairie markdown (extension 'extra') puis assaini par nh3.clean() pour prevenir les attaques XSS. Le resultat est marque safe pour le template.",
+      "formal_expression": "render_markdown(value) = mark_safe(nh3.clean(markdown(value, extensions=['extra'])))",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/articles/templatetags/markdown_filter.py", "function": "render_markdown", "line_start": 9, "line_end": 11, "code_snippet": "@register.filter(name='render_markdown')\ndef render_markdown(value):\n    return mark_safe(nh3.clean(md.markdown(value, extensions=['extra'])))" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Contenu avec balises HTML malveillantes", "expected_behavior": "Assaini par nh3.clean (XSS prevention)" },
+        { "description": "Contenu vide", "expected_behavior": "Retourne string vide" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-038",
+      "domain": "tags",
+      "module": "articles",
+      "summary": "Un article peut avoir des tags via django-taggit (TaggableManager). Les tags sont geres par GenericForeignKey. Un artcile sans tags est valide (blank=True).",
+      "formal_expression": "tags = TaggableManager(blank=True); storage via taggit_taggeditem (GenericFK)",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/articles/models.py", "function": "Article", "line_start": 38, "line_end": 38, "code_snippet": "tags = TaggableManager(blank=True)" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-039",
+      "domain": "comments",
+      "module": "comments",
+      "summary": "Le contenu d'un commentaire est obligatoire (TextField sans blank=True). Le body est trimme (strip) et si vide, aucun commentaire n'est cree mais la reponse HTMX est quand meme retournee.",
+      "formal_expression": "body = request.POST['body'].strip(); IF body THEN create Comment ELSE skip (no error)",
+      "type": "validation",
+      "source_locations": [
+        { "file": "apps/comments/views.py", "function": "comment_create_view", "line_start": 15, "line_end": 17, "code_snippet": "body = request.POST.get('body', '').strip()\nif body:\n    Comment.objects.create(article=article, author=request.user, content=body)" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Body compose uniquement d'espaces", "expected_behavior": "Strip les rend vides, pas de creation" },
+        { "description": "Body absent du POST", "expected_behavior": "Default a string vide, pas de creation" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-040",
+      "domain": "comments",
+      "module": "comments",
+      "summary": "La creation de commentaire necessite l'authentification et la methode POST. L'auteur est automatiquement l'utilisateur courant. Le commentaire est lie a l'article identifie par slug.",
+      "formal_expression": "@login_required AND @require_POST; comment.author = request.user; comment.article = get_by_slug",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/comments/views.py", "function": "comment_create_view", "line_start": 11, "line_end": 17, "code_snippet": "@login_required\n@require_POST\ndef comment_create_view(request, slug):\n    article = get_object_or_404(Article, slug=slug)\n    body = request.POST.get('body', '').strip()\n    if body:\n        Comment.objects.create(article=article, author=request.user, content=body)" }
+      ],
+      "dependencies": ["BR-005"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-041",
+      "domain": "comments",
+      "module": "comments",
+      "summary": "La suppression d'un commentaire est autorisee pour DEUX roles : l'auteur du commentaire OU l'auteur de l'article. Toute autre tentative retourne HTTP 403 Forbidden.",
+      "formal_expression": "IF comment.author == request.user OR article.author == request.user THEN delete ELSE 403 Forbidden",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/comments/views.py", "function": "comment_delete_view", "line_start": 28, "line_end": 32, "code_snippet": "comment = get_object_or_404(Comment, id=comment_id, article=article)\nif comment.author != request.user and article.author != request.user:\n    return HttpResponseForbidden()\ncomment.delete()" }
+      ],
+      "dependencies": [],
+      "edge_cases": [
+        { "description": "Utilisateur est l'auteur de l'article mais pas du commentaire", "expected_behavior": "Suppression autorisee (moderation par l'auteur de l'article)" },
+        { "description": "Admin ou superuser", "expected_behavior": "Pas de privilege special dans le code (seulement via admin Django)" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-042",
+      "domain": "rendering",
+      "module": "comments",
+      "summary": "Apres creation ou suppression de commentaire, une requete HTMX retourne le partial comment_list.html (liste complete des commentaires mise a jour). Une requete non-HTMX redirige vers le detail de l'article.",
+      "formal_expression": "IF is_htmx THEN render('partials/comment_list.html', comments=article.comments.order_by('-created')) ELSE redirect('article_detail')",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "apps/comments/views.py", "function": "comment_create_view", "line_start": 18, "line_end": 21, "code_snippet": "if is_htmx(request):\n    comments = article.comment_set.select_related('author').order_by('-created')\n    return render(request, 'partials/comment_list.html', {'comments': comments, 'article': article})\nreturn redirect('article_detail', slug=slug)" },
+        { "file": "apps/comments/views.py", "function": "comment_delete_view", "line_start": 33, "line_end": 36, "code_snippet": "if is_htmx(request):\n    comments = article.comment_set.select_related('author').order_by('-created')\n    return render(request, 'partials/comment_list.html', {'comments': comments, 'article': article})\nreturn redirect('article_detail', slug=slug)" }
+      ],
+      "dependencies": ["BR-001"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-043",
+      "domain": "comments",
+      "module": "comments",
+      "summary": "Un commentaire est lie a un article et un auteur par FK avec ON DELETE CASCADE. La suppression d'un article entraine la suppression de tous ses commentaires. La suppression d'un utilisateur aussi.",
+      "formal_expression": "comment.article: FK(Article, CASCADE); comment.author: FK(User, CASCADE)",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "apps/comments/models.py", "function": "Comment", "line_start": 6, "line_end": 11, "code_snippet": "class Comment(models.Model):\n    article = models.ForeignKey(Article, on_delete=models.CASCADE)\n    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)\n    content = models.TextField()\n    created = models.DateTimeField(auto_now_add=True, db_index=True)\n    updated = models.DateTimeField(auto_now=True)" }
+      ],
+      "dependencies": ["BR-022", "BR-007"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-044",
+      "domain": "comments",
+      "module": "comments",
+      "summary": "La suppression de commentaire necessite l'authentification et la methode POST. Le commentaire est identifie par son ID numerique dans l'URL, et doit appartenir a l'article identifie par slug.",
+      "formal_expression": "@login_required AND @require_POST; comment = get_by(id=comment_id, article=get_by(slug=slug))",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "apps/comments/views.py", "function": "comment_delete_view", "line_start": 25, "line_end": 29, "code_snippet": "@login_required\n@require_POST\ndef comment_delete_view(request, slug, comment_id):\n    article = get_object_or_404(Article, slug=slug)\n    comment = get_object_or_404(Comment, id=comment_id, article=article)" }
+      ],
+      "dependencies": ["BR-041"],
+      "edge_cases": [
+        { "description": "comment_id valide mais n'appartient pas a l'article du slug", "expected_behavior": "404 Not Found" }
+      ],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-045",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "Le bandeau d'accueil (banner avec logo et slogan 'A place to share your knowledge.') est affiche UNIQUEMENT pour les utilisateurs non authentifies.",
+      "formal_expression": "IF NOT user.is_authenticated THEN show banner",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "templates/articles/home.html", "function": "template", "line_start": 6, "line_end": 13, "code_snippet": "{% if not user.is_authenticated %}\n<div class='banner'>\n  <h1><img src=... alt='conduit' ...></h1>\n  <p>A place to share your knowledge.</p>\n</div>\n{% endif %}" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-046",
+      "domain": "navigation",
+      "module": "templates",
+      "summary": "La navigation differe selon l'etat d'authentification. Authentifie: Home, New Article, Settings, Profile (avec avatar). Non authentifie: Home, Sign in, Sign up.",
+      "formal_expression": "IF authenticated THEN navbar=[Home, New Article, Settings, Profile(username+avatar)] ELSE navbar=[Home, Sign in, Sign up]",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "templates/partials/header.html", "function": "template", "line_start": 9, "line_end": 37, "code_snippet": "{% if user.is_authenticated %}\n  <a href=article_create>New Article</a>\n  <a href=settings>Settings</a>\n  <a href=profile><img src=avatar>{{ user.username }}</a>\n{% else %}\n  <a href=login>Sign in</a>\n  <a href=register>Sign up</a>\n{% endif %}" }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-047",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "L'avatar par defaut est 'static/images/default-avatar.svg'. Il est utilise partout quand user.image est null ou vide : header, article_list, article_meta, comment_list, comment_form.",
+      "formal_expression": "avatar_url = user.image IF user.image ELSE 'static/images/default-avatar.svg'",
+      "type": "transformation",
+      "source_locations": [
+        { "file": "templates/partials/header.html", "function": "template", "line_start": 24, "line_end": 24, "code_snippet": "<img src='{% if user.image %}{{ user.image }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}'>" },
+        { "file": "templates/partials/article_list.html", "function": "template", "line_start": 6, "line_end": 6, "code_snippet": "<img src='{% if article.author.image %}{{ article.author.image }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}'>" },
+        { "file": "templates/partials/comment_list.html", "function": "template", "line_start": 9, "line_end": 9, "code_snippet": "<img src='{% if comment.author.image %}...{% else %}{% static 'images/default-avatar.svg' %}{% endif %}'>" }
+      ],
+      "dependencies": ["BR-009"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-048",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "Le format de date affiche pour les articles et commentaires est 'F j, Y' (ex: 'January 1, 2026'). Utilise le filtre Django |date.",
+      "formal_expression": "date_format = 'F j, Y' (Month Day, Year)",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "templates/partials/article_list.html", "function": "template", "line_start": 10, "line_end": 10, "code_snippet": "<span class='date'>{{ article.created|date:'F j, Y' }}</span>" },
+        { "file": "templates/partials/article_meta.html", "function": "template", "line_start": 8, "line_end": 8, "code_snippet": "<span class='date'>{{ article.created|date:'F j, Y' }}</span>" },
+        { "file": "templates/partials/comment_list.html", "function": "template", "line_start": 14, "line_end": 14, "code_snippet": "<span class='date-posted'>{{ comment.created|date:'F j, Y' }}</span>" }
+      ],
+      "dependencies": ["BR-006"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-049",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "Les actions contextuelles sur un article dependent de la relation avec l'utilisateur : auteur voit Edit+Delete ; authentifie non-auteur voit Follow+Favorite ; non authentifie ne voit rien.",
+      "formal_expression": "IF user == article.author THEN [Edit, Delete] ELIF user.is_authenticated THEN [Follow(author), Favorite] ELSE []",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "templates/partials/article_meta.html", "function": "template", "line_start": 11, "line_end": 26, "code_snippet": "{% if user == article.author %}\n  <a href=article_edit>Edit Article</a>\n  <form method=post action=article_delete>Delete Article</form>\n{% elif user.is_authenticated %}\n  {% include 'partials/follow_button.html' %}\n  {% include 'partials/favorite_button.html' %}\n{% endif %}" }
+      ],
+      "dependencies": ["BR-034", "BR-035", "BR-019", "BR-036"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 98,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-050",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "L'onglet 'Your Feed' (following) est visible uniquement pour les utilisateurs authentifies. L'onglet tag apparait dynamiquement seulement lors du filtrage par tag.",
+      "formal_expression": "IF authenticated THEN show 'Your Feed' tab; IF active_tab=='tag' THEN show tag tab",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "templates/partials/feed_content.html", "function": "template", "line_start": 3, "line_end": 28, "code_snippet": "{% if user.is_authenticated %}\n  <a href='/?feed=following'>Your Feed</a>\n{% endif %}\n...\n{% if active_tab == 'tag' %}\n  <a class='active'><i class='ion-pound'></i> {{ active_tag }}</a>\n{% endif %}" }
+      ],
+      "dependencies": ["BR-026"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-051",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "Le bouton Favorite pour les utilisateurs non authentifies redirige vers /login au lieu de poster (onclick redirect). Le texte change: 'Unfavorite' si deja en favori, 'Favorite' sinon.",
+      "formal_expression": "IF authenticated THEN hx-post(favorite_toggle) ELSE redirect(login); text = is_favorite ? 'Unfavorite' : 'Favorite'",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "templates/partials/favorite_button.html", "function": "template", "line_start": 1, "line_end": 11, "code_snippet": "{% if user.is_authenticated %}\n<button hx-post='article_favorite' ...>{% if article.is_favorite %}Unfavorite{% else %}Favorite{% endif %} ({{ article.num_favorites }})</button>\n{% else %}\n<button onclick='window.location.href=login'>Favorite ({{ article.num_favorites }})</button>\n{% endif %}" }
+      ],
+      "dependencies": ["BR-036", "BR-025"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-052",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "Le bouton Follow est cache si l'utilisateur consulte son propre profil. Le texte change: 'Unfollow' si deja abonne, 'Follow' sinon. Le bouton inclut le username de la cible.",
+      "formal_expression": "IF authenticated AND user != profile_user THEN show follow_button; text = is_following ? 'Unfollow username' : 'Follow username'",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "templates/partials/follow_button.html", "function": "template", "line_start": 1, "line_end": 7, "code_snippet": "{% if user.is_authenticated and user != profile_user %}\n<button hx-post='follow' ...>{% if is_following %}Unfollow{% else %}Follow{% endif %} {{ profile_user.username }}</button>\n{% endif %}" }
+      ],
+      "dependencies": ["BR-019"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-053",
+      "domain": "ui",
+      "module": "templates",
+      "summary": "Les utilisateurs non authentifies voient le message 'Sign in or sign up to add comments on this article.' avec un lien vers /register au lieu du formulaire de commentaire.",
+      "formal_expression": "IF NOT authenticated THEN show auth_prompt('Sign in or sign up') ELSE show comment_form",
+      "type": "authorization",
+      "source_locations": [
+        { "file": "templates/articles/detail.html", "function": "template", "line_start": 41, "line_end": 56, "code_snippet": "{% if user.is_authenticated %}\n  <form hx-post='comment_create' ...>...</form>\n{% else %}\n  <p class='comment-auth-prompt'>\n    <a href='{% url register %}'>Sign in or sign up</a> to add comments on this article.\n  </p>\n{% endif %}" }
+      ],
+      "dependencies": ["BR-040"],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 95,
+      "requires_human_validation": false,
+      "validation_question": null
+    },
+    {
+      "id": "BR-054",
+      "domain": "security",
+      "module": "templates",
+      "summary": "Le token CSRF est configure globalement via l'attribut hx-headers sur le body HTML pour toutes les requetes HTMX. Cela protege contre les attaques CSRF.",
+      "formal_expression": "<body hx-headers='{\"X-CSRFToken\": \"{{ csrf_token }}\"}'>",
+      "type": "constraint",
+      "source_locations": [
+        { "file": "templates/base.html", "function": "template", "line_start": 14, "line_end": 14, "code_snippet": "<body hx-headers='{\"X-CSRFToken\": \"{{ csrf_token }}\"}'> " }
+      ],
+      "dependencies": [],
+      "edge_cases": [],
+      "duplicates": [],
+      "inconsistencies": [],
+      "confidence": 90,
+      "requires_human_validation": false,
+      "validation_question": null
+    }
+  ],
+  "inconsistencies": [
+    {
+      "rule_ids": ["BR-017", "BR-028"],
+      "description": "ARTICLES_PER_PAGE = 10 est defini independamment dans deux fichiers distincts : apps/accounts/views.py (ligne 12) et apps/articles/views.py (ligne 14). Si l'une des valeurs est modifiee sans l'autre, la pagination deviendra incoherente entre le profil et le feed d'accueil. Devrait etre factorise en constante partagee.",
+      "locations": [
+        { "file": "apps/accounts/views.py", "line": 12, "code": "ARTICLES_PER_PAGE = 10" },
+        { "file": "apps/articles/views.py", "line": 14, "code": "ARTICLES_PER_PAGE = 10" }
+      ],
+      "severity": "medium"
+    },
+    {
+      "rule_ids": ["BR-004", "BR-013", "BR-015"],
+      "description": "Les 4 validateurs de mot de passe (AUTH_PASSWORD_VALIDATORS) sont configures dans settings.py mais ne sont PAS appliques lors de l'inscription (register_view utilise create_user/set_password qui bypasse les validators) ni lors du changement de mot de passe dans settings_view (CharField sans validation Django). Les mots de passe faibles sont donc potentiellement acceptes. Cela doit etre verifie et une decision metier prise : appliquer les validators ou reproduire le comportement permissif actuel.",
+      "locations": [
+        { "file": "config/settings.py", "line": 117, "code": "AUTH_PASSWORD_VALIDATORS = [...]" },
+        { "file": "apps/accounts/views.py", "line": 38, "code": "user = User.objects.create_user(email=..., password=...)" },
+        { "file": "apps/accounts/views.py", "line": 62, "code": "user.set_password(password)" }
+      ],
+      "severity": "high",
+      "status": "resolved",
+      "resolution": "Comportement voulu. BR-004 marquee non_migrate. La cible ne doit PAS appliquer de validation de complexite de mot de passe. Decision validee le 2026-04-13."
+    }
+  ],
+  "questions_for_humans": [
+    {
+      "id": "Q-001",
+      "related_rules": ["BR-004", "BR-013", "BR-015"],
+      "question": "Les validateurs de mot de passe Django (longueur min 8, pas trop commun, pas numerique, pas similaire au username) sont configures mais ne semblent PAS appliques lors de l'inscription ni du changement de mot de passe. Est-ce un bug du legacy a corriger dans la cible, ou un comportement voulu (pas de restriction sur les mots de passe) ?",
+      "impact": "Si c'est un bug, la cible doit appliquer les validators. Si c'est voulu, la cible doit les ignorer. Choix critique pour la conformite.",
+      "severity": "high",
+      "status": "answered",
+      "answered_at": "2026-04-13",
+      "answer": "Comportement voulu. La regle n'est pas effective et ne doit PAS etre migree. Aucune validation de complexite de mot de passe dans la cible.",
+      "decision": "non_migrate"
+    }
+  ]
+}

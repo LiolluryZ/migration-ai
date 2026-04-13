@@ -1,0 +1,885 @@
+{
+  "generated_at": "2026-04-13T12:00:00Z",
+  "agent": "06-extracteur-workflows",
+  "confidence": 92,
+  "summary": {
+    "total_workflows": 11,
+    "total_states": 39,
+    "total_transitions": 36
+  },
+  "workflows": [
+    {
+      "id": "WF-001",
+      "name": "Authentification (Login)",
+      "domain": "accounts",
+      "trigger": "Utilisateur soumet le formulaire de connexion (POST /login)",
+      "trigger_location": { "file": "apps/accounts/views.py", "line": 17 },
+      "states": [
+        {
+          "name": "form_displayed",
+          "description": "Formulaire de connexion visible, en attente de soumission.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "credentials_validating",
+          "description": "Validation du formulaire et appel a authenticate(email, password).",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["Valider LoginForm", "authenticate(email=..., password=...)"],
+          "exit_actions": []
+        },
+        {
+          "name": "authenticated",
+          "description": "Utilisateur connecte, session Django demarree, redirection vers home.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["login(request, user)", "redirect('home')"],
+          "exit_actions": []
+        },
+        {
+          "name": "login_failed",
+          "description": "Credentials incorrects, formulaire re-affiche avec erreur generique.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["form.add_error(None, 'Invalid email or password.')"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "form_displayed",
+          "to": "credentials_validating",
+          "condition": "POST + LoginForm.is_valid()",
+          "condition_rules": [],
+          "actions": ["Valider LoginForm (email, password)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "login_view", "line": 18 }
+        },
+        {
+          "from": "credentials_validating",
+          "to": "authenticated",
+          "condition": "authenticate() retourne un user non-None (ref BR-011, BR-012)",
+          "condition_rules": ["BR-011", "BR-012"],
+          "actions": ["login(request, user)", "redirect('home')"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "login_view", "line": 21 }
+        },
+        {
+          "from": "credentials_validating",
+          "to": "login_failed",
+          "condition": "authenticate() retourne None — email inconnu ou mot de passe incorrect (ref BR-011)",
+          "condition_rules": ["BR-011"],
+          "actions": ["form.add_error(None, 'Invalid email or password.')"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "login_view", "line": 24 }
+        },
+        {
+          "from": "login_failed",
+          "to": "form_displayed",
+          "condition": "Re-affichage du formulaire avec erreur",
+          "condition_rules": [],
+          "actions": ["render('accounts/login.html', {'form': form})"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "login_view", "line": 26 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "form_displayed",
+          "to": "form_displayed",
+          "condition": "POST + formulaire invalide (champs manquants/malformes)",
+          "rollback_actions": ["render('accounts/login.html') avec erreurs de validation"]
+        }
+      ],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> form_displayed\n  form_displayed --> credentials_validating : POST + form_valid\n  credentials_validating --> authenticated : authenticate() != None\n  authenticated --> [*] : redirect to home\n  credentials_validating --> login_failed : authenticate() == None\n  login_failed --> form_displayed : re-display form\n  form_displayed --> form_displayed : POST + form_invalid"
+    },
+
+    {
+      "id": "WF-002",
+      "name": "Inscription Utilisateur (Register)",
+      "domain": "accounts",
+      "trigger": "Utilisateur soumet le formulaire d'inscription (POST /register)",
+      "trigger_location": { "file": "apps/accounts/views.py", "line": 29 },
+      "states": [
+        {
+          "name": "form_displayed",
+          "description": "Formulaire d'inscription vierge visible.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "creating_user",
+          "description": "Creation du compte en cours dans une transaction.atomic().",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["transaction.atomic()", "User.objects.create_user(email, username, password)"],
+          "exit_actions": []
+        },
+        {
+          "name": "auto_logging_in",
+          "description": "Utilisateur cree, connexion automatique en cours.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["login(request, user)"],
+          "exit_actions": []
+        },
+        {
+          "name": "authenticated",
+          "description": "Utilisateur inscrit et connecte, redirection vers home.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["redirect('home')"],
+          "exit_actions": []
+        },
+        {
+          "name": "registration_failed",
+          "description": "Erreur d'integrite (email ou username deja pris), formulaire re-affiche.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["clean_integrity_error(err)", "form.add_error(field, message)"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "form_displayed",
+          "to": "creating_user",
+          "condition": "POST + RegisterForm.is_valid() — username, email, password fournis (ref BR-013)",
+          "condition_rules": ["BR-013"],
+          "actions": ["transaction.atomic()", "User.objects.create_user(email=..., username=..., password=...)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "register_view", "line": 33 }
+        },
+        {
+          "from": "creating_user",
+          "to": "auto_logging_in",
+          "condition": "create_user() sans IntegrityError (ref BR-014)",
+          "condition_rules": ["BR-014"],
+          "actions": ["login(request, user)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "register_view", "line": 40 }
+        },
+        {
+          "from": "auto_logging_in",
+          "to": "authenticated",
+          "condition": "Login automatique reussi (ref BR-014)",
+          "condition_rules": ["BR-014"],
+          "actions": ["redirect('home')"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "register_view", "line": 41 }
+        },
+        {
+          "from": "creating_user",
+          "to": "registration_failed",
+          "condition": "IntegrityError — email ou username en doublon (ref BR-013, BR-002)",
+          "condition_rules": ["BR-013", "BR-002"],
+          "actions": ["clean_integrity_error(err)", "form.add_error('email', 'This email has already been taken.') | form.add_error('username', 'This username has already been taken.') | form.add_error(None, 'Registration failed.')"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "register_view", "line": 43 }
+        },
+        {
+          "from": "registration_failed",
+          "to": "form_displayed",
+          "condition": "Re-affichage du formulaire avec erreurs",
+          "condition_rules": [],
+          "actions": ["render('accounts/register.html', {'form': form})"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "register_view", "line": 52 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "creating_user",
+          "to": "registration_failed",
+          "condition": "IntegrityError email duplique",
+          "rollback_actions": ["transaction.atomic() rollback automatique", "form.add_error('email', 'This email has already been taken.')"]
+        },
+        {
+          "from": "creating_user",
+          "to": "registration_failed",
+          "condition": "IntegrityError username duplique",
+          "rollback_actions": ["transaction.atomic() rollback automatique", "form.add_error('username', 'This username has already been taken.')"]
+        },
+        {
+          "from": "creating_user",
+          "to": "registration_failed",
+          "condition": "IntegrityError champ non reconnu",
+          "rollback_actions": ["transaction.atomic() rollback automatique", "form.add_error(None, 'Registration failed.')"]
+        }
+      ],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> form_displayed\n  form_displayed --> creating_user : POST + form_valid\n  creating_user --> auto_logging_in : create_user() success\n  auto_logging_in --> authenticated : login() success\n  authenticated --> [*] : redirect to home\n  creating_user --> registration_failed : IntegrityError\n  registration_failed --> form_displayed : re-display with errors\n  form_displayed --> form_displayed : POST + form_invalid"
+    },
+
+    {
+      "id": "WF-003",
+      "name": "Modification des Parametres Utilisateur (Settings)",
+      "domain": "accounts",
+      "trigger": "Utilisateur authentifie soumet SettingsForm (POST /settings, @login_required)",
+      "trigger_location": { "file": "apps/accounts/views.py", "line": 55 },
+      "states": [
+        {
+          "name": "form_displayed",
+          "description": "Formulaire pre-rempli avec les donnees actuelles de l'utilisateur (image, username, bio, email).",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": ["SettingsForm(instance=request.user)"],
+          "exit_actions": []
+        },
+        {
+          "name": "saving_settings",
+          "description": "Validation du formulaire, sauvegarde des donnees utilisateur.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["form.save(commit=False)"],
+          "exit_actions": []
+        },
+        {
+          "name": "re_authenticating",
+          "description": "Nouveau mot de passe defini — re-login obligatoire pour maintenir la session active.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["user.set_password(password)", "user.save()", "login(request, user)"],
+          "exit_actions": []
+        },
+        {
+          "name": "settings_saved",
+          "description": "Parametres sauvegardes sans changement de mot de passe.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["user.save()"],
+          "exit_actions": []
+        },
+        {
+          "name": "redirected_to_profile",
+          "description": "Redirection vers la page de profil de l'utilisateur.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["redirect('profile', username=user.username)"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "form_displayed",
+          "to": "saving_settings",
+          "condition": "POST + SettingsForm.is_valid() (ref BR-015)",
+          "condition_rules": ["BR-015"],
+          "actions": ["form.save(commit=False) — produit l'objet user non sauvegarde"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "settings_view", "line": 57 }
+        },
+        {
+          "from": "saving_settings",
+          "to": "re_authenticating",
+          "condition": "form.cleaned_data['password'] non vide (ref BR-015)",
+          "condition_rules": ["BR-015"],
+          "actions": ["user.set_password(password)", "user.save()", "login(request, user) — re-login pour maintenir la session"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "settings_view", "line": 62 }
+        },
+        {
+          "from": "saving_settings",
+          "to": "settings_saved",
+          "condition": "form.cleaned_data['password'] vide (ref BR-015)",
+          "condition_rules": ["BR-015"],
+          "actions": ["user.save()"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "settings_view", "line": 65 }
+        },
+        {
+          "from": "re_authenticating",
+          "to": "redirected_to_profile",
+          "condition": "Re-login reussi",
+          "condition_rules": [],
+          "actions": ["redirect('profile', username=user.username)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "settings_view", "line": 68 }
+        },
+        {
+          "from": "settings_saved",
+          "to": "redirected_to_profile",
+          "condition": "Sauvegarde reussie (sans changement de mot de passe)",
+          "condition_rules": [],
+          "actions": ["redirect('profile', username=user.username)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "settings_view", "line": 68 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "form_displayed",
+          "to": "form_displayed",
+          "condition": "POST + formulaire invalide",
+          "rollback_actions": ["render('accounts/settings.html') avec erreurs de validation"]
+        }
+      ],
+      "confidence": 95,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> form_displayed\n  form_displayed --> saving_settings : POST + form_valid\n  saving_settings --> re_authenticating : password non vide\n  saving_settings --> settings_saved : password vide\n  re_authenticating --> redirected_to_profile : login() + redirect\n  settings_saved --> redirected_to_profile : redirect to profile\n  redirected_to_profile --> [*]\n  form_displayed --> form_displayed : POST + form_invalid"
+    },
+
+    {
+      "id": "WF-004",
+      "name": "Deconnexion (Logout)",
+      "domain": "accounts",
+      "trigger": "Utilisateur soumet le formulaire de deconnexion (POST /logout, @require_POST)",
+      "trigger_location": { "file": "apps/accounts/views.py", "line": 72 },
+      "states": [
+        {
+          "name": "session_active",
+          "description": "Session utilisateur active (authentifie ou anonyme).",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "logged_out",
+          "description": "Session detruite, utilisateur redevenu anonyme, redirection vers home.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["logout(request)", "redirect('home')"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "session_active",
+          "to": "logged_out",
+          "condition": "POST /logout (ref BR-016)",
+          "condition_rules": ["BR-016"],
+          "actions": ["logout(request)", "redirect('home')"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "logout_view", "line": 73 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "session_active",
+          "to": "session_active",
+          "condition": "GET /logout (methode non autorisee)",
+          "rollback_actions": ["Django retourne automatiquement HTTP 405 Method Not Allowed (@require_POST)"]
+        }
+      ],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> session_active\n  session_active --> logged_out : POST /logout (BR-016)\n  logged_out --> [*] : redirect to home\n  note right of session_active : GET /logout → HTTP 405"
+    },
+
+    {
+      "id": "WF-005",
+      "name": "Toggle Suivi Utilisateur (Follow/Unfollow)",
+      "domain": "accounts",
+      "trigger": "Utilisateur authentifie clique sur Follow ou Unfollow (POST /profile/<username>/follow, @login_required @require_POST)",
+      "trigger_location": { "file": "apps/accounts/views.py", "line": 122 },
+      "states": [
+        {
+          "name": "not_following",
+          "description": "L'utilisateur courant ne suit pas encore le profil cible.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "following",
+          "description": "L'utilisateur courant suit dejà le profil cible.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "follow_toggled",
+          "description": "Etat de suivi inverse, reponse HTMX partielle ou redirect.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": [],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "not_following",
+          "to": "follow_toggled",
+          "condition": "profile_user != request.user ET pas dans followers (ref BR-019, BR-010)",
+          "condition_rules": ["BR-019", "BR-010"],
+          "actions": ["profile_user.followers.add(request.user)", "is_following = True", "HTMX: render('partials/follow_button.html') | non-HTMX: redirect('profile', username)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "follow_view", "line": 131 }
+        },
+        {
+          "from": "following",
+          "to": "follow_toggled",
+          "condition": "profile_user != request.user ET deja dans followers (ref BR-019, BR-010)",
+          "condition_rules": ["BR-019", "BR-010"],
+          "actions": ["profile_user.followers.remove(request.user)", "is_following = False", "HTMX: render('partials/follow_button.html') | non-HTMX: redirect('profile', username)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "follow_view", "line": 128 }
+        },
+        {
+          "from": "not_following",
+          "to": "follow_toggled",
+          "condition": "profile_user == request.user (auto-follow interdit — no-op, ref BR-019)",
+          "condition_rules": ["BR-019"],
+          "actions": ["is_following = False (aucune modification DB)", "HTMX: render('partials/follow_button.html') | non-HTMX: redirect('profile', username)"],
+          "source_location": { "file": "apps/accounts/views.py", "function": "follow_view", "line": 136 }
+        }
+      ],
+      "error_handling": [],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> not_following\n  [*] --> following\n  not_following --> follow_toggled : add follower (is_following=True)\n  following --> follow_toggled : remove follower (is_following=False)\n  not_following --> follow_toggled : auto-follow attempt (no-op)\n  follow_toggled --> [*] : HTMX partial follow_button | redirect to profile"
+    },
+
+    {
+      "id": "WF-006",
+      "name": "Creation d'Article",
+      "domain": "articles",
+      "trigger": "Utilisateur authentifie soumet ArticleForm (POST /article/create, @login_required)",
+      "trigger_location": { "file": "apps/articles/views.py", "line": 108 },
+      "states": [
+        {
+          "name": "editing_form",
+          "description": "Formulaire de creation d'article vierge visible.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": ["ArticleForm()"],
+          "exit_actions": []
+        },
+        {
+          "name": "saving_article",
+          "description": "Formulaire valide, creation de l'objet Article, generation du slug, association des tags, invalidation du cache.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": [
+            "Article(author=request.user)",
+            "article.title = form.title; article.summary = form.description; article.content = form.body",
+            "article.save() → slug = slugify(title) [auto via Article.save() quand pk is None] (ref BR-023)",
+            "article.tags.clear() → article.tags.add(tag) pour chaque tag (ref BR-032)",
+            "cache.delete('all_tags') (ref BR-027)"
+          ],
+          "exit_actions": []
+        },
+        {
+          "name": "article_published",
+          "description": "Article cree et publie, redirection vers le detail.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["redirect('article_detail', slug=article.slug)"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "editing_form",
+          "to": "saving_article",
+          "condition": "POST + ArticleForm.is_valid() (ref BR-033, BR-031)",
+          "condition_rules": ["BR-033", "BR-031", "BR-032"],
+          "actions": [
+            "_save_article_form(form, article) : mapping form.description → article.summary, form.body → article.content",
+            "slug genere automatiquement via slugify(title) (ref BR-023)",
+            "cache.delete('all_tags') (ref BR-027)"
+          ],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_create_view", "line": 111 }
+        },
+        {
+          "from": "saving_article",
+          "to": "article_published",
+          "condition": "Sauvegarde reussie sans exception",
+          "condition_rules": [],
+          "actions": ["redirect('article_detail', slug=article.slug)"],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_create_view", "line": 114 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "editing_form",
+          "to": "editing_form",
+          "condition": "Formulaire invalide (titre manquant ou contrainte unique violee)",
+          "rollback_actions": ["render('articles/editor.html') avec erreurs de validation"]
+        }
+      ],
+      "confidence": 95,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> editing_form\n  editing_form --> saving_article : POST + form_valid\n  saving_article --> article_published : save() + tags + cache_delete\n  article_published --> [*] : redirect to article detail\n  editing_form --> editing_form : POST + form_invalid\n  note right of saving_article : slug=slugify(title) si pk=None (BR-023)\n  note right of saving_article : cache.delete('all_tags') (BR-027)"
+    },
+
+    {
+      "id": "WF-007",
+      "name": "Edition d'Article",
+      "domain": "articles",
+      "trigger": "Auteur authentifie soumet ArticleForm en edition (POST /article/<slug>/edit, @login_required)",
+      "trigger_location": { "file": "apps/articles/views.py", "line": 118 },
+      "states": [
+        {
+          "name": "editing_form",
+          "description": "Formulaire pre-rempli avec les donnees actuelles (title, description=summary, body=content, tags).",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [
+            "get_object_or_404(Article, slug=slug, author=request.user) (ref BR-034)",
+            "ArticleForm(initial={title, description: summary, body: content, tags: comma-separated})"
+          ],
+          "exit_actions": []
+        },
+        {
+          "name": "saving_article",
+          "description": "Formulaire valide, mise a jour des champs, re-calcul des tags, invalidation du cache.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": [
+            "_save_article_form(form, article)",
+            "article.tags.clear() → re-add tags (ref BR-032)",
+            "cache.delete('all_tags') (ref BR-027)",
+            "IMPORTANT: slug NE change PAS a l'edition (ref BR-023)"
+          ],
+          "exit_actions": []
+        },
+        {
+          "name": "article_updated",
+          "description": "Article mis a jour, redirection vers le detail.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["redirect('article_detail', slug=article.slug)"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "editing_form",
+          "to": "saving_article",
+          "condition": "POST + ArticleForm.is_valid() + article.author == request.user (ref BR-034, BR-031)",
+          "condition_rules": ["BR-034", "BR-031", "BR-032", "BR-023"],
+          "actions": [
+            "_save_article_form(form, article)",
+            "slug inchange (BR-023)",
+            "cache.delete('all_tags') (BR-027)"
+          ],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_edit_view", "line": 122 }
+        },
+        {
+          "from": "saving_article",
+          "to": "article_updated",
+          "condition": "Sauvegarde reussie",
+          "condition_rules": [],
+          "actions": ["redirect('article_detail', slug=article.slug)"],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_edit_view", "line": 128 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "editing_form",
+          "to": "editing_form",
+          "condition": "Formulaire invalide",
+          "rollback_actions": ["render('articles/editor.html') avec erreurs"]
+        },
+        {
+          "from": "editing_form",
+          "to": null,
+          "condition": "Utilisateur authentifie mais non-auteur tente l'edition",
+          "rollback_actions": ["get_object_or_404 echoue (filtre author=request.user) → 404 Not Found (pas 403, ref BR-034)"]
+        }
+      ],
+      "confidence": 95,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> editing_form : GET /article/slug/edit\n  editing_form --> saving_article : POST + form_valid + author==user\n  saving_article --> article_updated : save() + tags + cache_delete\n  article_updated --> [*] : redirect to article detail\n  editing_form --> editing_form : POST + form_invalid\n  note right of editing_form : 404 si non-auteur (BR-034)\n  note right of saving_article : slug INCHANGE (BR-023)"
+    },
+
+    {
+      "id": "WF-008",
+      "name": "Suppression d'Article",
+      "domain": "articles",
+      "trigger": "Auteur authentifie soumet le formulaire de suppression (POST /article/<slug>/delete, @login_required @require_POST)",
+      "trigger_location": { "file": "apps/articles/views.py", "line": 143 },
+      "states": [
+        {
+          "name": "article_exists",
+          "description": "Article trouve et auteur verifie via get_object_or_404.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": ["get_object_or_404(Article, slug=slug, author=request.user) (ref BR-035)"],
+          "exit_actions": []
+        },
+        {
+          "name": "article_deleted",
+          "description": "Article supprime. En cascade: tous les commentaires et liens favoris de cet article sont supprimes (ref BR-043).",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["article.delete() [cascade: comments (BR-043), favorites ManyToMany]", "redirect('home')"],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "article_exists",
+          "to": "article_deleted",
+          "condition": "POST + article.author == request.user (ref BR-035)",
+          "condition_rules": ["BR-035", "BR-043"],
+          "actions": ["article.delete() [suppression cascade: comments, favorites]", "redirect('home')"],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_delete_view", "line": 145 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "article_exists",
+          "to": null,
+          "condition": "Utilisateur authentifie non-auteur tente la suppression",
+          "rollback_actions": ["get_object_or_404(Article, slug=slug, author=request.user) echoue → 404 Not Found (pas 403, ref BR-035)"]
+        }
+      ],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> article_exists\n  article_exists --> article_deleted : POST + author==user (BR-035)\n  article_deleted --> [*] : redirect to home\n  note right of article_exists : 404 si non-auteur (BR-035)\n  note right of article_deleted : cascade: all comments deleted (BR-043)"
+    },
+
+    {
+      "id": "WF-009",
+      "name": "Toggle Favori Article (Favorite/Unfavorite)",
+      "domain": "articles",
+      "trigger": "Utilisateur authentifie clique sur Favorite/Unfavorite (POST /article/<slug>/favorite, @login_required @require_POST)",
+      "trigger_location": { "file": "apps/articles/views.py", "line": 152 },
+      "states": [
+        {
+          "name": "not_favorited",
+          "description": "L'article n'est pas en favori pour l'utilisateur courant.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "favorited",
+          "description": "L'article est dejà en favori pour l'utilisateur courant.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "favorite_toggled",
+          "description": "Etat de favori inverse. Compteur num_favorites recalcule via re-annotation. Reponse HTMX ou redirect.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": [
+            "Article.objects.with_favorites(request.user).select_related('author').get(pk=article.pk) — re-annotation pour compteur frais (ref BR-025)"
+          ],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "not_favorited",
+          "to": "favorite_toggled",
+          "condition": "article.favorites.filter(id=request.user.id).exists() == False (ref BR-036)",
+          "condition_rules": ["BR-036", "BR-025"],
+          "actions": [
+            "article.favorites.add(request.user)",
+            "Re-annotation avec with_favorites(request.user)",
+            "HTMX: render('partials/favorite_button.html', {article}) | non-HTMX: redirect('article_detail', slug)"
+          ],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_favorite_view", "line": 157 }
+        },
+        {
+          "from": "favorited",
+          "to": "favorite_toggled",
+          "condition": "article.favorites.filter(id=request.user.id).exists() == True (ref BR-036)",
+          "condition_rules": ["BR-036", "BR-025"],
+          "actions": [
+            "article.favorites.remove(request.user)",
+            "Re-annotation avec with_favorites(request.user)",
+            "HTMX: render('partials/favorite_button.html', {article}) | non-HTMX: redirect('article_detail', slug)"
+          ],
+          "source_location": { "file": "apps/articles/views.py", "function": "article_favorite_view", "line": 155 }
+        }
+      ],
+      "error_handling": [],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> not_favorited\n  [*] --> favorited\n  not_favorited --> favorite_toggled : favorites.add(user)\n  favorited --> favorite_toggled : favorites.remove(user)\n  favorite_toggled --> [*] : HTMX partial favorite_button | redirect to detail\n  note right of favorite_toggled : re-annotate with_favorites() (BR-025)\n  note right of favorite_toggled : auteur peut se mettre en favori (pas de restriction)"
+    },
+
+    {
+      "id": "WF-010",
+      "name": "Creation de Commentaire",
+      "domain": "comments",
+      "trigger": "Utilisateur authentifie soumet le formulaire de commentaire (POST /article/<slug>/comments/, @login_required @require_POST)",
+      "trigger_location": { "file": "apps/comments/views.py", "line": 11 },
+      "states": [
+        {
+          "name": "body_received",
+          "description": "Corps du commentaire recu et trimme (strip). Article identifie par slug.",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": ["get_object_or_404(Article, slug=slug)", "body = request.POST.get('body', '').strip() (ref BR-039)"],
+          "exit_actions": []
+        },
+        {
+          "name": "comment_created",
+          "description": "Commentaire cree en base. L'auteur est l'utilisateur courant.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["Comment.objects.create(article=article, author=request.user, content=body) (ref BR-040)"],
+          "exit_actions": []
+        },
+        {
+          "name": "comment_skipped",
+          "description": "Corps vide ou espaces seuls — aucun commentaire cree, aucune erreur affichee (comportement silencieux, ref BR-039).",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "response_sent",
+          "description": "Reponse HTMX (liste de commentaires partielle) ou redirection vers le detail envoyee.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": [],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "body_received",
+          "to": "comment_created",
+          "condition": "body.strip() != '' (ref BR-039)",
+          "condition_rules": ["BR-039", "BR-040"],
+          "actions": ["Comment.objects.create(article=article, author=request.user, content=body)"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_create_view", "line": 16 }
+        },
+        {
+          "from": "body_received",
+          "to": "comment_skipped",
+          "condition": "body.strip() == '' — corps vide ou espaces (ref BR-039) — skip silencieux",
+          "condition_rules": ["BR-039"],
+          "actions": [],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_create_view", "line": 15 }
+        },
+        {
+          "from": "comment_created",
+          "to": "response_sent",
+          "condition": "is_htmx(request) == True (ref BR-042, BR-001)",
+          "condition_rules": ["BR-042", "BR-001"],
+          "actions": ["comments = article.comment_set.select_related('author').order_by('-created')", "render('partials/comment_list.html', {comments, article})"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_create_view", "line": 18 }
+        },
+        {
+          "from": "comment_created",
+          "to": "response_sent",
+          "condition": "is_htmx(request) == False (ref BR-042)",
+          "condition_rules": ["BR-042"],
+          "actions": ["redirect('article_detail', slug=slug)"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_create_view", "line": 21 }
+        },
+        {
+          "from": "comment_skipped",
+          "to": "response_sent",
+          "condition": "is_htmx(request) == True (ref BR-042, BR-001)",
+          "condition_rules": ["BR-042", "BR-001"],
+          "actions": ["comments = article.comment_set.select_related('author').order_by('-created')", "render('partials/comment_list.html', {comments, article})"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_create_view", "line": 18 }
+        },
+        {
+          "from": "comment_skipped",
+          "to": "response_sent",
+          "condition": "is_htmx(request) == False (ref BR-042)",
+          "condition_rules": ["BR-042"],
+          "actions": ["redirect('article_detail', slug=slug)"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_create_view", "line": 21 }
+        }
+      ],
+      "error_handling": [],
+      "confidence": 95,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> body_received\n  body_received --> comment_created : body.strip() != empty (BR-039)\n  body_received --> comment_skipped : body.strip() == empty (silent)\n  comment_created --> response_sent : HTMX: partial comment_list\n  comment_created --> response_sent : non-HTMX: redirect to detail\n  comment_skipped --> response_sent : HTMX: partial comment_list\n  comment_skipped --> response_sent : non-HTMX: redirect to detail\n  response_sent --> [*]"
+    },
+
+    {
+      "id": "WF-011",
+      "name": "Suppression de Commentaire",
+      "domain": "comments",
+      "trigger": "Utilisateur authentifie (auteur du commentaire OU auteur de l'article) soumet la suppression (POST /article/<slug>/comments/<id>/delete, @login_required @require_POST)",
+      "trigger_location": { "file": "apps/comments/views.py", "line": 25 },
+      "states": [
+        {
+          "name": "authorization_check",
+          "description": "Article et commentaire recuperes, verification des droits en cours (ref BR-041, BR-044).",
+          "is_initial": true,
+          "is_terminal": false,
+          "entry_actions": [
+            "get_object_or_404(Article, slug=slug)",
+            "get_object_or_404(Comment, id=comment_id, article=article)"
+          ],
+          "exit_actions": []
+        },
+        {
+          "name": "authorized",
+          "description": "Utilisateur autorise: il est l'auteur du commentaire OU l'auteur de l'article (droit de moderation).",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": [],
+          "exit_actions": []
+        },
+        {
+          "name": "forbidden",
+          "description": "Tentative de suppression par un utilisateur non autorise.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": ["return HttpResponseForbidden()"],
+          "exit_actions": []
+        },
+        {
+          "name": "comment_deleted",
+          "description": "Commentaire supprime de la base.",
+          "is_initial": false,
+          "is_terminal": false,
+          "entry_actions": ["comment.delete()"],
+          "exit_actions": []
+        },
+        {
+          "name": "response_sent",
+          "description": "Reponse HTMX (liste de commentaires partielle) ou redirection vers le detail envoyee.",
+          "is_initial": false,
+          "is_terminal": true,
+          "entry_actions": [],
+          "exit_actions": []
+        }
+      ],
+      "transitions": [
+        {
+          "from": "authorization_check",
+          "to": "authorized",
+          "condition": "comment.author == request.user OU article.author == request.user (ref BR-041)",
+          "condition_rules": ["BR-041", "BR-044"],
+          "actions": [],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_delete_view", "line": 29 }
+        },
+        {
+          "from": "authorization_check",
+          "to": "forbidden",
+          "condition": "Ni auteur du commentaire ni auteur de l'article (ref BR-041)",
+          "condition_rules": ["BR-041"],
+          "actions": ["return HttpResponseForbidden()"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_delete_view", "line": 31 }
+        },
+        {
+          "from": "authorized",
+          "to": "comment_deleted",
+          "condition": "Autorisation confirmee",
+          "condition_rules": [],
+          "actions": ["comment.delete()"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_delete_view", "line": 32 }
+        },
+        {
+          "from": "comment_deleted",
+          "to": "response_sent",
+          "condition": "is_htmx(request) == True (ref BR-042, BR-001)",
+          "condition_rules": ["BR-042", "BR-001"],
+          "actions": ["comments = article.comment_set.select_related('author').order_by('-created')", "render('partials/comment_list.html', {comments, article})"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_delete_view", "line": 33 }
+        },
+        {
+          "from": "comment_deleted",
+          "to": "response_sent",
+          "condition": "is_htmx(request) == False (ref BR-042)",
+          "condition_rules": ["BR-042"],
+          "actions": ["redirect('article_detail', slug=slug)"],
+          "source_location": { "file": "apps/comments/views.py", "function": "comment_delete_view", "line": 36 }
+        }
+      ],
+      "error_handling": [
+        {
+          "from": "authorization_check",
+          "to": null,
+          "condition": "comment_id valide mais n'appartient pas a l'article du slug (ref BR-044)",
+          "rollback_actions": ["get_object_or_404(Comment, id=comment_id, article=article) echoue → 404 Not Found"]
+        }
+      ],
+      "confidence": 98,
+      "mermaid_diagram": "stateDiagram-v2\n  [*] --> authorization_check\n  authorization_check --> authorized : comment.author==user OR article.author==user (BR-041)\n  authorization_check --> forbidden : aucun des deux roles\n  forbidden --> [*] : HTTP 403 Forbidden\n  authorized --> comment_deleted : comment.delete()\n  comment_deleted --> response_sent : HTMX: partial comment_list\n  comment_deleted --> response_sent : non-HTMX: redirect to detail\n  response_sent --> [*]\n  note right of authorization_check : 404 si comment_id hors article (BR-044)"
+    }
+  ]
+}

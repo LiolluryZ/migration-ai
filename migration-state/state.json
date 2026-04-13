@@ -7,11 +7,11 @@
     "target_directory": "d:\\workspace\\migration IA\\target",
     "initialized_at": "2026-04-13T00:00:00Z"
   },
-  "current_phase": 1,
+  "current_phase": 2,
   "phases": {
     "phase0": { "status": "completed", "started_at": "2026-04-13T00:00:00Z", "completed_at": "2026-04-13T10:00:00Z" },
-    "phase1": { "status": "in_progress", "started_at": "2026-04-13T10:00:00Z", "completed_at": null },
-    "phase2": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase1": { "status": "completed", "started_at": "2026-04-13T10:00:00Z", "completed_at": "2026-04-13T14:00:00Z" },
+    "phase2": { "status": "in_progress", "started_at": "2026-04-13T14:00:00Z", "completed_at": null },
     "phase3": { "status": "pending", "started_at": null, "completed_at": null },
     "phase4": { "status": "pending", "started_at": null, "completed_at": null },
     "phase5": { "status": "pending", "started_at": null, "completed_at": null },
@@ -42,10 +42,10 @@
       "notes": "3 apps (accounts, articles, comments). 7 tables applicatives + 2 tables taggit. 8 migrations. 14 requêtes cataloguées. Schéma dérivé des modèles ORM (authoritative). Bugs historiques notés : article.updated était auto_now_add (corrigé en 0002), username n'avait pas de contrainte unique initialement (ajouté en 0003)."
     },
     "04-metriques":                  { "status": "completed", "phase": 0, "last_run": "2026-04-13T10:30:00Z", "output_files": ["migration-state/phase0/metrics_report.json"], "confidence": 82, "notes": "7 modules analyses. LOC total: 1651 (1051 Python/TS + 600 HTML templates). CC moyen global: 2.48. Modules high-effort: accounts (CC max=6, 10 patterns Django), articles (CC max=6, 12 patterns). Very_high: templates (18 composants Angular). Ordre migration: helpers -> tests_e2e -> config -> articles -> accounts -> comments -> templates." },
-    "05-extracteur-regles":          { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
-    "06-extracteur-workflows":       { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
-    "07-extracteur-rbac":            { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
-    "08-documenteur":                { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "05-extracteur-regles":          { "status": "completed", "phase": 1, "last_run": "2026-04-13T11:30:00Z", "output_files": ["migration-state/phase1/business_rules.json"], "confidence": 94, "notes": "54 regles metier extraites de 7 modules. Types: 12 validation, 2 calculation, 12 authorization, 3 workflow, 14 transformation, 11 constraint. 2 inconsistances detectees (ARTICLES_PER_PAGE duplique, password validators non appliques). 1 question pour validation humaine (comportement voulu ou bug sur les validators de password)." },
+    "06-extracteur-workflows":       { "status": "completed", "phase": 1, "last_run": "2026-04-13T12:00:00Z", "output_files": ["migration-state/phase1/workflows.json"], "confidence": 92, "notes": "11 workflows identifies dans 3 domaines (accounts, articles, comments). 39 etats, 36 transitions. Workflows : Login, Register, Settings, Logout, Follow/Unfollow, Article Create/Edit/Delete, Favorite Toggle, Comment Create/Delete. Toutes les conditions de transition referencent les BR correspondantes. Workflows implicites (toggle follow/favorite, skip commentaire vide) documentes. Aucun statut machine explicite : tous les workflows sont request/response sans persistance d'etat intermediaire." },
+    "07-extracteur-rbac":            { "status": "completed", "phase": 1, "last_run": "2026-04-13T12:30:00Z", "output_files": ["migration-state/phase1/rbac_matrix.json"], "confidence": 95, "notes": "3 rôles (anonymous, authenticated, staff). 10 ressources. 34 permissions. 1 anomalie WARNING (logout sans @login_required), 3 INFO. Ownership articles via get_object_or_404(author=request.user) → 404 non-propriétaire (intentionnel). Suppression commentaire : double condition (auteur commentaire OU auteur article) → 403. staff sans privilège applicatif. 7 notes de migration produites." },
+    "08-documenteur":                { "status": "completed", "phase": 1, "last_run": "2026-04-13T14:00:00Z", "output_files": ["migration-state/phase1/documentation/index.md", "migration-state/phase1/documentation/architecture.md", "migration-state/phase1/documentation/data_model.md", "migration-state/phase1/documentation/api_reference.md", "migration-state/phase1/documentation/business_rules_index.md", "migration-state/phase1/documentation/attention_points.md", "migration-state/phase1/documentation/domains/authentication.md", "migration-state/phase1/documentation/domains/articles.md", "migration-state/phase1/documentation/domains/comments.md", "migration-state/phase1/documentation/domains/social.md"], "confidence": 93, "notes": "Documentation consolidée générée : 10 fichiers Markdown dans phase1/documentation/. 4 domaines métier documentés (authentication, articles, comments, social). 54 règles métier indexées. 21 routes API documentées. Schéma de données complet avec ER Mermaid. 10 points d'attention identifiés dont 2 CRITICAL (logique double suppression commentaire, 404 vs 403 ownership articles)." },
     "09-generateur-tests-api":       { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "10-generateur-tests-e2e":       { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "11-golden-file":                { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
@@ -97,6 +97,30 @@
       "agent": "orchestrator",
       "action": "phase_transition",
       "details": "Phase 0 complétée (agents 01, 02, 03, 04 tous completed). Transition vers Phase 1 - Extraction des Règles Métier."
+    },
+    {
+      "timestamp": "2026-04-13T12:00:00Z",
+      "agent": "06-extracteur-workflows",
+      "action": "workflows_extracted",
+      "details": "11 workflows documentes dans migration-state/phase1/workflows.json. Domaines: accounts (WF-001 Login, WF-002 Register, WF-003 Settings, WF-004 Logout, WF-005 Follow Toggle), articles (WF-006 Article Create, WF-007 Article Edit, WF-008 Article Delete, WF-009 Favorite Toggle), comments (WF-010 Comment Create, WF-011 Comment Delete). 39 etats total, 36 transitions. Toutes les BR pertinentes referencees. Diagrammes Mermaid stateDiagram-v2 generes. Confidence 92%."
+    },
+    {
+      "timestamp": "2026-04-13T12:30:00Z",
+      "agent": "07-extracteur-rbac",
+      "action": "rbac_matrix_generated",
+      "details": "Matrice RBAC complète générée. 3 rôles : anonymous, authenticated, staff. 10 ressources : home_feed, following_feed, article, article_favorite, comment, user_profile, user_settings, user_follow, authentication, django_admin. 34 permissions documentées. 4 anomalies : 1 WARNING (logout sans @login_required), 3 INFO (in-handler auth check, 404 vs 403 intentionnel, staff sans privilège applicatif). 7 notes de migration critiques. Mécanismes auth : Django sessions + CsrfViewMiddleware + @login_required + ORM ownership filter. Confiance : 95%."
+    },
+    {
+      "timestamp": "2026-04-13T14:00:00Z",
+      "agent": "08-documenteur",
+      "action": "documentation_generated",
+      "details": "Documentation consolidée Phase 1 générée : 10 fichiers Markdown dans migration-state/phase1/documentation/. index.md (navigation), architecture.md (diagrammes Mermaid), data_model.md (schéma ER Mermaid), api_reference.md (21 routes), business_rules_index.md (54 règles), attention_points.md (10 points dont 2 CRITICAL). 4 domaines : domains/authentication.md, domains/articles.md, domains/comments.md, domains/social.md. Phase 1 complète (agents 05-08 tous completed). Transition vers Phase 2. Confiance : 93%."
+    },
+    {
+      "timestamp": "2026-04-13T14:00:00Z",
+      "agent": "08-documenteur",
+      "action": "phase_transition",
+      "details": "Tous les agents Phase 1 complétés (05-extracteur-regles, 06-extracteur-workflows, 07-extracteur-rbac, 08-documenteur). Phase 1 marquée completed. Phase 2 (Construction du Harnais de Tests) démarrée."
     }
   ]
 }

@@ -1,0 +1,679 @@
+{
+  "generated_at": "2026-04-13T12:30:00Z",
+  "agent": "07-extracteur-rbac",
+  "confidence": 95,
+  "notes": "Application Django 5.2 avec modèle auth basé sur is_authenticated + ownership (ABAC). 3 rôles statiques (anonymous, authenticated, staff). Contrôle d'accès aux ressources par @login_required (middleware) + get_object_or_404(author=request.user) (filtre ORM propriétaire). La suppression de commentaire utilise une double condition : auteur du commentaire OU auteur de l'article. Aucun système de permissions Django (django.contrib.auth.permissions) utilisé dans le code applicatif — uniquement dans l'admin.",
+
+  "summary": {
+    "total_roles": 3,
+    "total_resources": 10,
+    "total_permissions": 34,
+    "unprotected_routes": 1,
+    "anomalies": 4
+  },
+
+  "roles": [
+    {
+      "name": "anonymous",
+      "inherits_from": null,
+      "description": "Visiteur non authentifié. Accès en lecture seule aux contenus publics (feed global, articles, profils). Redirigé vers /login pour toute action protégée.",
+      "source_location": {
+        "file": "config/settings.py",
+        "line": 155,
+        "notes": "LOGIN_URL = '/login' définit la cible de redirection pour @login_required"
+      }
+    },
+    {
+      "name": "authenticated",
+      "inherits_from": null,
+      "description": "Utilisateur connecté via email + password. Peut lire, créer des articles, commenter, favoriser, suivre. Les opérations de modification/suppression sont limitées à ses propres ressources (ownership check via GET ou ORM filter).",
+      "source_location": {
+        "file": "apps/accounts/models.py",
+        "line": 29,
+        "notes": "User hérite de AbstractUser. USERNAME_FIELD = 'email'. is_authenticated est géré nativement par Django AbstractUser."
+      }
+    },
+    {
+      "name": "staff",
+      "inherits_from": "authenticated",
+      "description": "Utilisateur avec is_staff=True. Accès à l'interface d'administration Django (/admin/). Aucun privilège supplémentaire dans le code applicatif (vues, templates). Créé via create_superuser() avec is_staff=True ET is_superuser=True.",
+      "source_location": {
+        "file": "apps/accounts/models.py",
+        "line": 17,
+        "notes": "create_superuser() force is_staff=True et is_superuser=True. Tous les modèles (User, Article, Comment, Tag) sont auto-enregistrés en admin via apps/articles/admin.py."
+      }
+    }
+  ],
+
+  "resources": [
+    {
+      "name": "home_feed",
+      "type": "route",
+      "actions": ["read"],
+      "notes": "Feed global et filtrage par tag. GET / et GET /tag/<str:tag>. Onglet 'Global Feed' et onglet 'tag' dynamique."
+    },
+    {
+      "name": "following_feed",
+      "type": "feature",
+      "actions": ["read"],
+      "notes": "Onglet 'Your Feed' sur la page d'accueil. GET /?feed=following. Visible uniquement pour les authentifiés (template + redirect serveur)."
+    },
+    {
+      "name": "article",
+      "type": "model",
+      "actions": ["read", "create", "update", "delete"],
+      "notes": "CRUD articles. Lecture publique. Création/modification/suppression requièrent auth + ownership (sauf création qui assigne l'auteur automatiquement)."
+    },
+    {
+      "name": "article_favorite",
+      "type": "feature",
+      "actions": ["toggle"],
+      "notes": "Toggle favori via POST /article/<slug>/favorite. Nécessite auth. Aucune restriction sur l'auto-favorisation."
+    },
+    {
+      "name": "comment",
+      "type": "model",
+      "actions": ["create", "delete"],
+      "notes": "Commentaires sur articles. Lecture incluse dans article_detail (public). Création nécessite auth. Suppression : auteur du commentaire OU auteur de l'article."
+    },
+    {
+      "name": "user_profile",
+      "type": "route",
+      "actions": ["read"],
+      "notes": "GET /profile/<str:username> et GET /profile/<str:username>/favorites. Entièrement public. Profil inexistant → 404 dédié."
+    },
+    {
+      "name": "user_settings",
+      "type": "route",
+      "actions": ["read", "update"],
+      "notes": "GET et POST /settings. Toujours les settings de l'utilisateur courant (pas de risque cross-user — aucun paramètre username dans l'URL)."
+    },
+    {
+      "name": "user_follow",
+      "type": "feature",
+      "actions": ["toggle"],
+      "notes": "Toggle follow/unfollow via POST /profile/<str:username>/follow. Nécessite auth. Auto-follow ignoré silencieusement (no-op, is_following=False)."
+    },
+    {
+      "name": "authentication",
+      "type": "feature",
+      "actions": ["login", "register", "logout"],
+      "notes": "Login: POST /login (GET pour form). Register: POST /register (GET pour form). Logout: POST /logout (require_POST, pas de @login_required — anomalie WARNING)."
+    },
+    {
+      "name": "django_admin",
+      "type": "feature",
+      "actions": ["access"],
+      "notes": "GET /admin/. Interface standard Django admin. Accès réservé is_staff=True. Tous les modèles auto-enregistrés. Non migrable comme route applicative."
+    }
+  ],
+
+  "permissions": [
+
+    {
+      "role": "anonymous",
+      "resource": "home_feed",
+      "action": "read",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "home_view / tag_view",
+        "line": 63
+      },
+      "notes": "Aucun middleware d'auth. Les deux routes GET / et GET /tag/<tag> sont publiques."
+    },
+    {
+      "role": "anonymous",
+      "resource": "following_feed",
+      "action": "read",
+      "allowed": false,
+      "condition": "redirect_to_login",
+      "condition_rule": "BR-026",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "_build_feed",
+        "line": 27
+      },
+      "notes": "if feed == 'following' and not request.user.is_authenticated: return redirect('login'). Vérification dans le handler, pas en middleware."
+    },
+    {
+      "role": "anonymous",
+      "resource": "article",
+      "action": "read",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_detail_view",
+        "line": 78
+      },
+      "notes": "GET /article/<slug> est public. Article inexistant → 404 dédié (detail_404.html)."
+    },
+    {
+      "role": "anonymous",
+      "resource": "article",
+      "action": "create",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-033",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_create_view",
+        "line": 108
+      },
+      "notes": "@login_required redirige vers /login?next=/editor."
+    },
+    {
+      "role": "anonymous",
+      "resource": "article",
+      "action": "update",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-034",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_edit_view",
+        "line": 118
+      },
+      "notes": "@login_required redirige vers /login?next=/editor/<slug>."
+    },
+    {
+      "role": "anonymous",
+      "resource": "article",
+      "action": "delete",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-035",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_delete_view",
+        "line": 131
+      },
+      "notes": "@login_required redirige vers /login."
+    },
+    {
+      "role": "anonymous",
+      "resource": "article_favorite",
+      "action": "toggle",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-036 / BR-051",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_favorite_view",
+        "line": 138
+      },
+      "notes": "Côté serveur : @login_required. Côté client : bouton favorite a un onclick='window.location.href=login' pour les anonymes (BR-051). Double protection."
+    },
+    {
+      "role": "anonymous",
+      "resource": "comment",
+      "action": "create",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-040 / BR-053",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "function": "comment_create_view",
+        "line": 11
+      },
+      "notes": "@login_required. Côté template : le formulaire de commentaire est remplacé par un message 'Sign in or sign up to add comments on this article.' (BR-053)."
+    },
+    {
+      "role": "anonymous",
+      "resource": "comment",
+      "action": "delete",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-044",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "function": "comment_delete_view",
+        "line": 25
+      },
+      "notes": "@login_required."
+    },
+    {
+      "role": "anonymous",
+      "resource": "user_profile",
+      "action": "read",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "_profile_view",
+        "line": 81
+      },
+      "notes": "GET /profile/<str:username> et /profile/<str:username>/favorites sont publics. Profil inexistant → 404 dédié (profile_404.html)."
+    },
+    {
+      "role": "anonymous",
+      "resource": "user_settings",
+      "action": "read",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-020",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "settings_view",
+        "line": 55
+      },
+      "notes": "@login_required redirige vers /login?next=/settings."
+    },
+    {
+      "role": "anonymous",
+      "resource": "user_settings",
+      "action": "update",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-020",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "settings_view",
+        "line": 55
+      },
+      "notes": "@login_required."
+    },
+    {
+      "role": "anonymous",
+      "resource": "user_follow",
+      "action": "toggle",
+      "allowed": false,
+      "condition": "login_required_redirect",
+      "condition_rule": "BR-019 / BR-020",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "follow_view",
+        "line": 126
+      },
+      "notes": "@login_required @require_POST."
+    },
+    {
+      "role": "anonymous",
+      "resource": "authentication",
+      "action": "login",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": "BR-011 / BR-012",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "login_view",
+        "line": 17
+      },
+      "notes": "GET /login (form) et POST /login (submit). Aucune redirection si déjà connecté (pas de check is_authenticated dans la vue)."
+    },
+    {
+      "role": "anonymous",
+      "resource": "authentication",
+      "action": "register",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": "BR-013 / BR-014",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "register_view",
+        "line": 29
+      },
+      "notes": "GET /register et POST /register. Aucune redirection si déjà connecté."
+    },
+    {
+      "role": "anonymous",
+      "resource": "authentication",
+      "action": "logout",
+      "allowed": true,
+      "condition": "no_op_if_not_authenticated",
+      "condition_rule": "BR-016",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "logout_view",
+        "line": 72
+      },
+      "notes": "ANOMALIE WARNING : Pas de @login_required sur logout_view. Un utilisateur non authentifié peut POST /logout — logout() est un no-op mais l'endpoint est exposé. Voir anomalies[0]."
+    },
+    {
+      "role": "anonymous",
+      "resource": "django_admin",
+      "action": "access",
+      "allowed": false,
+      "condition": "admin_login_required",
+      "condition_rule": null,
+      "source_location": {
+        "file": "config/urls.py",
+        "function": "admin.site.urls",
+        "line": 23
+      },
+      "notes": "Redirige vers /admin/login/ si non staff."
+    },
+
+    {
+      "role": "authenticated",
+      "resource": "home_feed",
+      "action": "read",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "home_view",
+        "line": 63
+      }
+    },
+    {
+      "role": "authenticated",
+      "resource": "following_feed",
+      "action": "read",
+      "allowed": true,
+      "condition": "filtered_to_followed_authors",
+      "condition_rule": "BR-026",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "_build_feed",
+        "line": 30
+      },
+      "notes": "Articles filtrés aux auteurs suivis par l'utilisateur courant. User.objects.filter(followers=request.user)."
+    },
+    {
+      "role": "authenticated",
+      "resource": "article",
+      "action": "read",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_detail_view",
+        "line": 78
+      }
+    },
+    {
+      "role": "authenticated",
+      "resource": "article",
+      "action": "create",
+      "allowed": true,
+      "condition": "author_auto_assigned",
+      "condition_rule": "BR-033",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_create_view",
+        "line": 113
+      },
+      "notes": "Article(author=request.user). L'auteur est automatiquement l'utilisateur courant."
+    },
+    {
+      "role": "authenticated",
+      "resource": "article",
+      "action": "update",
+      "allowed": true,
+      "condition": "own_only",
+      "condition_rule": "BR-034",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_edit_view",
+        "line": 120
+      },
+      "notes": "get_object_or_404(Article, slug=slug, author=request.user). Retourne 404 (pas 403) si non-propriétaire. Sécurité par obscurité intentionnelle."
+    },
+    {
+      "role": "authenticated",
+      "resource": "article",
+      "action": "delete",
+      "allowed": true,
+      "condition": "own_only",
+      "condition_rule": "BR-035",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_delete_view",
+        "line": 133
+      },
+      "notes": "get_object_or_404(Article, slug=slug, author=request.user). Retourne 404 (pas 403) si non-propriétaire."
+    },
+    {
+      "role": "authenticated",
+      "resource": "article_favorite",
+      "action": "toggle",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": "BR-036",
+      "source_location": {
+        "file": "apps/articles/views.py",
+        "function": "article_favorite_view",
+        "line": 140
+      },
+      "notes": "Tout article peut être favorisé, y compris ses propres articles (pas de restriction auto-favorite)."
+    },
+    {
+      "role": "authenticated",
+      "resource": "comment",
+      "action": "create",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": "BR-040",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "function": "comment_create_view",
+        "line": 13
+      },
+      "notes": "Peut commenter tout article (pas de restriction). Body vide = commentaire ignoré silencieusement (BR-039)."
+    },
+    {
+      "role": "authenticated",
+      "resource": "comment",
+      "action": "delete",
+      "allowed": true,
+      "condition": "own_comment_or_article_author",
+      "condition_rule": "BR-041",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "function": "comment_delete_view",
+        "line": 28
+      },
+      "notes": "Autorisé si comment.author == request.user OU article.author == request.user. Retourne HTTP 403 Forbidden sinon (pas 404). Seul endpoint retournant un 403 dans l'application."
+    },
+    {
+      "role": "authenticated",
+      "resource": "user_profile",
+      "action": "read",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "_profile_view",
+        "line": 81
+      }
+    },
+    {
+      "role": "authenticated",
+      "resource": "user_settings",
+      "action": "read",
+      "allowed": true,
+      "condition": "own_only_implicit",
+      "condition_rule": "BR-015 / BR-020",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "settings_view",
+        "line": 57
+      },
+      "notes": "L'URL /settings n'accepte pas de paramètre utilisateur. Le formulaire charge toujours instance=request.user. Impossible d'accéder aux settings d'un autre utilisateur par construction."
+    },
+    {
+      "role": "authenticated",
+      "resource": "user_settings",
+      "action": "update",
+      "allowed": true,
+      "condition": "own_only_implicit",
+      "condition_rule": "BR-015",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "settings_view",
+        "line": 60
+      },
+      "notes": "Mise à jour uniquement du compte courant. Champs: image, username, bio, email, password (optionnel). Changement de password déclenche re-login automatique."
+    },
+    {
+      "role": "authenticated",
+      "resource": "user_follow",
+      "action": "toggle",
+      "allowed": true,
+      "condition": "not_self",
+      "condition_rule": "BR-019",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "follow_view",
+        "line": 131
+      },
+      "notes": "if profile_user != request.user: toggle follow. Sinon no-op silencieux (is_following=False). Peut suivre tout autre utilisateur sans restriction."
+    },
+    {
+      "role": "authenticated",
+      "resource": "authentication",
+      "action": "login",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "notes": "Pas de redirection automatique si déjà connecté. Un utilisateur connecté peut accéder à /login et /register sans être redirigé."
+    },
+    {
+      "role": "authenticated",
+      "resource": "authentication",
+      "action": "register",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": null,
+      "notes": "Pas de redirection automatique si déjà connecté."
+    },
+    {
+      "role": "authenticated",
+      "resource": "authentication",
+      "action": "logout",
+      "allowed": true,
+      "condition": null,
+      "condition_rule": "BR-016",
+      "source_location": {
+        "file": "apps/accounts/views.py",
+        "function": "logout_view",
+        "line": 72
+      }
+    },
+
+    {
+      "role": "staff",
+      "resource": "django_admin",
+      "action": "access",
+      "allowed": true,
+      "condition": "is_staff_true",
+      "condition_rule": null,
+      "source_location": {
+        "file": "config/urls.py",
+        "function": "admin.site.urls",
+        "line": 23
+      },
+      "notes": "is_staff=True requis. Interface standard Django admin. Tous les modèles (User, Article, Comment, Tag, TaggedItem) auto-enregistrés via apps/articles/admin.py. Aucun ModelAdmin personnalisé. staff/superuser peuvent CRUD toutes les données via l'admin. IMPORTANT: aucun privilège spécial dans le code applicatif (BR-041)."
+    }
+  ],
+
+  "anomalies": [
+    {
+      "type": "unprotected_route",
+      "description": "logout_view (POST /logout) n'a pas de @login_required. Un utilisateur non authentifié peut envoyer un POST /logout sans authentification. La fonction logout() est un no-op sur une session anonyme, et le CSRF token est requis (@require_POST + csrf middleware). Risque pratique minimal mais violation du principe de protection des endpoints de mutation d'état.",
+      "location": {
+        "file": "apps/accounts/views.py",
+        "line": 72,
+        "code": "@require_POST\ndef logout_view(request):\n    logout(request)\n    return redirect('home')"
+      },
+      "severity": "warning"
+    },
+    {
+      "type": "unprotected_route",
+      "description": "La vérification d'authentification pour ?feed=following est effectuée à l'intérieur du handler (_build_feed) et non par un middleware. La route GET / a auth_required: false dans le catalogue. L'accès au feed personnalisé est contrôlé programmatiquement (plus fragile que middleware). Si la route est copiée ou réutilisée sans le body check, la protection serait perdue.",
+      "location": {
+        "file": "apps/articles/views.py",
+        "line": 27,
+        "code": "if feed == 'following' and not request.user.is_authenticated:\n    return redirect('login')"
+      },
+      "severity": "info"
+    },
+    {
+      "type": "contradictory_permission",
+      "description": "article_edit_view et article_delete_view retournent HTTP 404 (et non 403 Forbidden) quand un utilisateur authentifié tente d'accéder à l'article d'un autre utilisateur (get_object_or_404 avec filtre author=request.user). Ce comportement est intentionnel (sécurité par obscurité — ne pas révéler l'existence de l'article) mais diffère du comportement standard HTTP (403). À reproduire impérativement dans la cible pour conformité comportementale.",
+      "location": {
+        "file": "apps/articles/views.py",
+        "line": 120,
+        "code": "article = get_object_or_404(Article, slug=slug, author=request.user)"
+      },
+      "severity": "info"
+    },
+    {
+      "type": "unused_role",
+      "description": "Le rôle 'staff' (is_staff=True) n'a aucun privilège spécial dans le code applicatif (vues, templates, logique métier). Il n'existe que pour l'accès à /admin/. Aucune route applicative ne vérifie user.is_staff. La notion de 'modérateur' ou 'd'administrateur applicatif' est absente du code (BR-041). Dans la cible, un rôle 'admin' ne devrait donc pas avoir de permissions supplémentaires dans l'API applicative.",
+      "location": {
+        "file": "apps/comments/views.py",
+        "line": 32,
+        "code": "# Exemple: comment 'staff' ne peut PAS supprimer un commentaire via l'app si ni auteur du comment ni auteur de l'article"
+      },
+      "severity": "info"
+    }
+  ],
+
+  "auth_mechanisms": {
+    "session_backend": "Django sessions (cookie-based, SessionMiddleware)",
+    "authentication_backend": "django.contrib.auth.backends.ModelBackend avec USERNAME_FIELD='email'",
+    "csrf_protection": "CsrfViewMiddleware global + hx-headers sur body pour HTMX (BR-054)",
+    "login_url": "/login",
+    "login_decorator": "@login_required (django.contrib.auth.decorators)",
+    "ownership_pattern": "get_object_or_404(Model, pk=pk, author=request.user) — retourne 404 si non-propriétaire",
+    "authorization_403_pattern": "HttpResponseForbidden() explicite uniquement dans comment_delete_view (BR-041)",
+    "no_jwt": true,
+    "no_oauth": true,
+    "no_api_key": true
+  },
+
+  "migration_notes": [
+    {
+      "id": "MN-01",
+      "description": "Le modèle RBAC de la cible doit implémenter une couche ownership : un utilisateur ne peut modifier/supprimer que ses propres articles. La cible (Fastify) devra utiliser un middleware ou guard qui vérifie article.authorId === user.id.",
+      "related_rules": ["BR-034", "BR-035"],
+      "priority": "critical"
+    },
+    {
+      "id": "MN-02",
+      "description": "La suppression de commentaire a une logique d'autorisation duale : l'auteur du commentaire OU l'auteur de l'article peut supprimer. Cette règle doit être implémentée comme un guard spécifique dans la cible (pas un simple ownership check). Retourner 403 Forbidden (pas 404) si non autorisé.",
+      "related_rules": ["BR-041"],
+      "priority": "critical"
+    },
+    {
+      "id": "MN-03",
+      "description": "Dans le legacy, article_edit et article_delete retournent 404 (pas 403) pour les non-propriétaires. La cible doit reproduire ce comportement (sécurité par obscurité intentionnelle). NE PAS retourner 403 pour ces deux endpoints.",
+      "related_rules": ["BR-034", "BR-035"],
+      "priority": "high"
+    },
+    {
+      "id": "MN-04",
+      "description": "Dans la cible Angular/Fastify, le rôle 'staff' n'a aucune logique spéciale côté applicatif. Si un panneau admin est prévu, ses permissions sont hors scope de la migration iso-fonctionnelle.",
+      "related_rules": ["BR-041"],
+      "priority": "medium"
+    },
+    {
+      "id": "MN-05",
+      "description": "Le self-follow (suivre son propre compte) est un no-op silencieux dans le legacy (pas d'erreur, is_following reste False). La cible doit reproduire ce comportement : ne pas rejeter la requête, retourner is_following=false.",
+      "related_rules": ["BR-019"],
+      "priority": "medium"
+    },
+    {
+      "id": "MN-06",
+      "description": "Les routes GET / et GET /?feed=following partagent le même endpoint, la distinction se fait via query param. La protection auth pour following est in-handler. Dans la cible, cette logique doit être préservée : le endpoint est unique, le middleware/guard vérifie le paramètre feed.",
+      "related_rules": ["BR-026"],
+      "priority": "medium"
+    },
+    {
+      "id": "MN-07",
+      "description": "Le logout ne requiert pas d'authentification dans le legacy. Dans la cible, ajouter un guard d'authentification sur le logout est acceptable (amélioration) mais pas obligatoire pour la conformité comportementale.",
+      "related_rules": ["BR-016"],
+      "priority": "low"
+    }
+  ]
+}
