@@ -1,0 +1,102 @@
+{
+  "project": {
+    "name": "conduit",
+    "source_tech": "Python/Django",
+    "target_tech": "TypeScript/Angular+Fastify",
+    "source_directory": "d:\\workspace\\migration IA\\legacy",
+    "target_directory": "d:\\workspace\\migration IA\\target",
+    "initialized_at": "2026-04-13T00:00:00Z"
+  },
+  "current_phase": 1,
+  "phases": {
+    "phase0": { "status": "completed", "started_at": "2026-04-13T00:00:00Z", "completed_at": "2026-04-13T10:00:00Z" },
+    "phase1": { "status": "in_progress", "started_at": "2026-04-13T10:00:00Z", "completed_at": null },
+    "phase2": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase3": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase4": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase5": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase6": { "status": "pending", "started_at": null, "completed_at": null }
+  },
+  "agents": {
+    "01-cartographe": {
+      "status": "completed",
+      "phase": 0,
+      "last_run": "2026-04-13T00:05:00Z",
+      "output_files": [
+        "migration-state/phase0/structure.json",
+        "migration-state/phase0/dependency_graph.dot"
+      ],
+      "confidence": 92,
+      "notes": "49 fichiers Python, 7 modules, ~1051 LOC. 4 éléments dead code potentiels détectés."
+    },
+    "02-analyseur-routes":           { "status": "completed", "phase": 0, "last_run": "2026-04-13T00:10:00Z", "output_files": ["migration-state/phase0/routes_catalog.json"], "confidence": 93, "notes": "23 routes backend (17 URL patterns), 11 routes frontend (templates Django). Application monolithique SSR + HTMX. Aucun routeur SPA. 8 interactions HTMX documentées. 10 routes protégées par @login_required." },
+    "03-inventaire-db": {
+      "status": "completed",
+      "phase": 0,
+      "last_run": "2026-04-13T00:10:00Z",
+      "output_files": [
+        "migration-state/phase0/db_schema.json",
+        "migration-state/phase0/er_diagram.mermaid"
+      ],
+      "confidence": 88,
+      "notes": "3 apps (accounts, articles, comments). 7 tables applicatives + 2 tables taggit. 8 migrations. 14 requêtes cataloguées. Schéma dérivé des modèles ORM (authoritative). Bugs historiques notés : article.updated était auto_now_add (corrigé en 0002), username n'avait pas de contrainte unique initialement (ajouté en 0003)."
+    },
+    "04-metriques":                  { "status": "completed", "phase": 0, "last_run": "2026-04-13T10:30:00Z", "output_files": ["migration-state/phase0/metrics_report.json"], "confidence": 82, "notes": "7 modules analyses. LOC total: 1651 (1051 Python/TS + 600 HTML templates). CC moyen global: 2.48. Modules high-effort: accounts (CC max=6, 10 patterns Django), articles (CC max=6, 12 patterns). Very_high: templates (18 composants Angular). Ordre migration: helpers -> tests_e2e -> config -> articles -> accounts -> comments -> templates." },
+    "05-extracteur-regles":          { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "06-extracteur-workflows":       { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "07-extracteur-rbac":            { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "08-documenteur":                { "status": "pending", "phase": 1, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "09-generateur-tests-api":       { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "10-generateur-tests-e2e":       { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "11-golden-file":                { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "12-recorder-http":              { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "13-navigateur-visuel":          { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "14-comparateur-visuel":         { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "15-couverture-metier":          { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "16-mappeur-techno":             { "status": "pending", "phase": 3, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "17-planificateur":              { "status": "pending", "phase": 3, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "18-traducteur":                 { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "19-validateur-conformite":      { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "20-comparateur-reponses":       { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "21-revieweur-migration":        { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "22-audit-final":                { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "23-detecteur-features-fantomes":{ "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "24-comparateur-surface-api":    { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" }
+  },
+  "migration_modules": [],
+  "module_progress": {},
+  "blockers": [],
+  "human_validations_pending": [],
+  "log": [
+    {
+      "timestamp": "2026-04-13T00:00:00Z",
+      "agent": "init",
+      "action": "project_initialized",
+      "details": "Projet conduit initialisé. Source: Python/Django (d:\\workspace\\migration IA\\legacy). Cible: TypeScript/Angular+Fastify (d:\\workspace\\migration IA\\target)."
+    },
+    {
+      "timestamp": "2026-04-13T00:10:00Z",
+      "agent": "02-analyseur-routes",
+      "action": "routes_catalog_generated",
+      "details": "Catalogue complet des routes généré. 23 routes backend (17 patterns URL Django), 11 routes frontend (templates SSR). Apps analysées : articles, accounts, comments, admin. 8 interactions HTMX documentées. Matrice de couverture 1:1 (monolithe SSR sans API REST séparée). Confiance globale : 93%."
+    },
+    {
+      "timestamp": "2026-04-13T00:10:00Z",
+      "agent": "03-inventaire-db",
+      "action": "db_inventory_completed",
+      "details": "Inventaire DB terminé. 9 tables (7 applicatives + 2 taggit), 38 colonnes, 6 relations, 8 migrations, 14 requêtes cataloguées. Confidence: 88. Outputs: db_schema.json, er_diagram.mermaid."
+    },
+    {
+      "timestamp": "2026-04-13T10:30:00Z",
+      "agent": "04-metriques",
+      "action": "metrics_computed",
+      "details": "Metriques calculees sur 7 modules (1651 LOC total: 1051 Python/TS + 600 HTML). CC moyen global 2.48. Instabilite: helpers=0.0, articles=0.25, accounts=0.5, comments=0.67, config=1.0, templates=1.0, tests_e2e=1.0. Distribution efforts: 3 low, 1 medium, 2 high, 1 very_high. Ordre migration suggere: helpers -> tests_e2e -> config -> articles -> accounts -> comments -> templates. Aucun SQL brut detecte. Confidence 82%."
+    },
+    {
+      "timestamp": "2026-04-13T10:00:00Z",
+      "agent": "orchestrator",
+      "action": "phase_transition",
+      "details": "Phase 0 complétée (agents 01, 02, 03, 04 tous completed). Transition vers Phase 1 - Extraction des Règles Métier."
+    }
+  ]
+}

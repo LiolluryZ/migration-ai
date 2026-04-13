@@ -1,0 +1,272 @@
+{
+  "generated_at": "2026-04-13T00:00:00Z",
+  "agent": "01-cartographe",
+  "confidence": 92,
+  "summary": {
+    "total_files": 49,
+    "total_modules": 7,
+    "total_loc": 1051,
+    "languages_detected": ["Python", "HTML (Django templates)", "TypeScript (Playwright config)", "CSS", "SVG"]
+  },
+  "modules": [
+    {
+      "name": "accounts",
+      "path": "apps/accounts",
+      "type": "controller",
+      "files": [
+        "apps/accounts/__init__.py",
+        "apps/accounts/models.py",
+        "apps/accounts/views.py",
+        "apps/accounts/forms.py",
+        "apps/accounts/urls.py",
+        "apps/accounts/apps.py",
+        "apps/accounts/admin.py",
+        "apps/accounts/management/___init__.py",
+        "apps/accounts/management/commands/__init__.py",
+        "apps/accounts/management/commands/createUser.py",
+        "apps/accounts/migrations/0001_initial.py",
+        "apps/accounts/migrations/0002_rename_name_user_username.py",
+        "apps/accounts/migrations/0003_alter_user_username.py",
+        "apps/accounts/migrations/__init__.py"
+      ],
+      "public_interface": [
+        { "name": "User", "type": "class", "signature": "class User(AbstractUser)", "file": "apps/accounts/models.py", "line": 29 },
+        { "name": "UserManager", "type": "class", "signature": "class UserManager(BaseUserManager)", "file": "apps/accounts/models.py", "line": 6 },
+        { "name": "login_view", "type": "function", "signature": "def login_view(request)", "file": "apps/accounts/views.py", "line": 18 },
+        { "name": "register_view", "type": "function", "signature": "def register_view(request)", "file": "apps/accounts/views.py", "line": 29 },
+        { "name": "settings_view", "type": "function", "signature": "def settings_view(request)", "file": "apps/accounts/views.py", "line": 54 },
+        { "name": "logout_view", "type": "function", "signature": "def logout_view(request)", "file": "apps/accounts/views.py", "line": 70 },
+        { "name": "profile_view", "type": "function", "signature": "def profile_view(request, username)", "file": "apps/accounts/views.py", "line": 115 },
+        { "name": "profile_favorites_view", "type": "function", "signature": "def profile_favorites_view(request, username)", "file": "apps/accounts/views.py", "line": 118 },
+        { "name": "follow_view", "type": "function", "signature": "def follow_view(request, username)", "file": "apps/accounts/views.py", "line": 122 },
+        { "name": "LoginForm", "type": "class", "signature": "class LoginForm(forms.Form)", "file": "apps/accounts/forms.py", "line": 10 },
+        { "name": "RegisterForm", "type": "class", "signature": "class RegisterForm(forms.Form)", "file": "apps/accounts/forms.py", "line": 14 },
+        { "name": "SettingsForm", "type": "class", "signature": "class SettingsForm(forms.ModelForm)", "file": "apps/accounts/forms.py", "line": 19 },
+        { "name": "createUser", "type": "function", "signature": "class Command(BaseCommand) - management command: createUser", "file": "apps/accounts/management/commands/createUser.py", "line": 6 }
+      ],
+      "dependencies": {
+        "internal": ["helpers", "articles"],
+        "external": ["django"]
+      },
+      "dependents": ["config", "comments"],
+      "loc": 294,
+      "is_potentially_dead": false,
+      "confidence": 95,
+      "notes": "Modèle User custom (email comme USERNAME_FIELD). Gestion follow/unfollow avec ManyToMany self-referential. Dépend d'articles.models dans profile_view pour la pagination."
+    },
+    {
+      "name": "articles",
+      "path": "apps/articles",
+      "type": "controller",
+      "files": [
+        "apps/articles/__init__.py",
+        "apps/articles/models.py",
+        "apps/articles/views.py",
+        "apps/articles/forms.py",
+        "apps/articles/urls.py",
+        "apps/articles/apps.py",
+        "apps/articles/admin.py",
+        "apps/articles/templatetags/__init__.py",
+        "apps/articles/templatetags/markdown_filter.py",
+        "apps/articles/management/__init__.py",
+        "apps/articles/management/commands/__init__.py",
+        "apps/articles/management/commands/seed_data.py",
+        "apps/articles/migrations/0001_initial.py",
+        "apps/articles/migrations/0002_alter_article_updated.py",
+        "apps/articles/migrations/0003_alter_article_created.py",
+        "apps/articles/migrations/__init__.py"
+      ],
+      "public_interface": [
+        { "name": "Article", "type": "class", "signature": "class Article(models.Model)", "file": "apps/articles/models.py", "line": 28 },
+        { "name": "ArticleQuerySet", "type": "class", "signature": "class ArticleQuerySet(models.QuerySet)", "file": "apps/articles/models.py", "line": 11 },
+        { "name": "ArticleManager", "type": "class", "signature": "ArticleManager = models.Manager.from_queryset(ArticleQuerySet)", "file": "apps/articles/models.py", "line": 25 },
+        { "name": "home_view", "type": "function", "signature": "def home_view(request)", "file": "apps/articles/views.py", "line": 63 },
+        { "name": "tag_view", "type": "function", "signature": "def tag_view(request, tag)", "file": "apps/articles/views.py", "line": 66 },
+        { "name": "article_detail_view", "type": "function", "signature": "def article_detail_view(request, slug)", "file": "apps/articles/views.py", "line": 70 },
+        { "name": "article_create_view", "type": "function", "signature": "def article_create_view(request)", "file": "apps/articles/views.py", "line": 99 },
+        { "name": "article_edit_view", "type": "function", "signature": "def article_edit_view(request, slug)", "file": "apps/articles/views.py", "line": 111 },
+        { "name": "article_delete_view", "type": "function", "signature": "def article_delete_view(request, slug)", "file": "apps/articles/views.py", "line": 131 },
+        { "name": "article_favorite_view", "type": "function", "signature": "def article_favorite_view(request, slug)", "file": "apps/articles/views.py", "line": 138 },
+        { "name": "ArticleForm", "type": "class", "signature": "class ArticleForm(forms.Form)", "file": "apps/articles/forms.py", "line": 4 },
+        { "name": "render_markdown", "type": "function", "signature": "@register.filter(name='render_markdown') def render_markdown(value)", "file": "apps/articles/templatetags/markdown_filter.py", "line": 8 },
+        { "name": "seed_data", "type": "function", "signature": "class Command(BaseCommand) - management command: seed_data", "file": "apps/articles/management/commands/seed_data.py", "line": 10 }
+      ],
+      "dependencies": {
+        "internal": ["helpers"],
+        "external": ["django", "taggit", "markdown", "nh3"]
+      },
+      "dependents": ["config", "accounts", "comments"],
+      "loc": 332,
+      "is_potentially_dead": false,
+      "confidence": 95,
+      "notes": "Module central. Utilise django-taggit pour les tags. Cache intégré (5 min) pour la liste des tags. La vue home supporte 3 onglets : global, following, tag. Le slug est généré automatiquement à la création. ArticleQuerySet.with_favorites() est utilisé partout pour l'annotation des compteurs de favoris."
+    },
+    {
+      "name": "comments",
+      "path": "apps/comments",
+      "type": "controller",
+      "files": [
+        "apps/comments/__init__.py",
+        "apps/comments/models.py",
+        "apps/comments/views.py",
+        "apps/comments/urls.py",
+        "apps/comments/apps.py",
+        "apps/comments/admin.py",
+        "apps/comments/migrations/0001_initial.py",
+        "apps/comments/migrations/0002_alter_comment_created.py",
+        "apps/comments/migrations/__init__.py"
+      ],
+      "public_interface": [
+        { "name": "Comment", "type": "class", "signature": "class Comment(models.Model)", "file": "apps/comments/models.py", "line": 6 },
+        { "name": "comment_create_view", "type": "function", "signature": "def comment_create_view(request, slug)", "file": "apps/comments/views.py", "line": 12 },
+        { "name": "comment_delete_view", "type": "function", "signature": "def comment_delete_view(request, slug, comment_id)", "file": "apps/comments/views.py", "line": 24 }
+      ],
+      "dependencies": {
+        "internal": ["articles", "accounts"],
+        "external": ["django"]
+      },
+      "dependents": ["config"],
+      "loc": 64,
+      "is_potentially_dead": false,
+      "confidence": 95,
+      "notes": "Module simple. Autorisation de suppression: auteur du commentaire ou auteur de l'article. Support HTMX pour les rechargements partiels."
+    },
+    {
+      "name": "helpers",
+      "path": "helpers",
+      "type": "utility",
+      "files": [
+        "helpers/htmx.py",
+        "helpers/exceptions.py",
+        "helpers/context_processors.py",
+        "helpers/tests.py"
+      ],
+      "public_interface": [
+        { "name": "is_htmx", "type": "function", "signature": "def is_htmx(request: HttpRequest) -> bool", "file": "helpers/htmx.py", "line": 4 },
+        { "name": "clean_integrity_error", "type": "function", "signature": "def clean_integrity_error(error: Exception) -> str | None", "file": "helpers/exceptions.py", "line": 24 },
+        { "name": "get_or_404", "type": "function", "signature": "def get_or_404(model_or_qs, resource, **kwargs) -> Model", "file": "helpers/exceptions.py", "line": 19 },
+        { "name": "ResourceNotFound", "type": "class", "signature": "class ResourceNotFound(Http404)", "file": "helpers/exceptions.py", "line": 13 },
+        { "name": "conduit_context", "type": "function", "signature": "def conduit_context(request)", "file": "helpers/context_processors.py", "line": 4 }
+      ],
+      "dependencies": {
+        "internal": [],
+        "external": ["django", "psycopg2"]
+      },
+      "dependents": ["accounts", "articles", "comments"],
+      "loc": 100,
+      "is_potentially_dead": false,
+      "confidence": 90,
+      "notes": "get_or_404 et ResourceNotFound définis dans helpers mais non utilisés dans le code applicatif actuel (les vues utilisent directement get_object_or_404 de Django). conduit_context injecte les données user dans window.__conduit_debug__ via le contexte template."
+    },
+    {
+      "name": "config",
+      "path": "config",
+      "type": "config",
+      "files": [
+        "config/__init__.py",
+        "config/settings.py",
+        "config/urls.py",
+        "config/wsgi.py",
+        "config/asgi.py",
+        "manage.py"
+      ],
+      "public_interface": [
+        { "name": "urlpatterns", "type": "route", "signature": "ROOT url router: admin/, articles.urls, accounts.urls, comments.urls", "file": "config/urls.py", "line": 22 },
+        { "name": "DATABASES", "type": "class", "signature": "SQLite (DEBUG/local) ou PostgreSQL (via DATABASE_URL)", "file": "config/settings.py", "line": 82 }
+      ],
+      "dependencies": {
+        "internal": ["accounts", "articles", "comments"],
+        "external": ["django"]
+      },
+      "dependents": [],
+      "loc": 215,
+      "is_potentially_dead": false,
+      "confidence": 95,
+      "notes": "DATABASE_URL permet de basculer entre SQLite (local) et PostgreSQL (prod). Support SECRET_KEY, DEBUG, ALLOWED_HOSTS via variables d'environnement. USE_FAST_HASHER pour accélérer les tests."
+    },
+    {
+      "name": "templates",
+      "path": "templates",
+      "type": "view",
+      "files": [
+        "templates/base.html",
+        "templates/accounts/login.html",
+        "templates/accounts/register.html",
+        "templates/accounts/settings.html",
+        "templates/accounts/profile.html",
+        "templates/accounts/profile_404.html",
+        "templates/articles/home.html",
+        "templates/articles/detail.html",
+        "templates/articles/editor.html",
+        "templates/articles/detail_404.html",
+        "templates/partials/header.html",
+        "templates/partials/footer.html",
+        "templates/partials/feed_content.html",
+        "templates/partials/article_list.html",
+        "templates/partials/article_meta.html",
+        "templates/partials/comment_list.html",
+        "templates/partials/favorite_button.html",
+        "templates/partials/follow_button.html"
+      ],
+      "public_interface": [
+        { "name": "base.html", "type": "route", "signature": "Layout de base avec header, footer, HTMX CDN", "file": "templates/base.html", "line": 1 },
+        { "name": "partials/*", "type": "route", "signature": "Fragments HTMX retournés par les vues en réponse aux requêtes HX-Request", "file": "templates/partials/", "line": 1 }
+      ],
+      "dependencies": {
+        "internal": ["accounts", "articles", "comments"],
+        "external": ["htmx.org (CDN)"]
+      },
+      "dependents": [],
+      "loc": 600,
+      "is_potentially_dead": false,
+      "confidence": 85,
+      "notes": "18 templates Django. Les partials (8 fichiers) sont utilisés exclusivement pour les échanges HTMX (réponses partielles). Ils deviennent des composants Angular dans la cible. Le template base.html inclut HTMX via CDN."
+    },
+    {
+      "name": "tests_e2e",
+      "path": "playwright",
+      "type": "test",
+      "files": [
+        "playwright/playwright.config.ts"
+      ],
+      "public_interface": [
+        { "name": "playwright.config.ts", "type": "function", "signature": "defineConfig({ testDir: '../realworld/specs/e2e' })", "file": "playwright/playwright.config.ts", "line": 1 }
+      ],
+      "dependencies": {
+        "internal": [],
+        "external": ["@playwright/test", "bun"]
+      },
+      "dependents": [],
+      "loc": 46,
+      "is_potentially_dead": false,
+      "confidence": 90,
+      "notes": "Tests E2E du spec RealWorld. Pointe sur realworld/specs/e2e (sous-module git). Lance un serveur Django avec SQLite in-memory. Base URL: http://localhost:8000. USE_API=false pour mode UI."
+    }
+  ],
+  "dead_code": [
+    {
+      "file": "helpers/exceptions.py",
+      "name": "get_or_404",
+      "type": "function",
+      "reason": "Défini dans helpers mais jamais appelé: les vues utilisent directement get_object_or_404 de Django. Nécessite validation humaine."
+    },
+    {
+      "file": "helpers/exceptions.py",
+      "name": "ResourceNotFound",
+      "type": "class",
+      "reason": "Sous-classe Http404 définie dans helpers mais non référencée dans les vues applicatives. Nécessite validation humaine."
+    },
+    {
+      "file": "apps/accounts/admin.py",
+      "name": "accounts/admin.py",
+      "type": "file",
+      "reason": "Fichier vide (commentaire seulement). L'enregistrement des modèles admin est géré globalement dans articles/admin.py via get_models()."
+    },
+    {
+      "file": "apps/comments/admin.py",
+      "name": "comments/admin.py",
+      "type": "file",
+      "reason": "Fichier vide (commentaire seulement)."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "generated_at": "2026-04-13T10:30:00Z",
+  "agent": "04-metriques",
+  "confidence": 82,
+  "method_note": "Complexite cyclomatique calculee par analyse statique manuelle (style radon/McCabe): base=1, +1 par if/elif/for/while/except/ternary. Les operateurs booleens composes (and/or) comptent comme 1 branche globale (condition composee = 1 decision point). Les templates Django sont analyses par comptage des tags {% if %}/{% elif %}/{% for %}. Les fichiers de configuration (settings.py) sont traites comme des unites avec leurs blocs conditionnels. Valeurs approximatives car sans execution d'outil AST.",
+
+  "global": {
+    "total_loc": 1651,
+    "total_loc_breakdown": {
+      "python": 1005,
+      "html_templates": 600,
+      "typescript": 46
+    },
+    "total_modules": 7,
+    "average_complexity": 2.48,
+    "most_coupled_modules": ["articles", "accounts", "helpers", "config", "comments"],
+    "complexity_distribution": {
+      "low": 3,
+      "medium": 1,
+      "high": 2,
+      "very_high": 1
+    }
+  },
+
+  "per_module": [
+    {
+      "module": "accounts",
+      "path": "apps/accounts",
+      "loc": 294,
+      "functions_analyzed": 17,
+      "cyclomatic_complexity_avg": 2.47,
+      "cyclomatic_complexity_max": 6,
+      "worst_function": {
+        "name": "register_view",
+        "file": "apps/accounts/views.py",
+        "line": 29,
+        "complexity": 6,
+        "rationale": "if POST + if form.is_valid + except IntegrityError + if field==email + elif field==username = 5 branches"
+      },
+      "coupling_afferent": 2,
+      "coupling_efferent": 2,
+      "instability": 0.5,
+      "afferent_from": ["config", "comments"],
+      "efferent_to": ["helpers", "articles"],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 10,
+      "framework_patterns_detail": [
+        "AbstractUser (custom user model)",
+        "BaseUserManager (custom manager)",
+        "ManyToManyField self-referential (followers)",
+        "@login_required decorator",
+        "forms.Form / forms.ModelForm",
+        "authenticate/login/logout (Django auth system)",
+        "@require_POST decorator",
+        "transaction.atomic()",
+        "Management command (createUser)",
+        "EMAIL_FIELD / USERNAME_FIELD overrides"
+      ],
+      "estimated_migration_effort": "high",
+      "effort_justification": "Modele User custom (AbstractUser -> Sequelize + JWT). Auth email-based non standard. ManyToMany self-referentiel (followers). Formulaires Django -> Angular reactive forms. Gestion d'erreurs IntegrityError psycopg2/sqlite3 specifique. 10 patterns framework."
+    },
+    {
+      "module": "articles",
+      "path": "apps/articles",
+      "loc": 332,
+      "functions_analyzed": 14,
+      "cyclomatic_complexity_avg": 2.5,
+      "cyclomatic_complexity_max": 6,
+      "worst_function": {
+        "name": "_build_feed",
+        "file": "apps/articles/views.py",
+        "line": 17,
+        "complexity": 6,
+        "rationale": "except ValueError + if feed==following and not auth + if feed==following and auth + elif tag + if is_htmx = 5 branches"
+      },
+      "coupling_afferent": 3,
+      "coupling_efferent": 1,
+      "instability": 0.25,
+      "afferent_from": ["config", "accounts", "comments"],
+      "efferent_to": ["helpers"],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 12,
+      "framework_patterns_detail": [
+        "Custom QuerySet (ArticleQuerySet) avec annotations ORM",
+        "Manager.from_queryset()",
+        "models.Count/Exists/OuterRef/Value (annotations ORM avancees)",
+        "TaggableManager (django-taggit)",
+        "auto_now_add/auto_now",
+        "@login_required decorator",
+        "@require_POST decorator",
+        "cache.get_or_set (Django cache framework)",
+        "Template tag @register.filter (render_markdown)",
+        "Markdown + nh3 (sanitization HTML)",
+        "Management command (seed_data)",
+        "slugify auto-generation a la creation"
+      ],
+      "estimated_migration_effort": "high",
+      "effort_justification": "Module central avec QuerySet personnalise (annotations Count/Exists -> Sequelize). Systeme de tags via taggit. Cache integre (5 min). Rendu Markdown cote serveur. Pagination manuelle. 12 patterns framework. Instabilite faible (0.25) = beaucoup de modules en dependent."
+    },
+    {
+      "module": "comments",
+      "path": "apps/comments",
+      "loc": 64,
+      "functions_analyzed": 3,
+      "cyclomatic_complexity_avg": 2.67,
+      "cyclomatic_complexity_max": 4,
+      "worst_function": {
+        "name": "comment_delete_view",
+        "file": "apps/comments/views.py",
+        "line": 24,
+        "complexity": 4,
+        "rationale": "if comment.author != request.user and article.author (1 branch compose) + if is_htmx = 2 branches + 1 base = 3. Plus decorateurs: @login_required, @require_POST implicitement. Recalcul: base=1 + if author check(+1) + if is_htmx(+1) + and dans condition(+1) = 4"
+      },
+      "coupling_afferent": 1,
+      "coupling_efferent": 2,
+      "instability": 0.67,
+      "afferent_from": ["config"],
+      "efferent_to": ["articles", "accounts"],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 5,
+      "framework_patterns_detail": [
+        "ForeignKey with CASCADE",
+        "@login_required decorator",
+        "@require_POST decorator",
+        "HttpResponseForbidden (autorisation specifique)",
+        "HTMX partial responses (comment_list.html partial)"
+      ],
+      "estimated_migration_effort": "low",
+      "effort_justification": "Module le plus simple: 64 LOC, 2 vues CRUD, logique d'autorisation claire. Instabilite elevee (0.67) = bon candidat early migration. Dependances sur articles et accounts doivent etre migrees en premier."
+    },
+    {
+      "module": "helpers",
+      "path": "helpers",
+      "loc": 100,
+      "functions_analyzed": 9,
+      "cyclomatic_complexity_avg": 1.56,
+      "cyclomatic_complexity_max": 4,
+      "worst_function": {
+        "name": "clean_integrity_error",
+        "file": "helpers/exceptions.py",
+        "line": 24,
+        "complexity": 4,
+        "rationale": "try/except Exception(+1) + if UniqueViolation is not None and isinstance(+1 compose) + if isinstance SQLiteIntegrityError(+1) = 3 branches"
+      },
+      "coupling_afferent": 3,
+      "coupling_efferent": 0,
+      "instability": 0.0,
+      "afferent_from": ["accounts", "articles", "comments"],
+      "efferent_to": [],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 4,
+      "framework_patterns_detail": [
+        "Django Http404 / HttpRequest type hints",
+        "Context processor Django (TEMPLATES settings)",
+        "psycopg2.errors.UniqueViolation (parsing specifique driver)",
+        "sqlite3.IntegrityError (parsing specifique driver)"
+      ],
+      "estimated_migration_effort": "low",
+      "effort_justification": "Module utilitaire pur, 100 LOC, Ce=0 (aucune dependance interne). CC avg le plus bas (1.56). Patterns DB-driver specifiques (psycopg2/sqlite3) a reimplementer pour Node.js/Sequelize. Context processor -> Angular global state. Foundation de tous les autres modules: doit migrer en premier.",
+      "nota_bene": "get_or_404 et ResourceNotFound marques dead code par agent-01: non utilises dans les vues applicatives actuelles. Confirmer si a migrer ou ignorer."
+    },
+    {
+      "module": "config",
+      "path": "config",
+      "loc": 215,
+      "functions_analyzed": 5,
+      "cyclomatic_complexity_avg": 2.6,
+      "cyclomatic_complexity_max": 8,
+      "worst_function": {
+        "name": "DATABASE_URL config block",
+        "file": "config/settings.py",
+        "line": 82,
+        "complexity": 8,
+        "rationale": "ALLOWED_HOSTS ternary(+1) + if DATABASE_URL.startswith(':memory:'... (+1) + if not DEBUG inside(+1) + elif DATABASE_URL(+1) + elif DEBUG(+1) + if USE_FAST_HASHER and not DEBUG(+1) + if USE_FAST_HASHER(+1) = 7 branches"
+      },
+      "coupling_afferent": 0,
+      "coupling_efferent": 3,
+      "instability": 1.0,
+      "afferent_from": [],
+      "efferent_to": ["accounts", "articles", "comments"],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 8,
+      "framework_patterns_detail": [
+        "INSTALLED_APPS (Django app registry)",
+        "MIDDLEWARE stack (Django middleware pipeline)",
+        "AUTH_USER_MODEL (custom user substitution)",
+        "TEMPLATES engine config avec context_processors",
+        "Django admin",
+        "WSGI/ASGI application",
+        "LOGIN_URL Django setting",
+        "USE_FAST_HASHER / PASSWORD_HASHERS Django setting"
+      ],
+      "estimated_migration_effort": "medium",
+      "effort_justification": "Aucune logique metier, 215 LOC, pure infrastructure. DATABASE_URL parsing -> Sequelize datasource config. MIDDLEWARE -> Fastify plugins. INSTALLED_APPS -> module registration. Instabilite max (1.0) = candidat early migration. Complexite max elevee (8) car DATABASE_URL multi-provider."
+    },
+    {
+      "module": "templates",
+      "path": "templates",
+      "loc": 600,
+      "loc_note": "LOC en HTML/Django Temple Language. Conversion vers Angular components.",
+      "functions_analyzed": 18,
+      "cyclomatic_complexity_avg": 2.94,
+      "cyclomatic_complexity_max": 5,
+      "worst_function": {
+        "name": "articles/detail.html",
+        "file": "templates/articles/detail.html",
+        "line": 1,
+        "complexity": 5,
+        "rationale": "{% if user.is_authenticated %}(+1) + {% if is_following %}(+1) + {% if article.author == user %}(+1) + {% for comment in comments %}(+1) + {% if comment.author == user %}(+1) = 5 branches estimees"
+      },
+      "coupling_afferent": 0,
+      "coupling_efferent": 3,
+      "instability": 1.0,
+      "afferent_from": [],
+      "efferent_to": ["accounts", "articles", "comments"],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 7,
+      "framework_patterns_detail": [
+        "Django Template Language ({% %} / {{ }})",
+        "{% load %} templatetags (markdown_filter)",
+        "{% url %} reverse routing",
+        "{% csrf_token %} CSRF protection",
+        "HTMX attributes (hx-post, hx-target, hx-swap) comme variables de template",
+        "Partials HTMX (8 fichiers -> Angular components)",
+        "Custom filter render_markdown (-> Angular pipe ou SSR)"
+      ],
+      "estimated_migration_effort": "very_high",
+      "effort_justification": "600 LOC HTML sur 18 fichiers dont 8 partials HTMX. Chaque partial HTMX devient un composant Angular avec @Input/@Output. Template language Django -> Angular template syntax. {% url %} -> routerLink. HTMX hx-post -> (click) Angular. render_markdown filter -> Angular pipe ou DomSanitizer. Effort tres eleve malgre instabilite max."
+    },
+    {
+      "module": "tests_e2e",
+      "path": "playwright",
+      "loc": 46,
+      "functions_analyzed": 1,
+      "cyclomatic_complexity_avg": 1.0,
+      "cyclomatic_complexity_max": 1,
+      "worst_function": {
+        "name": "defineConfig",
+        "file": "playwright/playwright.config.ts",
+        "line": 1,
+        "complexity": 1,
+        "rationale": "Configuration declarative sans logique conditionnelle"
+      },
+      "coupling_afferent": 0,
+      "coupling_efferent": 0,
+      "instability": 1.0,
+      "afferent_from": [],
+      "efferent_to": [],
+      "has_raw_sql": false,
+      "framework_specific_patterns": 2,
+      "framework_patterns_detail": [
+        "Playwright defineConfig (pointe sur realworld/specs/e2e sous-module git)",
+        "Django test server config (USE_API=false, SQLite in-memory)"
+      ],
+      "estimated_migration_effort": "low",
+      "effort_justification": "Un seul fichier de config TypeScript (46 LOC). Module isole (Ca=0, Ce=0). Adaptation du baseURL (localhost:8000 -> localhost:3000) et env vars. Le suite de tests e2e elle-meme (realworld/specs/e2e) est un sous-module externe non modifie."
+    }
+  ],
+
+  "suggested_migration_order": [
+    {
+      "order": 1,
+      "module": "helpers",
+      "instability": 0.0,
+      "cyclomatic_complexity_avg": 1.56,
+      "estimated_effort": "low",
+      "rationale": "Priorite absolue malgre I=0: Ce=0 (aucune dependance interne), Ca=3 (tous les modules applicatifs en dependent). Foundation incontournable: is_htmx, clean_integrity_error, conduit_context doivent exister dans la cible avant tout autre module. LOC minimal (100), complexite basse."
+    },
+    {
+      "order": 2,
+      "module": "tests_e2e",
+      "instability": 1.0,
+      "cyclomatic_complexity_avg": 1.0,
+      "estimated_effort": "low",
+      "rationale": "I=1.0 (max), CC=1.0 (min). Module isole, adaption rapide du playwright.config.ts pour pointer sur la cible (baseURL: localhost:3000). Harnais de tests mis en place en phase 2: essentiel de configurer l'infrastructure de test tot pour valider chaque module migre."
+    },
+    {
+      "order": 3,
+      "module": "config",
+      "instability": 1.0,
+      "cyclomatic_complexity_avg": 2.6,
+      "estimated_effort": "medium",
+      "rationale": "I=1.0 (max), Ca=0 (rien ne depend de config). Infrastructure pure: equivalents Fastify (server config, middleware, DATABASE_URL -> Sequelize datasource, AUTH_USER_MODEL -> JWT strategy). A migrer avant les modules metier pour disposer de l'infrastructure cible stable."
+    },
+    {
+      "order": 4,
+      "module": "articles",
+      "instability": 0.25,
+      "cyclomatic_complexity_avg": 2.5,
+      "estimated_effort": "high",
+      "rationale": "Malgre I=0.25 (module le plus stable), Ce=1 (depend uniquement de helpers, deja migre). Migre avant accounts car accounts depend d'articles (profile_view use Article.objects). Module central avec 3 dependants: sa migration debloque accounts et comments. Prioritaire sur accounts dans le graphe de dependances."
+    },
+    {
+      "order": 5,
+      "module": "accounts",
+      "instability": 0.5,
+      "cyclomatic_complexity_avg": 2.47,
+      "estimated_effort": "high",
+      "rationale": "I=0.5, depend de helpers (migre ordre 1) et articles (migre ordre 4). Module auth critique: User model, follow/unfollow, sessions. Sa migration debloque comments (dernier module metier). Systeme d'authentification email-based + JWT a implementer dans Fastify avant de pouvoir valider les routes protegees."
+    },
+    {
+      "order": 6,
+      "module": "comments",
+      "instability": 0.67,
+      "cyclomatic_complexity_avg": 2.67,
+      "estimated_effort": "low",
+      "rationale": "I=0.67 (haute instabilite), 64 LOC (module le plus petit). Depend d'articles et accounts (tous deux migres aux ordres 4 et 5). Module le plus simple a implementer: 2 endpoints CRUD avec autorisation claire. Applique l'algorithme 'haute instabilite + faible complexite' en derniere position car ses dependances devaient etre etablies avant."
+    },
+    {
+      "order": 7,
+      "module": "templates",
+      "instability": 1.0,
+      "cyclomatic_complexity_avg": 2.94,
+      "estimated_effort": "very_high",
+      "rationale": "I=1.0 mais effort tres_eleve (600 LOC HTML, 18 composants Angular a creer). Migration incrementale: chaque template migre en parallele du module backend correspondant (ex: accounts/profile.html avec accounts, articles/detail.html avec articles). Les 8 partials HTMX -> composants Angular sont le principal defi architectural. Positionne en dernier mais s'effectue en realite en parallele des ordres 4-6."
+    }
+  ],
+
+  "summary": {
+    "key_risks": [
+      "articles: Custom QuerySet annotations (Count/Exists/OuterRef) n'ont pas d'equivalent direct Sequelize -> scopes + sous-requetes manuelles",
+      "accounts: Modele User AbstractUser avec EMAIL comme USERNAME_FIELD -> authentification non standard a reimplementer entierement",
+      "templates: 8 partials HTMX -> difficulte d'implementation du mode partiel en Angular sans SPA full-reload",
+      "comments: Autorisation double (auteur commentaire OU auteur article) -> middleware specifique a valider",
+      "helpers: clean_integrity_error parse des messages d'erreur DB specifiques (psycopg2/sqlite3) -> equivalent Node.js/Sequelize a definir"
+    ],
+    "dead_code_impact": [
+      "helpers.get_or_404 et helpers.ResourceNotFound marques dead code: ne pas migrer sans validation humaine",
+      "apps/accounts/admin.py et apps/comments/admin.py vides: ignorer"
+    ],
+    "no_raw_sql": true,
+    "all_modules_use_django_orm": true,
+    "total_functions_analyzed": 67,
+    "migration_complexity_score": "MEDIUM-HIGH (2 modules high, 1 very_high, 1 medium, 3 low)"
+  }
+}

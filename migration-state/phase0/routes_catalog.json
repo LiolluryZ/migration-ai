@@ -1,0 +1,873 @@
+{
+  "generated_at": "2026-04-13T00:10:00Z",
+  "agent": "02-analyseur-routes",
+  "confidence": 93,
+  "notes": "Application Django 5.2 + HTMX — rendu côté serveur sans framework SPA. Les routes frontend sont les pages Django templates. Plusieurs endpoints détectent l'en-tête HX-Request et retournent des partiels HTML (HTMX) au lieu de la page complète. Aucun routeur JS côté client (React Router, Vue Router, Angular Router) n'est présent. La matrice de couverture est 1:1 (monolithe SSR).",
+
+  "summary": {
+    "total_backend_routes": 23,
+    "total_frontend_routes": 11,
+    "total_url_patterns": 17,
+    "methods_distribution": {
+      "GET": 11,
+      "POST": 12
+    },
+    "auth_protected_routes": 10,
+    "htmx_partial_responses": 8,
+    "apps": ["articles", "accounts", "comments", "admin"]
+  },
+
+  "backend_routes": [
+
+    {
+      "id": "home-get",
+      "method": "GET",
+      "path": "/",
+      "path_params": [],
+      "query_params": [
+        { "name": "feed", "type": "string", "required": false, "values": ["following", "global"], "notes": "feed=following requiert d'être authentifié, sinon redirige vers /login" },
+        { "name": "page", "type": "integer", "required": false, "default": 1 },
+        { "name": "tag", "type": "string", "required": false, "notes": "Filtre par tag (duplique /tag/<tag> via query param)" }
+      ],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "home_view",
+        "line": 70
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "HX-Request header absent", "template": "articles/home.html" },
+        { "condition": "HX-Request: true", "template": "partials/feed_content.html" }
+      ],
+      "auth_required": false,
+      "url_name": "home",
+      "confidence": 97
+    },
+
+    {
+      "id": "tag-get",
+      "method": "GET",
+      "path": "/tag/<str:tag>",
+      "path_params": ["tag"],
+      "query_params": [
+        { "name": "page", "type": "integer", "required": false, "default": 1 }
+      ],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "tag_view",
+        "line": 74
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "HX-Request header absent", "template": "articles/home.html" },
+        { "condition": "HX-Request: true", "template": "partials/feed_content.html" }
+      ],
+      "auth_required": false,
+      "url_name": "tag",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-detail-get",
+      "method": "GET",
+      "path": "/article/<slug:slug>",
+      "path_params": ["slug"],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_detail_view",
+        "line": 78
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "article trouvé", "template": "articles/detail.html", "status": 200 },
+        { "condition": "article non trouvé", "template": "articles/detail_404.html", "status": 404 }
+      ],
+      "auth_required": false,
+      "url_name": "article_detail",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-create-get",
+      "method": "GET",
+      "path": "/editor",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_create_view",
+        "line": 109
+      },
+      "middlewares": ["login_required"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "default", "template": "articles/editor.html", "status": 200 },
+        { "condition": "non authentifié", "redirect": "/login?next=/editor", "status": 302 }
+      ],
+      "auth_required": true,
+      "url_name": "article_create",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-create-post",
+      "method": "POST",
+      "path": "/editor",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "title", "type": "string", "required": true, "max_length": 150 },
+          { "name": "description", "type": "string", "required": false },
+          { "name": "body", "type": "text", "required": false, "notes": "Contenu Markdown" },
+          { "name": "tags", "type": "string", "required": false, "notes": "Noms de tags séparés par des virgules" },
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true, "notes": "Token CSRF Django" }
+        ]
+      },
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_create_view",
+        "line": 109
+      },
+      "middlewares": ["login_required", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "formulaire valide", "redirect": "/article/<slug-généré>", "status": 302 },
+        { "condition": "formulaire invalide", "template": "articles/editor.html", "status": 200 },
+        { "condition": "non authentifié", "redirect": "/login?next=/editor", "status": 302 }
+      ],
+      "auth_required": true,
+      "url_name": "article_create",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-edit-get",
+      "method": "GET",
+      "path": "/editor/<slug:slug>",
+      "path_params": ["slug"],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_edit_view",
+        "line": 119
+      },
+      "middlewares": ["login_required"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "auteur authentifié et propriétaire", "template": "articles/editor.html", "status": 200 },
+        { "condition": "non propriétaire ou article inexistant", "status": 404 },
+        { "condition": "non authentifié", "redirect": "/login?next=/editor/<slug>", "status": 302 }
+      ],
+      "auth_required": true,
+      "notes": "get_object_or_404 avec filtre sur l'auteur = seul l'auteur peut éditer",
+      "url_name": "article_edit",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-edit-post",
+      "method": "POST",
+      "path": "/editor/<slug:slug>",
+      "path_params": ["slug"],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "title", "type": "string", "required": true, "max_length": 150 },
+          { "name": "description", "type": "string", "required": false },
+          { "name": "body", "type": "text", "required": false, "notes": "Contenu Markdown" },
+          { "name": "tags", "type": "string", "required": false, "notes": "Noms de tags séparés par des virgules" },
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_edit_view",
+        "line": 119
+      },
+      "middlewares": ["login_required", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "formulaire valide", "redirect": "/article/<slug>", "status": 302 },
+        { "condition": "formulaire invalide", "template": "articles/editor.html", "status": 200 },
+        { "condition": "non propriétaire ou article inexistant", "status": 404 }
+      ],
+      "auth_required": true,
+      "url_name": "article_edit",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-delete-post",
+      "method": "POST",
+      "path": "/article/<slug:slug>/delete",
+      "path_params": ["slug"],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_delete_view",
+        "line": 133
+      },
+      "middlewares": ["login_required", "require_POST", "csrf"],
+      "response_format": "redirect",
+      "response_variants": [
+        { "condition": "auteur authentifié et propriétaire", "redirect": "/", "status": 302 },
+        { "condition": "non propriétaire ou article inexistant", "status": 404 },
+        { "condition": "non authentifié", "redirect": "/login", "status": 302 }
+      ],
+      "auth_required": true,
+      "url_name": "article_delete",
+      "confidence": 97
+    },
+
+    {
+      "id": "article-favorite-post",
+      "method": "POST",
+      "path": "/article/<slug:slug>/favorite",
+      "path_params": ["slug"],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/articles/views.py",
+        "function": "article_favorite_view",
+        "line": 139
+      },
+      "middlewares": ["login_required", "require_POST", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "HX-Request: true", "template": "partials/favorite_button.html", "status": 200, "notes": "Toggle favori, retourne le bouton mis à jour" },
+        { "condition": "HX-Request absent", "redirect": "/article/<slug>", "status": 302 }
+      ],
+      "auth_required": true,
+      "url_name": "article_favorite",
+      "confidence": 97
+    },
+
+    {
+      "id": "login-get",
+      "method": "GET",
+      "path": "/login",
+      "path_params": [],
+      "query_params": [
+        { "name": "next", "type": "string", "required": false, "notes": "URL de redirection après connexion (géré par Django authentication)" }
+      ],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "login_view",
+        "line": 17
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "default", "template": "accounts/login.html", "status": 200 }
+      ],
+      "auth_required": false,
+      "url_name": "login",
+      "confidence": 97
+    },
+
+    {
+      "id": "login-post",
+      "method": "POST",
+      "path": "/login",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "email", "type": "email", "required": true },
+          { "name": "password", "type": "string", "required": true },
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "login_view",
+        "line": 17
+      },
+      "middlewares": ["csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "credentials valides", "redirect": "/", "status": 302 },
+        { "condition": "credentials invalides", "template": "accounts/login.html", "status": 200, "notes": "Erreur non-field: 'Invalid email or password.'" }
+      ],
+      "auth_required": false,
+      "url_name": "login",
+      "confidence": 97
+    },
+
+    {
+      "id": "register-get",
+      "method": "GET",
+      "path": "/register",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "register_view",
+        "line": 29
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "default", "template": "accounts/register.html", "status": 200 }
+      ],
+      "auth_required": false,
+      "url_name": "register",
+      "confidence": 97
+    },
+
+    {
+      "id": "register-post",
+      "method": "POST",
+      "path": "/register",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "username", "type": "string", "required": true, "max_length": 60 },
+          { "name": "email", "type": "email", "required": true },
+          { "name": "password", "type": "string", "required": true },
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "register_view",
+        "line": 29
+      },
+      "middlewares": ["csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "inscription réussie", "redirect": "/", "status": 302, "notes": "Utilisateur connecté automatiquement" },
+        { "condition": "email déjà pris (IntegrityError)", "template": "accounts/register.html", "status": 200 },
+        { "condition": "username déjà pris (IntegrityError)", "template": "accounts/register.html", "status": 200 },
+        { "condition": "formulaire invalide", "template": "accounts/register.html", "status": 200 }
+      ],
+      "auth_required": false,
+      "url_name": "register",
+      "confidence": 97
+    },
+
+    {
+      "id": "settings-get",
+      "method": "GET",
+      "path": "/settings",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "settings_view",
+        "line": 57
+      },
+      "middlewares": ["login_required"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "authentifié", "template": "accounts/settings.html", "status": 200 },
+        { "condition": "non authentifié", "redirect": "/login?next=/settings", "status": 302 }
+      ],
+      "auth_required": true,
+      "url_name": "settings",
+      "confidence": 97
+    },
+
+    {
+      "id": "settings-post",
+      "method": "POST",
+      "path": "/settings",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "image", "type": "url", "required": false, "notes": "URL de l'avatar" },
+          { "name": "username", "type": "string", "required": true },
+          { "name": "bio", "type": "text", "required": false },
+          { "name": "email", "type": "email", "required": true },
+          { "name": "password", "type": "string", "required": false, "notes": "Nouveau mot de passe (vide = inchangé)" },
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "settings_view",
+        "line": 57
+      },
+      "middlewares": ["login_required", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "formulaire valide", "redirect": "/profile/<username>", "status": 302 },
+        { "condition": "formulaire invalide", "template": "accounts/settings.html", "status": 200 }
+      ],
+      "auth_required": true,
+      "notes": "Si le mot de passe est modifié, l'utilisateur est reconnecté (login()) pour éviter l'invalidation de session",
+      "url_name": "settings",
+      "confidence": 97
+    },
+
+    {
+      "id": "logout-post",
+      "method": "POST",
+      "path": "/logout",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "logout_view",
+        "line": 69
+      },
+      "middlewares": ["require_POST", "csrf"],
+      "response_format": "redirect",
+      "response_variants": [
+        { "condition": "default", "redirect": "/", "status": 302 }
+      ],
+      "auth_required": false,
+      "notes": "Pas de @login_required mais sans session active, logout() est sans effet",
+      "url_name": "logout",
+      "confidence": 97
+    },
+
+    {
+      "id": "profile-get",
+      "method": "GET",
+      "path": "/profile/<str:username>",
+      "path_params": ["username"],
+      "query_params": [
+        { "name": "page", "type": "integer", "required": false, "default": 1, "notes": "Pagination des articles de l'auteur" }
+      ],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "profile_view",
+        "line": 103
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "utilisateur trouvé", "template": "accounts/profile.html", "status": 200 },
+        { "condition": "utilisateur non trouvé", "template": "accounts/profile_404.html", "status": 404 },
+        { "condition": "HX-Request: true", "notes": "Retourne le rendu partiel de .profile-page via hx-select" }
+      ],
+      "auth_required": false,
+      "url_name": "profile",
+      "confidence": 97
+    },
+
+    {
+      "id": "profile-favorites-get",
+      "method": "GET",
+      "path": "/profile/<str:username>/favorites",
+      "path_params": ["username"],
+      "query_params": [
+        { "name": "page", "type": "integer", "required": false, "default": 1, "notes": "Pagination des articles favoris" }
+      ],
+      "body_schema": null,
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "profile_favorites_view",
+        "line": 107
+      },
+      "middlewares": [],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "utilisateur trouvé", "template": "accounts/profile.html", "status": 200 },
+        { "condition": "utilisateur non trouvé", "template": "accounts/profile_404.html", "status": 404 },
+        { "condition": "HX-Request: true", "notes": "Retourne le rendu partiel de .profile-page via hx-select" }
+      ],
+      "auth_required": false,
+      "url_name": "profile_favorites",
+      "confidence": 97
+    },
+
+    {
+      "id": "follow-post",
+      "method": "POST",
+      "path": "/profile/<str:username>/follow",
+      "path_params": ["username"],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/accounts/views.py",
+        "function": "follow_view",
+        "line": 111
+      },
+      "middlewares": ["login_required", "require_POST", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "HX-Request: true", "template": "partials/follow_button.html", "status": 200, "notes": "Toggle follow/unfollow, retourne le bouton mis à jour" },
+        { "condition": "HX-Request absent", "redirect": "/profile/<username>", "status": 302 }
+      ],
+      "auth_required": true,
+      "notes": "Suit ou désabonne selon l'état courant. Ignorer le suivi de soi-même (is_following=False).",
+      "url_name": "follow",
+      "confidence": 97
+    },
+
+    {
+      "id": "comment-create-post",
+      "method": "POST",
+      "path": "/article/<slug:slug>/comment",
+      "path_params": ["slug"],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "body", "type": "text", "required": true, "notes": "Texte du commentaire (vide = commentaire ignoré silencieusement)" },
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/comments/views.py",
+        "function": "comment_create_view",
+        "line": 11
+      },
+      "middlewares": ["login_required", "require_POST", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "HX-Request: true", "template": "partials/comment_list.html", "status": 200, "notes": "Retourne la liste complète des commentaires mise à jour" },
+        { "condition": "HX-Request absent", "redirect": "/article/<slug>", "status": 302 }
+      ],
+      "auth_required": true,
+      "url_name": "comment_create",
+      "confidence": 97
+    },
+
+    {
+      "id": "comment-delete-post",
+      "method": "POST",
+      "path": "/article/<slug:slug>/comment/<int:comment_id>/delete",
+      "path_params": ["slug", "comment_id"],
+      "query_params": [],
+      "body_schema": {
+        "type": "form-urlencoded",
+        "fields": [
+          { "name": "csrfmiddlewaretoken", "type": "string", "required": true }
+        ]
+      },
+      "handler": {
+        "file": "apps/comments/views.py",
+        "function": "comment_delete_view",
+        "line": 24
+      },
+      "middlewares": ["login_required", "require_POST", "csrf"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "HX-Request: true et autorisé", "template": "partials/comment_list.html", "status": 200 },
+        { "condition": "HX-Request absent et autorisé", "redirect": "/article/<slug>", "status": 302 },
+        { "condition": "non autorisé (ni auteur du comment ni auteur de l'article)", "status": 403 }
+      ],
+      "auth_required": true,
+      "notes": "Autorisé si request.user == commentaire.author OU request.user == article.author",
+      "url_name": "comment_delete",
+      "confidence": 97
+    },
+
+    {
+      "id": "admin",
+      "method": "GET",
+      "path": "/admin/",
+      "path_params": [],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "django.contrib.admin",
+        "function": "AdminSite",
+        "line": null
+      },
+      "middlewares": ["admin_auth"],
+      "response_format": "html",
+      "response_variants": [
+        { "condition": "staff authentifié", "template": "admin templates", "status": 200 },
+        { "condition": "non staff", "redirect": "/admin/login/", "status": 302 }
+      ],
+      "auth_required": true,
+      "notes": "Interface d'administration Django standard. Accès réservé aux is_staff=True.",
+      "url_name": "admin",
+      "confidence": 90
+    },
+
+    {
+      "id": "static-media",
+      "method": "GET",
+      "path": "/media/<path>",
+      "path_params": ["path"],
+      "query_params": [],
+      "body_schema": null,
+      "handler": {
+        "file": "django.conf.urls.static",
+        "function": "static",
+        "line": null
+      },
+      "middlewares": [],
+      "response_format": "binary",
+      "response_variants": [
+        { "condition": "DEBUG=True uniquement", "notes": "Désactivé en production — servir via nginx/S3" }
+      ],
+      "auth_required": false,
+      "notes": "Route ajoutée conditionnellement si settings.DEBUG=True. Ne pas migrer comme route applicative.",
+      "url_name": null,
+      "confidence": 80
+    }
+  ],
+
+  "frontend_routes": [
+    {
+      "path": "/",
+      "component": "home_view → articles/home.html",
+      "file": "templates/articles/home.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Affiche le Global Feed par défaut. Paramètre ?feed=following bascule sur le fil personnalisé (auth requise côté serveur). Les changements de tab et de pagination sont gérés par HTMX (hx-get, hx-push-url). Le partial cible est #feed-content.",
+      "htmx_targets": ["#feed-content → partials/feed_content.html"],
+      "confidence": 95
+    },
+    {
+      "path": "/tag/<tag>",
+      "component": "tag_view → articles/home.html",
+      "file": "templates/articles/home.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Filtre d'articles par tag. Accesssible via clic sur tag dans la sidebar. HTMX: hx-get sur les liens de tags dans la sidebar.",
+      "htmx_targets": ["#feed-content → partials/feed_content.html"],
+      "confidence": 95
+    },
+    {
+      "path": "/editor",
+      "component": "article_create_view → articles/editor.html",
+      "file": "templates/articles/editor.html",
+      "guards": ["login_required (server-side redirect)"],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Formulaire de création d'article. Gestion dynamique des tags via JS inline (pas HTMX).",
+      "confidence": 95
+    },
+    {
+      "path": "/editor/<slug>",
+      "component": "article_edit_view → articles/editor.html",
+      "file": "templates/articles/editor.html",
+      "guards": ["login_required (server-side redirect)", "owner_check (404 si non propriétaire)"],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Réutilise le même template que la création. Les valeurs initiales sont pré-remplies.",
+      "confidence": 95
+    },
+    {
+      "path": "/article/<slug>",
+      "component": "article_detail_view → articles/detail.html",
+      "file": "templates/articles/detail.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Page de détail d'un article. Contient le formulaire de commentaire (HTMX POST vers /article/<slug>/comment) et la liste des commentaires avec suppression HTMX.",
+      "htmx_targets": [
+        "#comment-list → partials/comment_list.html (création et suppression commentaires)",
+        "this → partials/favorite_button.html (toggle favori)",
+        "this → partials/follow_button.html (toggle suivi auteur)"
+      ],
+      "confidence": 95
+    },
+    {
+      "path": "/login",
+      "component": "login_view → accounts/login.html",
+      "file": "templates/accounts/login.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [],
+      "confidence": 95
+    },
+    {
+      "path": "/register",
+      "component": "register_view → accounts/register.html",
+      "file": "templates/accounts/register.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [],
+      "confidence": 95
+    },
+    {
+      "path": "/settings",
+      "component": "settings_view → accounts/settings.html",
+      "file": "templates/accounts/settings.html",
+      "guards": ["login_required (server-side redirect)"],
+      "lazy_loaded": false,
+      "children": [],
+      "confidence": 95
+    },
+    {
+      "path": "/profile/<username>",
+      "component": "profile_view → accounts/profile.html",
+      "file": "templates/accounts/profile.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [
+        { "path": "/profile/<username>/favorites", "notes": "Onglet Favorited Articles via HTMX (hx-get, hx-select='.profile-page', hx-push-url)" }
+      ],
+      "notes": "La navigation entre onglets 'My Articles' et 'Favorited Articles' se fait via HTMX sans rechargement complet. La pagination est également gérée via HTMX.",
+      "htmx_targets": [
+        ".profile-page → profile.html#.profile-page (onglets et pagination)"
+      ],
+      "confidence": 95
+    },
+    {
+      "path": "/profile/<username>/favorites",
+      "component": "profile_favorites_view → accounts/profile.html",
+      "file": "templates/accounts/profile.html",
+      "guards": [],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Même template que profile, onglet favoris actif.",
+      "confidence": 95
+    },
+    {
+      "path": "/admin/",
+      "component": "Django Admin",
+      "file": "django.contrib.admin (built-in)",
+      "guards": ["is_staff (server-side)"],
+      "lazy_loaded": false,
+      "children": [],
+      "notes": "Interface admin standard Django. Non migré dans la cible Angular/Fastify (à traiter séparément).",
+      "confidence": 90
+    }
+  ],
+
+  "coverage_matrix": [
+    {
+      "frontend_route": "/",
+      "backend_calls": ["GET /"],
+      "notes": "SSR direct — la page est rendue par home_view. HTMX tabs/pagination rappellent GET / avec query params.",
+      "confidence": 95
+    },
+    {
+      "frontend_route": "/?feed=following",
+      "backend_calls": ["GET /?feed=following"],
+      "notes": "Même endpoint, query param différent. HTMX hx-get.",
+      "confidence": 95
+    },
+    {
+      "frontend_route": "/tag/<tag>",
+      "backend_calls": ["GET /tag/<tag>"],
+      "notes": "HTMX hx-get sur les tags de la sidebar.",
+      "confidence": 95
+    },
+    {
+      "frontend_route": "/editor",
+      "backend_calls": ["GET /editor", "POST /editor"],
+      "notes": "Affichage formulaire (GET) puis soumission (POST direct, pas HTMX).",
+      "confidence": 95
+    },
+    {
+      "frontend_route": "/editor/<slug>",
+      "backend_calls": ["GET /editor/<slug>", "POST /editor/<slug>"],
+      "notes": "Pré-remplissage puis soumission form.",
+      "confidence": 95
+    },
+    {
+      "frontend_route": "/article/<slug>",
+      "backend_calls": [
+        "GET /article/<slug>",
+        "POST /article/<slug>/favorite (HTMX)",
+        "POST /profile/<username>/follow (HTMX — bouton follow auteur)",
+        "POST /article/<slug>/comment (HTMX)",
+        "POST /article/<slug>/comment/<id>/delete (HTMX)",
+        "POST /article/<slug>/delete (form submit direct)"
+      ],
+      "notes": "Page la plus riche en interactions HTMX. Plusieurs endpoints backends appelés depuis une seule page frontend.",
+      "confidence": 92
+    },
+    {
+      "frontend_route": "/login",
+      "backend_calls": ["GET /login", "POST /login"],
+      "confidence": 97
+    },
+    {
+      "frontend_route": "/register",
+      "backend_calls": ["GET /register", "POST /register"],
+      "confidence": 97
+    },
+    {
+      "frontend_route": "/settings",
+      "backend_calls": ["GET /settings", "POST /settings"],
+      "confidence": 97
+    },
+    {
+      "frontend_route": "/profile/<username>",
+      "backend_calls": [
+        "GET /profile/<username>",
+        "POST /profile/<username>/follow (HTMX)",
+        "GET /profile/<username>/favorites (HTMX — changement d'onglet)",
+        "GET /profile/<username>?page=N (HTMX — pagination)"
+      ],
+      "notes": "Navigation d'onglet et pagination entièrement HTMX.",
+      "confidence": 92
+    },
+    {
+      "frontend_route": "/profile/<username>/favorites",
+      "backend_calls": [
+        "GET /profile/<username>/favorites",
+        "POST /profile/<username>/follow (HTMX)",
+        "GET /profile/<username>?page=N (HTMX — pagination)"
+      ],
+      "confidence": 92
+    },
+    {
+      "frontend_route": "/admin/",
+      "backend_calls": ["GET /admin/", "POST /admin/<model>/ (actions CRUD)"],
+      "notes": "L'admin Django génère ses propres routes internes. Non documentées en détail ici.",
+      "confidence": 70
+    }
+  ],
+
+  "htmx_interactions_summary": {
+    "notes": "Cette application utilise HTMX (v2.0.4) pour des mises à jour partielles de DOM sans rechargement. Tous les endpoints HTMX sont des routes Django standards qui détectent l'en-tête HX-Request via helpers/htmx.py:is_htmx(). Le header CSRF est injecté globalement via hx-headers sur le <body>.",
+    "interactions": [
+      { "trigger": "Clic onglet feed (Global/Following/Tag)", "hx_method": "GET", "target": "#feed-content", "partial": "partials/feed_content.html" },
+      { "trigger": "Pagination feed home", "hx_method": "GET", "target": "#feed-content", "partial": "partials/feed_content.html" },
+      { "trigger": "Clic tag sidebar", "hx_method": "GET", "target": "#feed-content", "partial": "partials/feed_content.html" },
+      { "trigger": "Bouton Favorite article", "hx_method": "POST", "target": "this (button)", "partial": "partials/favorite_button.html" },
+      { "trigger": "Bouton Follow/Unfollow", "hx_method": "POST", "target": "this (button)", "partial": "partials/follow_button.html" },
+      { "trigger": "Soumission formulaire commentaire", "hx_method": "POST", "target": "#comment-list", "partial": "partials/comment_list.html" },
+      { "trigger": "Suppression commentaire (icône poubelle)", "hx_method": "POST", "target": "#comment-list", "partial": "partials/comment_list.html" },
+      { "trigger": "Onglets profil (My Articles / Favorited)", "hx_method": "GET", "target": ".profile-page", "hx_select": ".profile-page", "partial": "accounts/profile.html#.profile-page" },
+      { "trigger": "Pagination profil", "hx_method": "GET", "target": ".profile-page", "hx_select": ".profile-page", "partial": "accounts/profile.html#.profile-page" }
+    ]
+  }
+}

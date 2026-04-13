@@ -1,0 +1,48 @@
+{
+  "source": {
+    "directory": "d:\\workspace\\migration IA\\legacy",
+    "tech_stack": "Python/Django + HTMX",
+    "framework": "Django 5.2",
+    "language": "Python",
+    "package_manager": "uv",
+    "orm": "Django ORM",
+    "test_framework": "pytest / Django TestCase",
+    "exclude_patterns": ["node_modules/", "vendor/", ".git/", "dist/", "build/", "__pycache__/", ".idea/", ".vscode/", ".venv/"]
+  },
+  "target": {
+    "directory": "d:\\workspace\\migration IA\\target",
+    "tech_stack": "Angular + Fastify + Sequelize",
+    "framework": "Angular (frontend) + Fastify (backend)",
+    "language": "TypeScript",
+    "package_manager": "npm",
+    "orm": "Sequelize",
+    "test_framework": "Jest"
+  },
+  "database": {
+    "type": "SQLite (local/test) / PostgreSQL (production)",
+    "migration_directory": "d:\\workspace\\migration IA\\legacy",
+    "model_directory": "d:\\workspace\\migration IA\\legacy\\apps"
+  },
+  "testing": {
+    "api_test_format": "http",
+    "e2e_framework": "playwright",
+    "base_url_legacy": "http://localhost:8000",
+    "base_url_target": "http://localhost:3000",
+    "visual_viewports": [
+      { "width": 1920, "height": 1080, "label": "desktop" },
+      { "width": 768, "height": 1024, "label": "tablet" },
+      { "width": 375, "height": 812, "label": "mobile" }
+    ],
+    "visual_tolerance_threshold": 0.1,
+    "performance_degradation_threshold_percent": 10
+  },
+  "credentials": {
+    "test_users": [
+      {
+        "role": "user",
+        "username": "test@email.com",
+        "password": "test"
+      }
+    ]
+  }
+}

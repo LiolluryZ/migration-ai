@@ -1,0 +1,395 @@
+{
+  "generated_at": "2026-04-13T00:10:00Z",
+  "agent": "03-inventaire-db",
+  "confidence": 88,
+  "notes": "Schema dérivé des modèles ORM (authoritative) et croisé avec les fichiers de migrations. Les tables taggit_* proviennent de la librairie django-taggit et sont représentées d'après leur schéma public documenté. Les tables Django built-in (auth_group, auth_permission, django_content_type, django_migrations, django_session, django_admin_log) existent en base mais ne contiennent pas de logique métier applicative et ne sont pas détaillées ici.",
+  "schema_source": "models (authoritative) + migrations (chronological history)",
+  "summary": {
+    "total_tables": 9,
+    "total_columns": 38,
+    "total_relations": 6,
+    "total_migrations": 8,
+    "apps": ["accounts", "articles", "comments"],
+    "third_party_tables": ["taggit_tag", "taggit_taggeditem"]
+  },
+  "tables": [
+    {
+      "name": "accounts_user",
+      "app": "accounts",
+      "model": "User",
+      "model_file": "apps/accounts/models.py",
+      "extends": "AbstractUser",
+      "columns": [
+        { "name": "id",           "type": "bigint",    "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "password",     "type": "varchar(128)", "nullable": false, "default": null,           "constraints": [] },
+        { "name": "last_login",   "type": "datetime",  "nullable": true,  "default": null,           "constraints": [] },
+        { "name": "is_superuser", "type": "boolean",   "nullable": false, "default": "false",        "constraints": [] },
+        { "name": "is_staff",     "type": "boolean",   "nullable": false, "default": "false",        "constraints": [] },
+        { "name": "is_active",    "type": "boolean",   "nullable": false, "default": "true",         "constraints": [] },
+        { "name": "date_joined",  "type": "datetime",  "nullable": false, "default": "now()",        "constraints": [] },
+        { "name": "email",        "type": "varchar(254)", "nullable": false, "default": null,         "constraints": ["unique"] },
+        { "name": "username",     "type": "varchar(60)",  "nullable": false, "default": null,         "constraints": ["unique"], "notes": "Champ initialement nommé 'name' (migration 0001), renommé en 'username' (0002) puis rendu unique (0003)" },
+        { "name": "bio",          "type": "text",      "nullable": false, "default": "''",           "constraints": [] },
+        { "name": "image",        "type": "varchar(200)", "nullable": true, "default": null,         "constraints": [] }
+      ],
+      "indexes": [
+        { "name": "accounts_user_email_key",    "columns": ["email"],    "unique": true },
+        { "name": "accounts_user_username_key", "columns": ["username"], "unique": true }
+      ],
+      "relations": [
+        { "type": "many_to_many", "target_table": "accounts_user",       "through": "accounts_user_followers", "foreign_key": null, "description": "Self-referential asymmetric M2M for followers" },
+        { "type": "has_many",     "target_table": "articles_article",    "through": null,                      "foreign_key": "author_id" },
+        { "type": "many_to_many", "target_table": "articles_article",    "through": "articles_article_favorites", "foreign_key": null, "description": "Articles favorited by this user (reverse of Article.favorites)" },
+        { "type": "has_many",     "target_table": "comments_comment",    "through": null,                      "foreign_key": "author_id" }
+      ],
+      "accessed_by": [
+        { "module": "accounts.views", "operations": ["read", "write"] },
+        { "module": "articles.views", "operations": ["read"] }
+      ]
+    },
+    {
+      "name": "accounts_user_followers",
+      "app": "accounts",
+      "model": "User.followers (implicit M2M through table)",
+      "notes": "Table implicite créée par Django pour ManyToManyField('self', symmetrical=False). Représente la relation follower -> followed.",
+      "columns": [
+        { "name": "id",          "type": "bigint", "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "from_user_id", "type": "bigint", "nullable": false, "default": null,            "constraints": ["foreign_key -> accounts_user(id)"] },
+        { "name": "to_user_id",  "type": "bigint", "nullable": false, "default": null,            "constraints": ["foreign_key -> accounts_user(id)"] }
+      ],
+      "indexes": [
+        { "name": "accounts_user_followers_from_to_uniq", "columns": ["from_user_id", "to_user_id"], "unique": true }
+      ],
+      "relations": [
+        { "type": "belongs_to", "target_table": "accounts_user", "foreign_key": "from_user_id" },
+        { "type": "belongs_to", "target_table": "accounts_user", "foreign_key": "to_user_id" }
+      ],
+      "accessed_by": [
+        { "module": "accounts.views (follow_view)", "operations": ["read", "write"] }
+      ]
+    },
+    {
+      "name": "articles_article",
+      "app": "articles",
+      "model": "Article",
+      "model_file": "apps/articles/models.py",
+      "columns": [
+        { "name": "id",        "type": "bigint",       "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "title",     "type": "varchar(150)", "nullable": false, "default": null,             "constraints": ["unique"] },
+        { "name": "summary",   "type": "text",         "nullable": false, "default": "''",             "constraints": [] },
+        { "name": "content",   "type": "text",         "nullable": false, "default": "''",             "constraints": [] },
+        { "name": "created",   "type": "datetime",     "nullable": false, "default": "now() (auto_now_add)", "constraints": ["index"], "notes": "db_index ajouté en migration 0003" },
+        { "name": "updated",   "type": "datetime",     "nullable": false, "default": "auto (auto_now)", "constraints": [],          "notes": "Initialement auto_now_add, corrigé en auto_now en migration 0002" },
+        { "name": "slug",      "type": "varchar(255)", "nullable": false, "default": null,             "constraints": ["unique"], "notes": "Généré automatiquement via slugify(title) à la création" },
+        { "name": "author_id", "type": "bigint",       "nullable": false, "default": null,             "constraints": ["foreign_key -> accounts_user(id) ON DELETE CASCADE"] }
+      ],
+      "indexes": [
+        { "name": "articles_article_title_key",   "columns": ["title"],   "unique": true },
+        { "name": "articles_article_slug_key",    "columns": ["slug"],    "unique": true },
+        { "name": "articles_article_created_idx", "columns": ["created"], "unique": false }
+      ],
+      "relations": [
+        { "type": "belongs_to", "target_table": "accounts_user",      "foreign_key": "author_id",  "on_delete": "CASCADE" },
+        { "type": "many_to_many", "target_table": "accounts_user",    "through": "articles_article_favorites", "foreign_key": null },
+        { "type": "many_to_many", "target_table": "taggit_tag",       "through": "taggit_taggeditem", "foreign_key": null, "description": "GenericFK via django-taggit TaggableManager" },
+        { "type": "has_many",     "target_table": "comments_comment", "through": null,             "foreign_key": "article_id" }
+      ],
+      "accessed_by": [
+        { "module": "articles.views", "operations": ["read", "write", "delete"] },
+        { "module": "accounts.views", "operations": ["read"] }
+      ]
+    },
+    {
+      "name": "articles_article_favorites",
+      "app": "articles",
+      "model": "Article.favorites (implicit M2M through table)",
+      "notes": "Table implicite créée par Django pour ManyToManyField(AUTH_USER_MODEL, related_name='favorites').",
+      "columns": [
+        { "name": "id",         "type": "bigint", "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "article_id", "type": "bigint", "nullable": false, "default": null,             "constraints": ["foreign_key -> articles_article(id)"] },
+        { "name": "user_id",    "type": "bigint", "nullable": false, "default": null,             "constraints": ["foreign_key -> accounts_user(id)"] }
+      ],
+      "indexes": [
+        { "name": "articles_article_favorites_article_user_uniq", "columns": ["article_id", "user_id"], "unique": true }
+      ],
+      "relations": [
+        { "type": "belongs_to", "target_table": "articles_article", "foreign_key": "article_id" },
+        { "type": "belongs_to", "target_table": "accounts_user",    "foreign_key": "user_id" }
+      ],
+      "accessed_by": [
+        { "module": "articles.views (article_favorite_view)", "operations": ["read", "write"] }
+      ]
+    },
+    {
+      "name": "comments_comment",
+      "app": "comments",
+      "model": "Comment",
+      "model_file": "apps/comments/models.py",
+      "columns": [
+        { "name": "id",         "type": "bigint",  "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "content",    "type": "text",    "nullable": false, "default": null,             "constraints": [] },
+        { "name": "created",    "type": "datetime","nullable": false, "default": "now() (auto_now_add)", "constraints": ["index"], "notes": "db_index ajouté en migration 0002" },
+        { "name": "updated",    "type": "datetime","nullable": false, "default": "auto (auto_now)", "constraints": [] },
+        { "name": "article_id", "type": "bigint",  "nullable": false, "default": null,             "constraints": ["foreign_key -> articles_article(id) ON DELETE CASCADE"] },
+        { "name": "author_id",  "type": "bigint",  "nullable": false, "default": null,             "constraints": ["foreign_key -> accounts_user(id) ON DELETE CASCADE"] }
+      ],
+      "indexes": [
+        { "name": "comments_comment_created_idx", "columns": ["created"], "unique": false }
+      ],
+      "relations": [
+        { "type": "belongs_to", "target_table": "articles_article", "foreign_key": "article_id", "on_delete": "CASCADE" },
+        { "type": "belongs_to", "target_table": "accounts_user",    "foreign_key": "author_id",  "on_delete": "CASCADE" }
+      ],
+      "accessed_by": [
+        { "module": "comments.views", "operations": ["read", "write", "delete"] },
+        { "module": "articles.views (article_detail_view)", "operations": ["read"] }
+      ]
+    },
+    {
+      "name": "taggit_tag",
+      "app": "taggit (third-party)",
+      "model": "Tag",
+      "notes": "Table gérée par django-taggit. Schéma standard de la librairie.",
+      "columns": [
+        { "name": "id",   "type": "int",          "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "name", "type": "varchar(100)", "nullable": false, "default": null,             "constraints": ["unique"] },
+        { "name": "slug", "type": "varchar(100)", "nullable": false, "default": null,             "constraints": ["unique"] }
+      ],
+      "indexes": [
+        { "name": "taggit_tag_name_key", "columns": ["name"], "unique": true },
+        { "name": "taggit_tag_slug_key", "columns": ["slug"], "unique": true }
+      ],
+      "relations": [
+        { "type": "has_many", "target_table": "taggit_taggeditem", "foreign_key": "tag_id" }
+      ],
+      "accessed_by": [
+        { "module": "articles.views (_build_feed, cache)", "operations": ["read"] },
+        { "module": "articles.views (_save_article_form)", "operations": ["write"] }
+      ]
+    },
+    {
+      "name": "taggit_taggeditem",
+      "app": "taggit (third-party)",
+      "model": "TaggedItem",
+      "notes": "Table de jointure GenericForeignKey de django-taggit. Relie un Tag à n'importe quel objet via content_type + object_id. Pour ce projet, object_id pointe sur articles_article(id).",
+      "columns": [
+        { "name": "id",              "type": "int",    "nullable": false, "default": "auto_increment", "constraints": ["primary_key"] },
+        { "name": "object_id",       "type": "int",    "nullable": false, "default": null,             "constraints": ["index"] },
+        { "name": "content_type_id", "type": "int",    "nullable": false, "default": null,             "constraints": ["foreign_key -> django_content_type(id)"] },
+        { "name": "tag_id",          "type": "int",    "nullable": false, "default": null,             "constraints": ["foreign_key -> taggit_tag(id)"] }
+      ],
+      "indexes": [
+        { "name": "taggit_taggeditem_content_type_object_tag_uniq", "columns": ["content_type_id", "object_id", "tag_id"], "unique": true },
+        { "name": "taggit_taggeditem_object_id_idx", "columns": ["object_id"], "unique": false }
+      ],
+      "relations": [
+        { "type": "belongs_to", "target_table": "taggit_tag",           "foreign_key": "tag_id" },
+        { "type": "belongs_to", "target_table": "django_content_type",  "foreign_key": "content_type_id" }
+      ],
+      "accessed_by": [
+        { "module": "articles.views (select_related/prefetch tags)", "operations": ["read"] },
+        { "module": "articles.views (_save_article_form tags.add/clear)", "operations": ["write", "delete"] }
+      ]
+    }
+  ],
+  "migrations_timeline": [
+    {
+      "order": 1,
+      "file": "apps/accounts/migrations/0001_initial.py",
+      "date": "2023-06-26",
+      "app": "accounts",
+      "summary": "Création initiale de la table accounts_user (étend AbstractUser). Champ 'name' (renommé plus tard). ManyToMany followers, groups, user_permissions."
+    },
+    {
+      "order": 2,
+      "file": "apps/accounts/migrations/0002_rename_name_user_username.py",
+      "date": "2023-06-28",
+      "app": "accounts",
+      "summary": "Renommage du champ 'name' en 'username' sur accounts_user."
+    },
+    {
+      "order": 3,
+      "file": "apps/articles/migrations/0001_initial.py",
+      "date": "2024-01-06",
+      "app": "articles",
+      "summary": "Création initiale de la table articles_article. Champ 'updated' initialement en auto_now_add (bug corrigé en 0002). ManyToMany favorites et tags (taggit)."
+    },
+    {
+      "order": 4,
+      "file": "apps/comments/migrations/0001_initial.py",
+      "date": "2024-01-06",
+      "app": "comments",
+      "summary": "Création initiale de la table comments_comment avec FK vers articles_article et accounts_user."
+    },
+    {
+      "order": 5,
+      "file": "apps/accounts/migrations/0003_alter_user_username.py",
+      "date": "2024-06-10",
+      "app": "accounts",
+      "summary": "Ajout de la contrainte unique sur accounts_user.username."
+    },
+    {
+      "order": 6,
+      "file": "apps/articles/migrations/0002_alter_article_updated.py",
+      "date": "2026-02-04",
+      "app": "articles",
+      "summary": "Correction du champ 'updated' de auto_now_add vers auto_now (les mises à jour étaient ignorées)."
+    },
+    {
+      "order": 7,
+      "file": "apps/articles/migrations/0003_alter_article_created.py",
+      "date": "2026-03-20",
+      "app": "articles",
+      "summary": "Ajout d'un index de base de données (db_index=True) sur articles_article.created pour améliorer les performances de tri."
+    },
+    {
+      "order": 8,
+      "file": "apps/comments/migrations/0002_alter_comment_created.py",
+      "date": "2026-03-20",
+      "app": "comments",
+      "summary": "Ajout d'un index de base de données (db_index=True) sur comments_comment.created."
+    }
+  ],
+  "query_catalog": [
+    {
+      "module": "articles.views._build_feed",
+      "file": "apps/articles/views.py",
+      "line": 20,
+      "type": "read",
+      "tables": ["articles_article", "accounts_user", "articles_article_favorites", "taggit_tag", "taggit_taggeditem"],
+      "complexity": "complex",
+      "raw_sql": false,
+      "description": "Requête principale du fil d'actualité. Annotate favorites (Count + Exists subquery), filtre optionnel par auteurs suivis ou tag, select_related author, prefetch_related tags, tri -created, pagination offset/limit. Compte total pour pagination."
+    },
+    {
+      "module": "articles.views._build_feed",
+      "file": "apps/articles/views.py",
+      "line": 31,
+      "type": "read",
+      "tables": ["accounts_user", "accounts_user_followers"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Récupération des auteurs suivis par l'utilisateur : User.objects.filter(followers=request.user). Utilisé pour le fil 'following'."
+    },
+    {
+      "module": "articles.views._build_feed",
+      "file": "apps/articles/views.py",
+      "line": 47,
+      "type": "read",
+      "tables": ["taggit_tag"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Récupération de tous les tags pour la sidebar, mise en cache 300s via cache.get_or_set('all_tags')."
+    },
+    {
+      "module": "articles.views.article_detail_view",
+      "file": "apps/articles/views.py",
+      "line": 67,
+      "type": "read",
+      "tables": ["articles_article", "accounts_user", "articles_article_favorites", "taggit_tag", "taggit_taggeditem"],
+      "complexity": "complex",
+      "raw_sql": false,
+      "description": "Récupération d'un article par slug avec annotation favorites, select_related author, prefetch_related tags."
+    },
+    {
+      "module": "articles.views.article_detail_view",
+      "file": "apps/articles/views.py",
+      "line": 77,
+      "type": "read",
+      "tables": ["comments_comment", "accounts_user"],
+      "complexity": "moderate",
+      "raw_sql": false,
+      "description": "Récupération des commentaires d'un article triés par -created via reverse FK: article.comment_set.select_related('author').order_by('-created')."
+    },
+    {
+      "module": "articles.views.article_create_view",
+      "file": "apps/articles/views.py",
+      "line": 108,
+      "type": "write",
+      "tables": ["articles_article", "taggit_tag", "taggit_taggeditem"],
+      "complexity": "moderate",
+      "raw_sql": false,
+      "description": "Création d'un article + association des tags (tags.clear() + tags.add() pour chaque nom de tag)."
+    },
+    {
+      "module": "articles.views.article_edit_view",
+      "file": "apps/articles/views.py",
+      "line": 118,
+      "type": "write",
+      "tables": ["articles_article", "taggit_tag", "taggit_taggeditem"],
+      "complexity": "moderate",
+      "raw_sql": false,
+      "description": "Modification d'un article (get_object_or_404 by slug+author, save, retag)."
+    },
+    {
+      "module": "articles.views.article_delete_view",
+      "file": "apps/articles/views.py",
+      "line": 136,
+      "type": "delete",
+      "tables": ["articles_article", "comments_comment", "articles_article_favorites", "taggit_taggeditem"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Suppression d'un article (CASCADE supprime automatiquement ses commentaires, favorites et tagged items)."
+    },
+    {
+      "module": "articles.views.article_favorite_view",
+      "file": "apps/articles/views.py",
+      "line": 153,
+      "type": "write",
+      "tables": ["articles_article", "articles_article_favorites"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Toggle favori : vérifie existence via article.favorites.filter(id=user.id).exists(), puis add() ou remove()."
+    },
+    {
+      "module": "accounts.views.register_view",
+      "file": "apps/accounts/views.py",
+      "line": 34,
+      "type": "write",
+      "tables": ["accounts_user"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Création d'un utilisateur dans une transaction atomique. Capture IntegrityError pour email/username en doublon."
+    },
+    {
+      "module": "accounts.views._profile_view",
+      "file": "apps/accounts/views.py",
+      "line": 86,
+      "type": "read",
+      "tables": ["accounts_user", "articles_article", "articles_article_favorites", "taggit_tag", "taggit_taggeditem"],
+      "complexity": "complex",
+      "raw_sql": false,
+      "description": "Profil utilisateur : récupère l'utilisateur par username, puis ses articles (ou favoris) avec annotation favorites, pagination."
+    },
+    {
+      "module": "accounts.views.follow_view",
+      "file": "apps/accounts/views.py",
+      "line": 131,
+      "type": "write",
+      "tables": ["accounts_user", "accounts_user_followers"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Toggle follow : vérifie si le follower existe (profile_user.followers.filter(pk=user.id).exists()), puis add() ou remove()."
+    },
+    {
+      "module": "comments.views.comment_create_view",
+      "file": "apps/comments/views.py",
+      "line": 11,
+      "type": "write",
+      "tables": ["comments_comment"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Création d'un commentaire sur un article (Comment.objects.create). Re-fetch des commentaires pour mise à jour HTMX."
+    },
+    {
+      "module": "comments.views.comment_delete_view",
+      "file": "apps/comments/views.py",
+      "line": 24,
+      "type": "delete",
+      "tables": ["comments_comment"],
+      "complexity": "simple",
+      "raw_sql": false,
+      "description": "Suppression d'un commentaire avec vérification d'autorisation (auteur du commentaire ou auteur de l'article). Re-fetch des commentaires pour mise à jour HTMX."
+    }
+  ]
+}

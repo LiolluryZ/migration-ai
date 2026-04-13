@@ -1,0 +1,55 @@
+digraph conduit_dependencies {
+    rankdir=LR;
+    node [shape=box, fontname="Helvetica", fontsize=12];
+    edge [fontsize=10];
+
+    // Nodes with type labels
+    config       [label="config\n(config)", shape=diamond, style=filled, fillcolor="#FFD700"];
+    accounts     [label="accounts\n(controller)", style=filled, fillcolor="#AED6F1"];
+    articles     [label="articles\n(controller)", style=filled, fillcolor="#A9DFBF"];
+    comments     [label="comments\n(controller)", style=filled, fillcolor="#F9E79F"];
+    helpers      [label="helpers\n(utility)", style=filled, fillcolor="#D7BDE2"];
+    templates    [label="templates\n(view)", shape=note, style=filled, fillcolor="#FDEBD0"];
+    tests_e2e    [label="tests_e2e\n(test)", shape=hexagon, style=filled, fillcolor="#F5CBA7"];
+
+    // config -> apps (URL routing)
+    config -> articles  [label="urls"];
+    config -> accounts  [label="urls"];
+    config -> comments  [label="urls"];
+
+    // accounts -> helpers
+    accounts -> helpers  [label="htmx, exceptions"];
+    // accounts -> articles (profile_view uses Article.objects)
+    accounts -> articles [label="Article.objects (profile)"];
+
+    // articles -> helpers
+    articles -> helpers  [label="htmx"];
+
+    // comments -> articles
+    comments -> articles [label="Article FK"];
+    // comments -> accounts (via AUTH_USER_MODEL)
+    comments -> accounts [label="User FK (AUTH_USER_MODEL)"];
+
+    // templates depend on all app modules
+    templates -> accounts [style=dashed, label="renders"];
+    templates -> articles [style=dashed, label="renders"];
+    templates -> comments [style=dashed, label="renders"];
+
+    // External dependencies (shown as ellipses)
+    node [shape=ellipse, style=filled, fillcolor="#EAECEE"];
+    django      [label="django"];
+    taggit      [label="django-taggit"];
+    markdown_lib [label="markdown+nh3"];
+    psycopg2    [label="psycopg2"];
+    playwright_ext [label="@playwright/test"];
+
+    accounts -> django;
+    articles -> django;
+    articles -> taggit;
+    articles -> markdown_lib;
+    comments -> django;
+    helpers  -> django;
+    helpers  -> psycopg2;
+    config   -> django;
+    tests_e2e -> playwright_ext;
+}

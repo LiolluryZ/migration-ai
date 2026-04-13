@@ -1,0 +1,79 @@
+erDiagram
+    accounts_user {
+        bigint id PK
+        varchar_128 password
+        datetime last_login
+        boolean is_superuser
+        boolean is_staff
+        boolean is_active
+        datetime date_joined
+        varchar_254 email UK
+        varchar_60 username UK
+        text bio
+        varchar_200 image
+    }
+
+    articles_article {
+        bigint id PK
+        varchar_150 title UK
+        text summary
+        text content
+        datetime created
+        datetime updated
+        varchar_255 slug UK
+        bigint author_id FK
+    }
+
+    comments_comment {
+        bigint id PK
+        text content
+        datetime created
+        datetime updated
+        bigint article_id FK
+        bigint author_id FK
+    }
+
+    taggit_tag {
+        int id PK
+        varchar_100 name UK
+        varchar_100 slug UK
+    }
+
+    taggit_taggeditem {
+        int id PK
+        int object_id
+        int content_type_id FK
+        int tag_id FK
+    }
+
+    accounts_user_followers {
+        bigint id PK
+        bigint from_user_id FK
+        bigint to_user_id FK
+    }
+
+    articles_article_favorites {
+        bigint id PK
+        bigint article_id FK
+        bigint user_id FK
+    }
+
+    %% ── Relations ────────────────────────────────────────────────────────────
+    %% Un article appartient à un auteur (FK CASCADE)
+    articles_article }o--|| accounts_user : "author"
+
+    %% Un commentaire appartient à un article et à un auteur (FK CASCADE)
+    comments_comment }o--|| articles_article : "article"
+    comments_comment }o--|| accounts_user : "author"
+
+    %% M2M self-referential asymétrique : followers
+    accounts_user_followers }o--|| accounts_user : "from (follower)"
+    accounts_user_followers }o--|| accounts_user : "to (followed)"
+
+    %% M2M articles <-> users : favoris
+    articles_article_favorites }o--|| articles_article : "article"
+    articles_article_favorites }o--|| accounts_user : "user"
+
+    %% M2M articles <-> tags via django-taggit (GenericFK)
+    taggit_taggeditem }o--|| taggit_tag : "tag"
+    taggit_taggeditem }o--|| articles_article : "object (GenericFK)"
