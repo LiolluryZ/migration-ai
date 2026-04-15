@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-04-15T15:00:00Z",
+  "agent": "18-traducteur",
+  "module": "helpers",
+  "confidence": 92,
+  "summary": {
+    "files_translated": 3,
+    "lines_source": 101,
+    "lines_target": 69,
+    "rules_covered": 2,
+    "rules_not_migrated": 1,
+    "flagged_for_review": 2
+  },
+  "translations": [
+    {
+      "source_file": "helpers/htmx.py",
+      "target_file": "target/backend/src/shared/htmx.ts",
+      "strategy": "adapted",
+      "notes": "is_htmx(request: HttpRequest) → isHtmx(headers: IncomingHttpHeaders). The function signature changes from a full Django request to the headers map only — more generic and testable without a framework mock. The header name is lowercased ('hx-request') because Node.js normalises all incoming HTTP header names to lowercase, whereas Django's HttpRequest.headers is case-insensitive. Behaviour is identical: returns true iff the header value is exactly the string 'true'. The function is retained even though HTMX disappears in the SPA — it may be useful during the Strangler-Fig migration window.",
+      "confidence": 95,
+      "rules_covered": ["BR-001"]
+    },
+    {
+      "source_file": "helpers/exceptions.py",
+      "target_file": "target/backend/src/shared/errors.ts",
+      "strategy": "adapted",
+      "notes": "Only clean_integrity_error() is migrated → parseSequelizeError(). The two dead-code symbols (ResourceNotFound, get_or_404) are intentionally excluded — see flagged_for_review. DESIGN: the Python source does manual string-splitting on raw psycopg2/sqlite3 error messages. Sequelize already parses the constraint violation and exposes the field name as error.errors[0].path, making the translation considerably simpler while preserving the same public contract: returns a field name string or null. The catch-all try/catch is preserved to match the silent-failure behaviour of the source.",
+      "confidence": 90,
+      "rules_covered": ["BR-002"]
+    },
+    {
+      "source_file": "helpers/tests.py",
+      "target_file": "target/backend/src/shared/errors.spec.ts",
+      "strategy": "adapted",
+      "notes": "Django TestCase (unittest) → Jest describe/it. The four test cases are translated 1-to-1. Fixtures change: instead of constructing a django.db.IntegrityError with __cause__ set to a raw sqlite3.IntegrityError, we construct Sequelize UniqueConstraintError objects directly using ValidationErrorItem, which is the idiomatic Jest/Sequelize equivalent. The malformed-message test (test_returns_none_for_malformed_message) becomes 'empty errors array' — Sequelize handles message parsing internally so there is no equivalent 'malformed raw message'; an empty errors[] is the nearest analog of a constraint error that cannot be field-resolved.",
+      "confidence": 92,
+      "rules_covered": ["BR-002"]
+    }
+  ],
+  "not_migrated": [
+    {
+      "source_file": "helpers/context_processors.py",
+      "source_symbol": "conduit_context(request)",
+      "reason": "Django context processor (SSR rendering concern). In the SPA architecture this mechanism does not exist: Angular's AuthService/AuthStore exposes currentUser$ reactively and is injected wherever needed. The user data fields (username, email, bio, image) and the bio/image empty-string→null normalisation (edge case of BR-003) must be implemented in the Angular AuthService during the templates/accounts migration sprints.",
+      "covers_rule": "BR-003",
+      "action_required": "Implement in Angular AuthService (accounts/templates sprint)"
+    },
+    {
+      "source_file": "helpers/exceptions.py",
+      "source_symbols": ["ResourceNotFound", "get_or_404"],
+      "reason": "Confirmed dead code by Phase 0 cartography (agent 01). No callers found in any module. Django utility wrappers (get_object_or_404, Http404) have no equivalent role in Fastify — routes use Sequelize findOne() directly and return reply.code(404) inline.",
+      "covers_rule": null,
+      "action_required": "None — intentionally excluded. Validation checkpoint HV-001 (Phase 3) documents this decision."
+    }
+  ],
+  "flagged_for_review": [
+    {
+      "target_file": "target/backend/src/shared/htmx.ts",
+      "line": 0,
+      "reason": "isHtmx() is retained as a utility but has no callers in the current target codebase. Its only future use would be in Strangler-Fig proxying adapters. If those adapters are not implemented, this file can be deleted without impact.",
+      "confidence": 95,
+      "suggestion": "After completing the migration of all HTMX endpoints (articles, accounts, comments sprints), verify whether isHtmx() has any callers. Remove the file if unused at Phase 5 audit."
+    },
+    {
+      "target_file": "target/backend/src/shared/errors.ts",
+      "line": 0,
+      "reason": "parseSequelizeError relies on error.errors[0].path being populated by Sequelize. This is always the case for UniqueConstraintError raised by Sequelize itself, but may not hold if the error is constructed manually or comes from a raw Sequelize.query() call that bypasses the ORM layer.",
+      "confidence": 90,
+      "suggestion": "Verify with integration tests (accounts + articles sprints) that UniqueConstraintError.errors[0].path is set correctly for both sqlite (local) and PostgreSQL (production) backends."
+    }
+  ],
+  "coexistence_adapters_created": []
+}

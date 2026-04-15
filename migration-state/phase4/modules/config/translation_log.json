@@ -1,0 +1,132 @@
+{
+  "generated_at": "2026-04-15T16:00:00Z",
+  "agent": "18-traducteur",
+  "module": "config",
+  "confidence": 90,
+  "summary": {
+    "files_translated": 11,
+    "lines_source": 219,
+    "lines_target": 368,
+    "rules_covered": 2,
+    "flagged_for_review": 2
+  },
+  "translations": [
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/src/config/env.ts",
+      "strategy": "adapted",
+      "notes": "Django settings.py centralises all config. Fastify equivalent is env.ts which reads and validates env vars. Secret key mandatory check in production mirrors Django's SECURITY WARNING. ALLOWED_HOSTS semicolon-split logic preserved exactly. USE_FAST_HASHER (MD5 for tests) replaced by PBKDF2_ITERATIONS=1 env var per HV-002 decision.",
+      "confidence": 93,
+      "rules_covered": ["BR-006"]
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/src/config/sequelize.config.ts",
+      "strategy": "adapted",
+      "notes": "DATABASE_URL conditional logic (lines 83-100) preserved with identical branching: no URL → file-based SQLite, ':memory:'/file: → in-memory SQLite, URL → PostgreSQL. BR-006 (TIME_ZONE=UTC, USE_TZ=True) implemented via timezone:'+00:00' on all dialects and dialectOptions.useUTC:true on PostgreSQL. ValueError/SystemExit on bad config preserved as thrown Errors.",
+      "confidence": 92,
+      "rules_covered": ["BR-006"]
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/src/app.ts",
+      "strategy": "adapted",
+      "notes": "Django MIDDLEWARE stack translated to Fastify plugin registrations. SecurityMiddleware+XFrameOptionsMiddleware → @fastify/helmet. CommonMiddleware+ALLOWED_HOSTS → @fastify/cors with origin whitelist. CsrfViewMiddleware → SameSite=Strict cookie strategy (no HTML form CSRF in SPA). SessionMiddleware+AuthenticationMiddleware → @fastify/jwt + authenticate preHandler. DEBUG wildcard (ALLOWED_HOSTS=['*']) → origin:true in development.",
+      "confidence": 90,
+      "rules_covered": ["BR-005", "BR-006"]
+    },
+    {
+      "source_file": "config/urls.py",
+      "target_file": "target/backend/src/routes/index.ts",
+      "strategy": "redesigned",
+      "notes": "Django ROOT_URLCONF include() pattern → Fastify route module registration under /api prefix. TM-001: each Django URL group (articles.urls, accounts.urls, comments.urls) becomes a TODO stub with the corresponding sprint reference. Only health route is live in this sprint (bootstrap contract).",
+      "confidence": 88,
+      "rules_covered": []
+    },
+    {
+      "source_file": "config/urls.py",
+      "target_file": "target/backend/src/routes/health.ts",
+      "strategy": "direct",
+      "notes": "No Django equivalent — new endpoint required by migration_plan.json validation checkpoint. GET /api/health → 200 { status: 'ok' }. Zero business logic.",
+      "confidence": 100,
+      "rules_covered": []
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/src/plugins/authenticate.ts",
+      "strategy": "redesigned",
+      "notes": "Django @login_required + LOGIN_URL='/login' (BR-005) redesigned as Fastify preHandler using JWT. Django redirected unauthenticated users (302 to /login); REST equivalent is 401 Unauthorized (Angular handles client-side redirect). Only token verification in this sprint — User model lookup added in accounts module.",
+      "confidence": 88,
+      "rules_covered": ["BR-005"]
+    },
+    {
+      "source_file": "config/wsgi.py",
+      "target_file": "target/backend/src/server.ts",
+      "strategy": "redesigned",
+      "notes": "Django WSGI/ASGI entry points (wsgi.py, asgi.py) merged into a single server.ts. DB connectivity check at startup mirrors Django's ImproperlyConfigured exception on bad DB config. Exits with code 1 on DB failure (same as Django's SystemExit).",
+      "confidence": 92,
+      "rules_covered": []
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/package.json",
+      "strategy": "adapted",
+      "notes": "INSTALLED_APPS 3rd-party packages translated to npm dependencies: taggit → explicit join tables (handled per-module), django-extensions → devDependencies ts-node-dev, pytest → jest/ts-jest. Core packages: fastify + plugins (@fastify/helmet, @fastify/cors, @fastify/jwt, @fastify/cookie), sequelize + adapters (pg, sqlite3), dotenv.",
+      "confidence": 95,
+      "rules_covered": []
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/tsconfig.json",
+      "strategy": "direct",
+      "notes": "No Django equivalent — TypeScript project configuration. strict:true + esModuleInterop for clean type safety. experimentalDecorators enabled for future Sequelize model decorators (sequelize-typescript).",
+      "confidence": 100,
+      "rules_covered": []
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/jest.config.ts",
+      "strategy": "adapted",
+      "notes": "Django test settings (USE_FAST_HASHER) → Jest config. ts-jest preset. Tests match *.spec.ts. server.ts excluded from coverage (entry point only). PBKDF2_ITERATIONS=1 to be set in test process.env, mirroring Django USE_FAST_HASHER=True shortcut.",
+      "confidence": 90,
+      "rules_covered": []
+    },
+    {
+      "source_file": "config/settings.py",
+      "target_file": "target/backend/.env.example",
+      "strategy": "direct",
+      "notes": "All environment variables documented with Django equivalents. SECRET_KEY → JWT_SECRET, DATABASE_URL (preserved), ALLOWED_HOSTS → ALLOWED_ORIGINS, USE_FAST_HASHER → PBKDF2_ITERATIONS. HV-002 decision documented inline.",
+      "confidence": 100,
+      "rules_covered": []
+    }
+  ],
+  "flagged_for_review": [
+    {
+      "target_file": "target/backend/src/app.ts",
+      "line": 40,
+      "reason": "CSRF strategy changed from CsrfViewMiddleware to SameSite=Strict cookie. The SameSite attribute is enforced at the Set-Cookie level (accounts module). If any non-SPA consumer (mobile app, CLI scripts) sends cross-origin requests, this strategy must be re-evaluated.",
+      "confidence": 75,
+      "suggestion": "Validate with the team that all clients are SPA/XHR only. If server-side rendering or non-browser clients appear later, add @fastify/csrf-protection as a complementary layer."
+    },
+    {
+      "target_file": "target/backend/src/plugins/authenticate.ts",
+      "line": 25,
+      "reason": "Stub only — does NOT populate request.user. Any route that uses fastify.authenticate as preHandler and then reads request.user will fail until the accounts module completes its decorator.",
+      "confidence": 70,
+      "suggestion": "Accounts module (Sprint 3) must extend this plugin to decode the JWT payload and attach the User record to request.user. Declare the FastifyRequest interface augmentation in src/types/fastify.d.ts at that time."
+    }
+  ],
+  "coexistence_adapters_created": [],
+  "decisions": [
+    {
+      "id": "HV-002",
+      "impact": "config",
+      "description": "mots de passe PBKDF2 compatible Django — pas de bcrypt. PBKDF2_ITERATIONS env var en lieu de BCRYPT_ROUNDS. Implémentation complète dans accounts module."
+    },
+    {
+      "id": "BR-004",
+      "impact": "config",
+      "description": "AUTH_PASSWORD_VALIDATORS non migrés (excluded) — règle configurée mais non effective dans le legacy. Décision datée 2026-04-13 maintenue."
+    }
+  ]
+}

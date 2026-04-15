@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-04-15T19:30:00Z",
+  "agent": "21-revieweur-migration",
+  "module": "config",
+  "confidence": 86,
+  "verdict": "changes_requested",
+
+  "summary": {
+    "rules_present": 2,
+    "rules_modified": 0,
+    "rules_missing": 0,
+    "rules_excluded": 1,
+    "added_functionality": 0,
+    "total_rules_for_module": 3
+  },
+
+  "rules_status": [
+    {
+      "rule_id": "BR-004",
+      "status": "excluded",
+      "source_location": {
+        "file": "config/settings.py",
+        "line": 117,
+        "snippet": "AUTH_PASSWORD_VALIDATORS = [UserAttributeSimilarityValidator, MinimumLengthValidator, ...]"
+      },
+      "target_location": null,
+      "notes": "Règle non effective dans le legacy (validators configurés mais jamais invoqués à l'inscription ni au changement de mot de passe). Décision humaine du 2026-04-13 confirmée : ne pas implémenter de validators de complexité dans la cible. Exclusion correcte — pas de blocker.",
+      "confidence": 100
+    },
+    {
+      "rule_id": "BR-005",
+      "status": "present",
+      "source_location": {
+        "file": "config/settings.py",
+        "line": 155,
+        "snippet": "LOGIN_URL = \"/login\"  # + @login_required sur les vues protégées"
+      },
+      "target_location": {
+        "file": "target/backend/src/plugins/authenticate.ts",
+        "line": 14,
+        "snippet": "fastify.decorate('authenticate', async function(request, reply) { await request.jwtVerify(); ... reply.code(401).send(...) })"
+      },
+      "notes": "Equiv correct. Django redirige 302 → /login ; REST/JWT équivalent est 401 Unauthorized (l'Angular SPA gère le redirect côté client). Le preHandler est enregistré globalement via fastify-plugin (fp()) et disponible dans tous les scopes. Stub de ce sprint : le lookup User (request.user) sera complété dans le module accounts. La sémantique fonctionnelle 'accès refusé aux non-authentifiés' est préservée.",
+      "confidence": 93
+    },
+    {
+      "rule_id": "BR-006",
+      "status": "present",
+      "source_location": {
+        "file": "config/settings.py",
+        "lines": "134-137",
+        "snippet": "LANGUAGE_CODE = \"en-us\"\nTIME_ZONE = \"UTC\"\nUSE_I18N = True\nUSE_TZ = True"
+      },
+      "target_location": {
+        "file": "target/backend/src/config/sequelize.config.ts",
+        "lines": "22-52",
+        "snippet": "timezone: '+00:00',  // BR-006: UTC  (toutes dialectes)\ndialectOptions: { useUTC: true }  // PostgreSQL uniquement"
+      },
+      "notes": "UTC appliqué sur les 3 branches : SQLite file-based (timezone: '+00:00'), SQLite in-memory (timezone: '+00:00'), PostgreSQL (timezone: '+00:00' + dialectOptions.useUTC: true). La couverture est exhaustive — correspond à USE_TZ = True de Django qui force l'UTC dans l'ORM et la couche de présentation des dates.",
+      "confidence": 97
+    }
+  ],
+
+  "added_functionality": [],
+
+  "changes_requested": [
+    {
+      "location": {
+        "file": "target/backend/src/config/env.ts",
+        "line": 41
+      },
+      "issue": "BLOCKER — OWASP A07:2021 — JWT_SECRET hardcodé : `jwtSecret: jwtSecret ?? 'dev-insecure-secret-change-me'`. La protection par `NODE_ENV === 'production'` (ligne 9) ne couvre pas les environnements staging, CI non configurés, ou toute valeur de NODE_ENV autre que 'production'. Un attaquant connaissant ce secret public peut forger des JWT pour n'importe quel utilisateur. Note : le legacy Django avait aussi une SECRET_KEY hardcodée (django-insecure-...) — la migration a reproduit ce comportement — mais la criticité est plus élevée ici car JWT_SECRET signe directement les tokens d'authentification.",
+      "suggestion": "Supprimer le fallback hardcodé. Lever une exception si JWT_SECRET est absent, quel que soit NODE_ENV (ou au minimum exclure uniquement le mode test Jest auto-détecté via `process.env.JEST_WORKER_ID`). Exemple sécurisé :\n  const jwtSecret = process.env.JWT_SECRET;\n  const isTest = Boolean(process.env.JEST_WORKER_ID);\n  if (!jwtSecret && !isTest) {\n    throw new Error('JWT_SECRET must be set. Generate with: ...');\n  }\n  export const env = { jwtSecret: jwtSecret ?? '' };\nPour les tests Jest, injecter JWT_SECRET=test-secret dans jest.config.ts via `process.env.JWT_SECRET = 'test-secret'` dans globalSetup.",
+      "linked_rule": null,
+      "severity": "blocker",
+      "owasp": "A07:2021 – Identification and Authentication Failures"
+    },
+    {
+      "location": {
+        "file": "target/backend/src/config/sequelize.config.ts",
+        "line": 31
+      },
+      "issue": "WARNING — Garde de sécurité manquante : le legacy Django levait RuntimeError si DATABASE_URL=':memory:' ou 'file:' était utilisé hors DEBUG mode (config/settings.py ligne 85 : `if not DEBUG: raise RuntimeError`). La cible ne reproduit pas ce garde, permettant l'utilisation d'une base SQLite in-memory en production sans avertissement.",
+      "suggestion": "Ajouter la vérification équivalente :\n  if ((url === ':memory:' || url.startsWith('file:')) && env.nodeEnv === 'production') {\n    throw new Error('In-memory/file SQLite must not be used in production. Set DATABASE_URL to a PostgreSQL URL.');\n  }",
+      "linked_rule": null,
+      "severity": "warning",
+      "source_reference": "config/settings.py:85 — `if not DEBUG: raise RuntimeError('In-memory SQLite should only be used with DEBUG=True')`"
+    },
+    {
+      "location": {
+        "file": "target/backend/src/config/env.ts",
+        "line": 35
+      },
+      "issue": "WARNING — Garde de sécurité manquante : le legacy Django levait RuntimeError si USE_FAST_HASHER=True et not DEBUG (config/settings.py ligne 125 : `if USE_FAST_HASHER and not DEBUG: raise RuntimeError`). La cible ne contrôle pas que PBKDF2_ITERATIONS peut être à 1 en production — des mots de passe pourraient être hashés avec une force insuffisante sans avertissement.",
+      "suggestion": "Ajouter la vérification équivalente :\n  if (pbkdf2Iterations < 100 && process.env.NODE_ENV === 'production') {\n    throw new Error('PBKDF2_ITERATIONS too low for production. Minimum recommended: 260000.');\n  }",
+      "linked_rule": null,
+      "severity": "warning",
+      "source_reference": "config/settings.py:125 — `if USE_FAST_HASHER and not DEBUG: raise RuntimeError`"
+    }
+  ],
+
+  "informational": [
+    {
+      "topic": "Renommage ALLOWED_HOSTS → ALLOWED_ORIGINS",
+      "notes": "Le legacy utilisait ALLOWED_HOSTS (contrôle du Host header HTTP), la cible utilise ALLOWED_ORIGINS (contrôle CORS). Renommage sémantiquement juste pour une SPA séparée, correctement documenté dans env.ts et .env.example. Pas d'écart de comportement.",
+      "severity": "info"
+    },
+    {
+      "topic": "Route GET /api/health → 200",
+      "notes": "Pas d'équivalent dans config/urls.py (Django). Ajout justifié par un requirement d'infrastructure (validation checkpoint migration_plan.json). Zero logique métier. Conforme.",
+      "severity": "info"
+    },
+    {
+      "topic": "HV-002 — Pas de bcrypt",
+      "notes": "bcrypt et argon2 absents de package.json. PBKDF2_ITERATIONS exposé via env var. .env.example documente HV-002 avec valeurs par défaut Django (260000 iterations). Format hash Django pbkdf2_sha256$<iter>$<salt>$<hash> préservé. Décision respectée.",
+      "severity": "info"
+    },
+    {
+      "topic": "ZERO logique métier dans le module config",
+      "notes": "routes/index.ts ne monte que healthRoutes. Les routes articles/accounts/comments sont des TODO stubs explicitement documentés avec le sprint de référence. Aucune logique métier (validations, calculs, transformations) n'a été ajoutée.",
+      "severity": "info"
+    },
+    {
+      "topic": "CSRF — CsrfViewMiddleware non reproduit",
+      "notes": "La stratégie SameSite=Strict remplace explicitement CsrfViewMiddleware. Justifiée car l'application cible est une SPA Angular (fetch/XHR, pas de form POST classique). Documenté dans app.ts. Stratégie à valider lors de la revue du module accounts (implémentation Set-Cookie).",
+      "severity": "info"
+    }
+  ],
+
+  "security_checklist": {
+    "cors_configured": true,
+    "helmet_configured": true,
+    "jwt_secret_via_env_only": false,
+    "jwt_secret_no_hardcoded_default": false,
+    "no_new_routes_added": true,
+    "hv002_no_bcrypt": true,
+    "pbkdf2_iterations_via_env": true,
+    "br006_utc_configured": true,
+    "br005_prehandler_present": true
+  }
+}

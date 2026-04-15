@@ -13,7 +13,7 @@
     "phase1": { "status": "completed", "started_at": "2026-04-13T10:00:00Z", "completed_at": "2026-04-13T14:00:00Z" },
     "phase2": { "status": "completed", "started_at": "2026-04-13T14:00:00Z", "completed_at": "2026-04-15T10:00:00Z" },
     "phase3": { "status": "completed", "started_at": "2026-04-15T12:00:00Z", "completed_at": "2026-04-15T14:10:00Z" },
-    "phase4": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase4": { "status": "in_progress", "started_at": "2026-04-15T14:30:00Z", "completed_at": null },
     "phase5": { "status": "pending", "started_at": null, "completed_at": null },
     "phase6": { "status": "pending", "started_at": null, "completed_at": null }
   },
@@ -55,24 +55,55 @@
     "15-couverture-metier":          { "status": "completed", "phase": 2, "last_run": "2026-04-15T10:00:00Z", "output_files": ["migration-state/phase2/business_coverage.json"], "confidence": 87, "notes": "54 règles analysées. 42 couvertes, 11 partiellement couvertes, 0 non couvertes, 1 non testable (BR-004 exclu). Coverage global: 98.1% (>90% seuil). Gaps critiques: BR-037 XSS sanitisation Markdown (high), BR-048 format date F j, Y (high). Phase 2 complète — 5/5 agents de génération terminés (agents 09-13) + couverture validée." },
     "16-mappeur-techno":             { "status": "completed", "phase": 3, "last_run": "2026-04-15T12:00:00Z", "output_files": ["migration-state/phase3/tech_mapping.json"], "confidence": 87, "notes": "32 patterns mappés (Django 5.2 + HTMX → TypeScript/Fastify/Angular/Sequelize). direct: 5, adapt: 18, redesign: 9, unmappable: 1. Catégories: routing (5), orm (9), validation (4), auth (4), view (4), test (2), utility (3), architecture (1). Patterns critiques: session → JWT (redesign), HTMX partial responses → Angular réactif (redesign), taggit → tables explicites (redesign), double auth commentaire (adapt). Exemples de code concrets pour chaque mapping. Gotchas documentés: PBKDF2→bcrypt incompatibilité, 404 ownership article (intentionnel), BR-023 slug immuable, BR-041 double auteur commentaire, sécurité XSS Markdown DOMPurify." },
     "17-planificateur":              { "status": "completed", "phase": 3, "last_run": "2026-04-15T14:10:00Z", "output_files": ["migration-state/phase3/migration_plan.json"], "confidence": 88, "notes": "Ordre de migration : helpers→articles→accounts→comments→templates (topologique + instabilité + complexité). 5 phases de migration, 6 sprints. Chemin critique : helpers→articles→accounts→comments→templates. 3 adaptateurs de coexistence : proxy HTTP nginx (Strangler Fig), interface dead-model Django articles pendant migration accounts, lazy re-hash PBKDF2→bcrypt. 2 validations humaines requises : HV-001 (dead code helpers) et HV-002 BLOCKER (stratégie mots de passe PBKDF2→bcrypt). migration_modules[] mis à jour avec 6 modules ordonnés." },
-    "18-traducteur":                 { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "18-traducteur":                 { "status": "completed", "phase": 4, "last_run": "2026-04-15T16:00:00Z", "output_files": ["target/backend/src/shared/htmx.ts", "target/backend/src/shared/errors.ts", "target/backend/src/shared/errors.spec.ts", "migration-state/phase4/modules/helpers/translation_log.json", "target/backend/package.json", "target/backend/tsconfig.json", "target/backend/jest.config.ts", "target/backend/.env.example", "target/backend/src/config/env.ts", "target/backend/src/config/sequelize.config.ts", "target/backend/src/types/fastify.d.ts", "target/backend/src/plugins/authenticate.ts", "target/backend/src/routes/health.ts", "target/backend/src/routes/index.ts", "target/backend/src/app.ts", "target/backend/src/server.ts", "migration-state/phase4/modules/config/translation_log.json"], "confidence": 90, "notes": "Module config traduit (11 fichiers, 368 LOC cible). BR-005 (authenticate preHandler), BR-006 (UTC timezone) couverts. BR-004 excluded (non effective dans legacy). HV-002 documenté : PBKDF2 compatible Django. 2 points de suivi : CSRF SameSite=Strict strategy à valider, authenticate stub à compléter dans accounts module." },
     "19-validateur-conformite":      { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "20-comparateur-reponses":       { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
-    "21-revieweur-migration":        { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "21-revieweur-migration":        { "status": "completed", "phase": 4, "last_run": "2026-04-15T19:30:00Z", "output_files": ["migration-state/phase4/modules/helpers/review_report.json", "migration-state/phase4/modules/config/review_report.json"], "confidence": 86, "notes": "Module config reviewé. Verdict: CHANGES_REQUESTED (confiance 86%). BR-004 excluded (non effective, décision 2026-04-13 confirmée). BR-005 (authenticate preHandler) PRESENT — 401 correctement substitué au 302. BR-006 (UTC timezone) PRESENT — timezone:'+00:00' + dialectOptions.useUTC:true. BLOCKER OWASP A07:2021 : jwtSecret fallback hardcodé 'dev-insecure-secret-change-me' dans env.ts:41 — production guard insuffisant (NODE_ENV uniquement). 2 WARNINGs : garde ':memory:' SQLite hors production manquante (sequelize.config.ts:31), garde PBKDF2_ITERATIONS trop faible en production manquante (env.ts:35). ZERO logique métier ajoutée. HV-002 respecté (no bcrypt). Module helpers: Verdict APPROVED (précédente revue, confiance 93%)." },
     "22-audit-final":                { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "23-detecteur-features-fantomes":{ "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "24-comparateur-surface-api":    { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" }
   },
   "migration_modules": [
-    { "name": "helpers",   "path": "helpers/",          "migration_phase": 1, "status": "pending" },
-    { "name": "config",    "path": "config/",           "migration_phase": 1, "status": "pending" },
+    { "name": "helpers",   "path": "helpers/",          "migration_phase": 1, "status": "translated" },
+    { "name": "config",    "path": "config/",           "migration_phase": 1, "status": "translated" },
     { "name": "articles",  "path": "apps/articles/",    "migration_phase": 2, "status": "pending" },
     { "name": "accounts",  "path": "apps/accounts/",    "migration_phase": 3, "status": "pending" },
     { "name": "comments",  "path": "apps/comments/",    "migration_phase": 4, "status": "pending" },
     { "name": "templates", "path": "templates/",        "migration_phase": 5, "status": "pending" }
   ],
-  "module_progress": {},
-  "blockers": [],
+  "module_progress": {
+    "helpers": {
+      "status": "reviewed",
+      "translated_at": "2026-04-15T15:00:00Z",
+      "confidence": 92,
+      "review": "approved",
+      "reviewed_at": "2026-04-15T18:00:00Z",
+      "review_confidence": 93
+    },
+    "config": {
+      "status": "reviewed",
+      "translated_at": "2026-04-15T16:00:00Z",
+      "confidence": 90,
+      "review": "changes_requested",
+      "reviewed_at": "2026-04-15T19:30:00Z",
+      "review_confidence": 86
+    }
+  },
+  "blockers": [
+    {
+      "id": "BLOCKER-config-001",
+      "module": "config",
+      "agent": "21-revieweur-migration",
+      "detected_at": "2026-04-15T19:30:00Z",
+      "severity": "blocker",
+      "owasp": "A07:2021 – Identification and Authentication Failures",
+      "description": "JWT_SECRET a une valeur par défaut hardcodée dans target/backend/src/config/env.ts:41 : `jwtSecret: jwtSecret ?? 'dev-insecure-secret-change-me'`. La protection par NODE_ENV === 'production' est insuffisante — tout environnement non marqué 'production' (staging, CI, oubli de configuration) utilise silencieusement ce secret public. Un attaquant peut forger des JWT pour n'importe quel utilisateur.",
+      "file": "target/backend/src/config/env.ts",
+      "line": 41,
+      "resolution": "Supprimer le fallback hardcodé. Lever une exception si JWT_SECRET absent (hors contexte Jest auto-détecté via JEST_WORKER_ID). Injecter JWT_SECRET=test-secret dans jest.config.ts globalSetup.",
+      "status": "open"
+    }
+  ],
   "human_validations_pending": [
     {
       "id": "HV-002",
@@ -191,6 +222,30 @@
       "agent": "17-planificateur",
       "action": "migration_plan_generated",
       "details": "Plan de migration produit dans migration-state/phase3/migration_plan.json. 6 modules, 5 phases, 6 sprints. Ordre topologique : helpers (Phase 1) → config (Phase 1, parallèle) → articles (Phase 2) → accounts (Phase 3) → comments (Phase 4) → templates (Phase 5). Chemin critique longueur 5. 3 adaptateurs de coexistence : proxy nginx Strangler Fig (Sprints 2-6), interface modèles Django articles pendant migration accounts (Sprint 3-4), lazy re-hash PBKDF2→bcrypt (Sprint 4 + 30j). Séquencement Strangler Fig en 6 étapes documenté. BLOCKER HV-002 : stratégie migration mots de passe PBKDF2→bcrypt à valider avant Sprint 4. migration_modules[] mis à jour. Phase 3 completed. current_phase → 4. Confiance 88%."
+    },
+    {
+      "timestamp": "2026-04-15T15:00:00Z",
+      "agent": "18-traducteur",
+      "action": "module_translated",
+      "details": "Module helpers traduit Python/Django → TypeScript/Fastify. 3 fichiers produits dans target/backend/src/shared/ : htmx.ts (isHtmx — BR-001), errors.ts (parseSequelizeError — BR-002), errors.spec.ts (4 tests Jest). 2 éléments non migrés : conduit_context (→ Angular AuthService, BR-003) et dead code get_or_404/ResourceNotFound (confirmé Phase 0). 2 points de suivi : isHtmx sans callers actuels (à revalider Phase 5), parseSequelizeError à valider en intégration SQLite+PostgreSQL. Confiance 92%."
+    },
+    {
+      "timestamp": "2026-04-15T16:00:00Z",
+      "agent": "18-traducteur",
+      "action": "module_translated",
+      "details": "Module config traduit Python/Django → TypeScript/Fastify. 11 fichiers produits : package.json, tsconfig.json, jest.config.ts, .env.example, src/config/env.ts, src/config/sequelize.config.ts, src/types/fastify.d.ts, src/plugins/authenticate.ts, src/routes/health.ts, src/routes/index.ts, src/app.ts, src/server.ts. BR-005 (authenticate preHandler — stub), BR-006 (UTC timezone Sequelize) couverts. BR-004 excluded (non effective dans legacy). HV-002 : PBKDF2_ITERATIONS env var documentée (.env.example). Stratégie CSRF : SameSite=Strict remplace CsrfViewMiddleware (SPA). GET /api/health → 200 OK live. Confiance 90%."
+    },
+    {
+      "timestamp": "2026-04-15T18:00:00Z",
+      "agent": "21-revieweur-migration",
+      "action": "module_reviewed",
+      "details": "Revue de migration module helpers complétée. Verdict: APPROVED (confiance 93%). BR-001 (isHtmx) PRESENT — adaptation signature HttpRequest→IncomingHttpHeaders correcte, header lowercase Node.js valide, sémantique identique. BR-002 (parseSequelizeError) PRESENT — contrat public identique (field|null), Sequelize parse automatiquement les messages des 2 backends (SQLite+PostgreSQL), catch-all préservé. BR-003 (conduit_context) MISSING documenté — deferral explicitement accepté dans translation_log vers Angular AuthService (accounts/templates sprint), pas de blocker. Dead code (ResourceNotFound, get_or_404) correctement exclus (Phase 0 confirmé). ZERO fonctionnalité ajoutée. Tests: 4/4 cas mirrorés (email, username, unknown format, malformed). 3 findings INFO uniquement."
+    },
+    {
+      "timestamp": "2026-04-15T19:30:00Z",
+      "agent": "21-revieweur-migration",
+      "action": "module_reviewed",
+      "details": "Revue de migration module config complétée. Verdict: CHANGES_REQUESTED (confiance 86%). BR-004 excluded (non effective dans legacy, décision 2026-04-13 confirmée). BR-005 (authenticate preHandler) PRESENT — fastify.authenticate décoré via fastify-plugin, jwtVerify(), 401 semantiquement correct vs redirect Django. BR-006 (UTC timezone) PRESENT — timezone:'+00:00' sur toutes les dialectes Sequelize + dialectOptions.useUTC:true sur PostgreSQL. BLOCKER OWASP A07:2021 ouvert : jwtSecret fallback hardcodé 'dev-insecure-secret-change-me' (env.ts:41) — guard NODE_ENV=production insuffisant. 2 WARNINGs : garde ':memory:' hors production manquante (sequelize.config.ts:31), garde PBKDF2_ITERATIONS trop faible en production manquante (env.ts:35). ZERO logique métier ajoutée. HV-002 respecté : bcrypt absent, PBKDF2_ITERATIONS via env var. GET /api/health → 200 présent. .env.example complet (JWT_SECRET, DATABASE_URL, ALLOWED_ORIGINS, PBKDF2_ITERATIONS)."
     }
   ]
 }

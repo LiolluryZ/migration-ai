@@ -1,0 +1,130 @@
+{
+  "generated_at": "2026-04-15T18:00:00Z",
+  "agent": "21-revieweur-migration",
+  "module": "helpers",
+  "confidence": 93,
+  "verdict": "approved",
+  "summary": {
+    "rules_present": 2,
+    "rules_modified": 0,
+    "rules_missing": 1,
+    "added_functionality": 0,
+    "total_rules_for_module": 3
+  },
+  "rules_status": [
+    {
+      "rule_id": "BR-001",
+      "status": "present",
+      "source_location": { "file": "helpers/htmx.py", "line": 4 },
+      "target_location": { "file": "target/backend/src/shared/htmx.ts", "line": 14 },
+      "notes": "is_htmx(request: HttpRequest) → isHtmx(headers: IncomingHttpHeaders). Signature adaptation: the function now accepts the headers map directly instead of the full Django request object — a valid and more testable design that does NOT alter the business semantics. Header name 'HX-Request' → 'hx-request' (lowercase) is technically correct: Node.js normalises all incoming HTTP headers to lowercase on ingress (RFC 7230 §3.2), whereas Django's HttpRequest.headers performs a case-insensitive lookup. Both versions return true iff the header value is exactly the string 'true'. Edge case (absent header or value ≠ 'true') verified: Python returns False (missing key in get()), TypeScript returns false (undefined === 'true' is false). Semantics are identical.",
+      "confidence": 95
+    },
+    {
+      "rule_id": "BR-002",
+      "status": "present",
+      "source_location": { "file": "helpers/exceptions.py", "line": 27 },
+      "target_location": { "file": "target/backend/src/shared/errors.ts", "line": 24 },
+      "notes": "clean_integrity_error(error: Exception) -> str | None → parseSequelizeError(error: unknown): string | null. Both functions share an identical public contract: take an error, return the offending field name (e.g. 'email', 'username') or null if the error is not a recognised unique-constraint violation. The Python source manually parses raw driver messages from two backends (psycopg2.errors.UniqueViolation via string-split ':' then '(' then ')'; sqlite3.IntegrityError via string-split ': ' then '.'). Sequelize already performs this parsing for both backends and exposes the result as error.errors[0].path on UniqueConstraintError, making the translation simpler without altering the contract. Covered cases verified: (1) email uniqueness violation → 'email', (2) username uniqueness violation → 'username', (3) non-unique-constraint error → null, (4) malformed/empty errors → null. Catch-all silent-failure behaviour is preserved via the outer try/catch block. The optional-chaining path (error.errors[0]?.path ?? null) correctly returns null when errors[] is empty, matching the Python source's behaviour for malformed messages.",
+      "confidence": 90
+    },
+    {
+      "rule_id": "BR-003",
+      "status": "missing",
+      "source_location": { "file": "helpers/context_processors.py", "line": 4 },
+      "target_location": { "file": "N/A", "line": 0 },
+      "notes": "conduit_context(request) — a Django SSR context processor that exposes user data ({username, email, bio, image}) as JSON in every template rendering context — has NO equivalent in target/backend/src/shared/. This is a documented deferral: translation_log.json (agent 18) explicitly states 'action_required: Implement in Angular AuthService (accounts/templates sprint)'. The rule is architecturally impossible to implement in the backend shared module because: (1) Django context processors are an SSR-only mechanism, (2) the Angular SPA exposes current user reactively via AuthService/AuthStore rather than injecting it into server-rendered HTML, (3) the bio/image empty-string-to-null normalisation edge case of BR-003 must be handled in the Angular AuthService mapping layer. This deferral constitutes 'acceptation explicite documentee' per migration rules — it is NOT a blocking missing rule for the helpers module review. Tracking: must be implemented in the accounts or templates sprint before Phase 5 audit.",
+      "confidence": 95
+    }
+  ],
+  "dead_code_check": {
+    "status": "pass",
+    "items": [
+      {
+        "source_symbol": "ResourceNotFound(Http404)",
+        "source_location": { "file": "helpers/exceptions.py", "line": 13 },
+        "present_in_target": false,
+        "verdict": "correctly_excluded",
+        "notes": "Confirmed dead code by Phase 0 cartography (agent 01). No callers found in any module. Django Http404 subclass has no architectural equivalent in Fastify — routes return reply.code(404) inline. Decision documented in translation_log.json (not_migrated[1]) and Phase 3 HV-001 checkpoint."
+      },
+      {
+        "source_symbol": "get_or_404(model_or_qs, resource, **kwargs)",
+        "source_location": { "file": "helpers/exceptions.py", "line": 19 },
+        "present_in_target": false,
+        "verdict": "correctly_excluded",
+        "notes": "Confirmed dead code by Phase 0 cartography. Wraps Django's get_object_or_404 with ResourceNotFound — which is itself dead code. Fastify routes use Sequelize findOne() directly. Decision documented in translation_log.json (not_migrated[1]) and Phase 3 HV-001 checkpoint."
+      }
+    ]
+  },
+  "added_functionality": [],
+  "test_coverage_comparison": {
+    "source_file": "helpers/tests.py",
+    "target_file": "target/backend/src/shared/errors.spec.ts",
+    "source_test_count": 4,
+    "target_test_count": 4,
+    "coverage_status": "equivalent",
+    "mapping": [
+      {
+        "source_test": "test_sqlite_unique_violation — SQLiteIntegrityError('UNIQUE constraint failed: accounts_user.email') → 'email'",
+        "target_test": "returns field name for UniqueConstraintError on email",
+        "status": "mirrored",
+        "notes": "Django IntegrityError with sqlite3 cause replaced by Sequelize UniqueConstraintError with ValidationErrorItem(path='email'). Business assertion identical: result === 'email'."
+      },
+      {
+        "source_test": "test_sqlite_unique_violation_username — accounts_user.username → 'username'",
+        "target_test": "returns field name for UniqueConstraintError on username",
+        "status": "mirrored",
+        "notes": "Same adaptation as email test. Business assertion identical: result === 'username'."
+      },
+      {
+        "source_test": "test_returns_none_for_unknown_format — IntegrityError with __cause__ = None → None",
+        "target_test": "returns null for non-UniqueConstraintError",
+        "status": "mirrored",
+        "notes": "Python: cause is None → no isinstance branch matches → returns None. TypeScript: plain Error('some unrelated error') → instanceof UniqueConstraintError is false → returns null. Business assertion identical: result is null/None."
+      },
+      {
+        "source_test": "test_returns_none_for_malformed_message — SQLiteIntegrityError('something unexpected') → None (split raises IndexError, caught by except Exception)",
+        "target_test": "returns null when errors array is empty (malformed constraint error)",
+        "status": "mirrored_with_adaptation",
+        "notes": "The idiomatic Sequelize equivalent of a 'malformed raw DB message' is a UniqueConstraintError with an empty errors[] array (no path resolvable). Python path: string.split() raises IndexError → caught → None. TypeScript path: error.errors[0]?.path === undefined → ?? null → returns null. Semantics identical (unresolvable constraint → null), test fixture is different because Sequelize handles raw message parsing internally. This is the correct adaptation."
+      }
+    ],
+    "gaps": [
+      {
+        "description": "No unit tests for isHtmx() in source or target",
+        "severity": "info",
+        "notes": "helpers/tests.py intentionally scopes unit tests only to 'logic hard to exercise through the browser'. is_htmx/isHtmx is a one-line comparison covered by E2E HTMX interactions. Absence of unit test in target is consistent with source intent."
+      }
+    ]
+  },
+  "findings_summary": [
+    {
+      "id": "F-001",
+      "severity": "info",
+      "category": "deferred_rule",
+      "location": { "file": "helpers/context_processors.py", "line": 4 },
+      "description": "BR-003 (conduit_context user JSON) is not implemented in target/backend/src/shared/. Documented deferral to Angular AuthService (accounts/templates sprint). Not a blocker — acceptation explicite documentée in translation_log.json.",
+      "linked_rule": "BR-003",
+      "action": "Track implementation in accounts or templates sprint. Verify Angular AuthService exposes {username, email, bio: bio||null, image: image||null} and handles the empty-string-to-null normalisation edge case before Phase 5 audit."
+    },
+    {
+      "id": "F-002",
+      "severity": "info",
+      "category": "no_callers",
+      "location": { "file": "target/backend/src/shared/htmx.ts", "line": 14 },
+      "description": "isHtmx() has no callers in the current target codebase. The function is retained for Strangler-Fig transition adapters during the migration window. Flagged by agent 18.",
+      "linked_rule": "BR-001",
+      "action": "After completing migration of all HTMX endpoints (articles, accounts, comments sprints), verify whether isHtmx() has any callers. Remove the file at Phase 5 audit if unused."
+    },
+    {
+      "id": "F-003",
+      "severity": "info",
+      "category": "integration_validation_pending",
+      "location": { "file": "target/backend/src/shared/errors.ts", "line": 24 },
+      "description": "parseSequelizeError relies on UniqueConstraintError.errors[0].path being populated. This holds for Sequelize ORM-raised errors but should be validated for both SQLite (local/test) and PostgreSQL (production) backends with real integration tests.",
+      "linked_rule": "BR-002",
+      "action": "Verify with integration tests during accounts and articles sprints (both backends). The path field should be 'email' for email constraint violations and 'username' for username constraint violations."
+    }
+  ],
+  "changes_requested": []
+}

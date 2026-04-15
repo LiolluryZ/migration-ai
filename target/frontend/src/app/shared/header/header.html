@@ -1,0 +1,45 @@
+<!-- Translated from: templates/partials/header.html -->
+<nav class="navbar navbar-light">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">conduit</a>
+    <ul class="nav navbar-nav pull-xs-right">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          Home
+        </a>
+      </li>
+
+      @if (auth.isAuthenticated()) {
+        <!-- Authenticated nav — equivalent to {% if user.is_authenticated %} -->
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/editor" routerLinkActive="active">
+            <i class="ion-compose"></i>&nbsp;New Article
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/settings" routerLinkActive="active">
+            <i class="ion-gear-a"></i>&nbsp;Settings
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             [routerLink]="['/profile', auth.currentUser()?.username]"
+             routerLinkActive="active">
+            @if (auth.currentUser()?.image) {
+              <img class="user-pic" [src]="auth.currentUser()!.image" [alt]="auth.currentUser()!.username">
+            }
+            {{ auth.currentUser()?.username }}
+          </a>
+        </li>
+      } @else {
+        <!-- Anonymous nav — equivalent to {% else %} -->
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/login" routerLinkActive="active">Sign in</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-signup" routerLink="/register" routerLinkActive="active">Sign up</a>
+        </li>
+      }
+    </ul>
+  </div>
+</nav>
