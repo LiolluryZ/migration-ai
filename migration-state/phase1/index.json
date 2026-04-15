@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "phase": 1,
+  "note": "Index maître de Phase 1 — pointe vers les données métier fragmentées par module/domaine",
+  "sections": {
+    "business_rules": {
+      "description": "Règles métier extraites, organisées par module pour chargement sélectif",
+      "total_rules": 54,
+      "total_modules": 6,
+      "index_file": "business_rules/index.json",
+      "summary_file": "business_rules/summary.json",
+      "data_directory": "business_rules/modules/{module}/rules.json"
+    },
+    "workflows": {
+      "description": "Workflows/machines à états, un fichier par workflow",
+      "total_workflows": 11,
+      "index_file": "workflows/index.json",
+      "summary_file": "workflows/summary.json",
+      "data_directory": "workflows/{workflow_id}/workflow.json"
+    },
+    "rbac_matrix": {
+      "description": "Matrice RBAC centralisée (tableau croisé) avec index pour navigation",
+      "total_roles": 3,
+      "total_resources": 10,
+      "total_permissions": 34,
+      "index_file": "rbac_matrix/index.json",
+      "summary_file": "rbac_matrix/summary.json",
+      "matrix_file": "rbac_matrix/matrix.json"
+    }
+  },
+  "loading_strategy": {
+    "agents_phase_2_5": "Lire les index (léger), filtrer par module, charger seulement les données pertinentes",
+    "agent_22_audit_final": "Lire les résumés, puis charger tout le contenu pour validation exhaustive"
+  }
+}

@@ -1,0 +1,576 @@
+﻿{
+    "module":  "accounts",
+    "agent":  "05-extracteur-regles",
+    "rules":  [
+                  {
+                      "id":  "BR-007",
+                      "domain":  "user_management",
+                      "module":  "accounts",
+                      "summary":  "Le modele User utilise l\u0027email comme identifiant de connexion (USERNAME_FIELD), pas le username. L\u0027email est obligatoire et unique. Le username est un champ affiche, egalement unique, max 60 caracteres.",
+                      "formal_expression":  "USERNAME_FIELD = \u0027email\u0027; email: unique, required; username: unique, max_length=60, required",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/models.py",
+                                                   "function":  "User",
+                                                   "line_start":  30,
+                                                   "line_end":  44,
+                                                   "code_snippet":  "class User(AbstractUser):\n    email = models.EmailField(\u0027Email Address\u0027, unique=True)\n    username = models.CharField(max_length=60, unique=True)\n    EMAIL_FIELD = \u0027email\u0027\n    USERNAME_FIELD = \u0027email\u0027\n    REQUIRED_FIELDS: list[str] = []"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "REQUIRED_FIELDS est vide â€” seul email et password sont requis via createsuperuser",
+                                             "expected_behavior":  "Le username doit etre fourni separement"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-008",
+                      "domain":  "user_management",
+                      "module":  "accounts",
+                      "summary":  "Les champs first_name et last_name de AbstractUser sont supprimes du modele User. Seuls username, email, bio et image sont utilises.",
+                      "formal_expression":  "User.first_name = None; User.last_name = None",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/models.py",
+                                                   "function":  "User",
+                                                   "line_start":  32,
+                                                   "line_end":  33,
+                                                   "code_snippet":  "first_name = None\nlast_name = None"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-007"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-009",
+                      "domain":  "user_management",
+                      "module":  "accounts",
+                      "summary":  "Le champ bio est un texte libre optionnel (default vide). Le champ image est une URL optionnelle (pas un upload fichier).",
+                      "formal_expression":  "bio: text, blank=True, default=\u0027\u0027; image: URL, null=True, blank=True, max_length=200",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/models.py",
+                                                   "function":  "User",
+                                                   "line_start":  37,
+                                                   "line_end":  38,
+                                                   "code_snippet":  "bio = models.TextField(blank=True)\nimage = models.URLField(null=True, blank=True)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-007"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Image n\u0027est pas un fichier uploade mais un lien URL externe",
+                                             "expected_behavior":  "Validation URLField standard Django"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-010",
+                      "domain":  "social",
+                      "module":  "accounts",
+                      "summary":  "La relation de suivi (follow) entre utilisateurs est asymetrique : A peut suivre B sans que B suive A. C\u0027est une relation ManyToMany self-referentielle avec symmetrical=False.",
+                      "formal_expression":  "followers: ManyToMany(\u0027self\u0027, symmetrical=False); is_following(A, B) := A in B.followers",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/models.py",
+                                                   "function":  "User",
+                                                   "line_start":  40,
+                                                   "line_end":  40,
+                                                   "code_snippet":  "followers = models.ManyToManyField(\u0027self\u0027, blank=True, symmetrical=False)"
+                                               },
+                                               {
+                                                   "file":  "apps/accounts/models.py",
+                                                   "function":  "is_following",
+                                                   "line_start":  51,
+                                                   "line_end":  52,
+                                                   "code_snippet":  "def is_following(self, other_user: User) -\u003e bool:\n    return other_user.followers.filter(pk=self.id).exists() if self.is_authenticated else False"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur non authentifie",
+                                             "expected_behavior":  "is_following retourne toujours False"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-011",
+                      "domain":  "authentication",
+                      "module":  "accounts",
+                      "summary":  "L\u0027authentification se fait par email + password. En cas d\u0027echec, un message generique \u0027Invalid email or password.\u0027 est affiche (pas de distinction entre email inconnu et mauvais mot de passe).",
+                      "formal_expression":  "authenticate(email, password) -\u003e user | None; IF None THEN error(\u0027Invalid email or password.\u0027)",
+                      "type":  "workflow",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "login_view",
+                                                   "line_start":  17,
+                                                   "line_end":  27,
+                                                   "code_snippet":  "user = authenticate(email=form.cleaned_data[\u0027email\u0027], password=form.cleaned_data[\u0027password\u0027])\nif user is not None:\n    login(request, user)\n    return redirect(\u0027home\u0027)\nform.add_error(None, \u0027Invalid email or password.\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-007"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Email valide mais password incorrect",
+                                             "expected_behavior":  "Meme message generique"
+                                         },
+                                         {
+                                             "description":  "Email inexistant",
+                                             "expected_behavior":  "Meme message generique"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-012",
+                      "domain":  "authentication",
+                      "module":  "accounts",
+                      "summary":  "Apres un login reussi, l\u0027utilisateur est redirige vers la page d\u0027accueil (\u0027home\u0027).",
+                      "formal_expression":  "IF login_success THEN redirect(\u0027home\u0027)",
+                      "type":  "workflow",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "login_view",
+                                                   "line_start":  23,
+                                                   "line_end":  24,
+                                                   "code_snippet":  "login(request, user)\nreturn redirect(\u0027home\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-011"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-013",
+                      "domain":  "user_management",
+                      "module":  "accounts",
+                      "summary":  "L\u0027inscription requiert username, email et password. Les champs email et username doivent etre uniques. En cas de doublon email: \u0027This email has already been taken.\u0027 En cas de doublon username: \u0027This username has already been taken.\u0027 Sinon erreur generique.",
+                      "formal_expression":  "register(username, email, password); IF duplicate(email) THEN error(\u0027email taken\u0027); IF duplicate(username) THEN error(\u0027username taken\u0027)",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "register_view",
+                                                   "line_start":  30,
+                                                   "line_end":  52,
+                                                   "code_snippet":  "user = User.objects.create_user(email=..., username=..., password=...)\n...\nexcept IntegrityError as err:\n    field = clean_integrity_error(err)\n    if field == \u0027email\u0027: form.add_error(\u0027email\u0027, \u0027This email has already been taken.\u0027)\n    elif field == \u0027username\u0027: form.add_error(\u0027username\u0027, \u0027This username has already been taken.\u0027)"
+                                               },
+                                               {
+                                                   "file":  "apps/accounts/forms.py",
+                                                   "function":  "RegisterForm",
+                                                   "line_start":  14,
+                                                   "line_end":  17,
+                                                   "code_snippet":  "class RegisterForm(forms.Form):\n    username = forms.CharField(max_length=60, ...)\n    email = forms.EmailField(...)\n    password = forms.CharField(...)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-002",
+                                           "BR-007"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "IntegrityError non reconnue (ni email ni username)",
+                                             "expected_behavior":  "Message generique \u0027Registration failed.\u0027"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-014",
+                      "domain":  "authentication",
+                      "module":  "accounts",
+                      "summary":  "Apres une inscription reussie, l\u0027utilisateur est automatiquement connecte (login) et redirige vers la page d\u0027accueil.",
+                      "formal_expression":  "IF register_success THEN auto_login(user) AND redirect(\u0027home\u0027)",
+                      "type":  "workflow",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "register_view",
+                                                   "line_start":  40,
+                                                   "line_end":  42,
+                                                   "code_snippet":  "login(request, user)\nreturn redirect(\u0027home\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-013"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-015",
+                      "domain":  "user_management",
+                      "module":  "accounts",
+                      "summary":  "La page des parametres permet de modifier image, username, bio, email. Le mot de passe est optionnel : s\u0027il est fourni, il est mis a jour et l\u0027utilisateur est re-connecte (pour maintenir la session). Apres sauvegarde, redirection vers le profil.",
+                      "formal_expression":  "settings_update(image?, username, bio?, email, password?); IF password THEN set_password(password) AND re-login; redirect(\u0027profile\u0027, username)",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "settings_view",
+                                                   "line_start":  55,
+                                                   "line_end":  69,
+                                                   "code_snippet":  "form = SettingsForm(request.POST, instance=request.user)\nif form.is_valid():\n    user = form.save(commit=False)\n    password = form.cleaned_data.get(\u0027password\u0027)\n    if password:\n        user.set_password(password)\n    user.save()\n    if password:\n        login(request, user)\n    return redirect(\u0027profile\u0027, username=user.username)"
+                                               },
+                                               {
+                                                   "file":  "apps/accounts/forms.py",
+                                                   "function":  "SettingsForm",
+                                                   "line_start":  19,
+                                                   "line_end":  35,
+                                                   "code_snippet":  "class SettingsForm(forms.ModelForm):\n    password = forms.CharField(required=False, ...)\n    class Meta:\n        model = User\n        fields = [\u0027image\u0027, \u0027username\u0027, \u0027bio\u0027, \u0027email\u0027]"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-007",
+                                           "BR-009"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Mot de passe non fourni",
+                                             "expected_behavior":  "Seuls les autres champs sont mis a jour, pas de re-login"
+                                         },
+                                         {
+                                             "description":  "Username ou email deja pris par un autre",
+                                             "expected_behavior":  "Validation ModelForm standard Django (IntegrityError possible)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-016",
+                      "domain":  "authentication",
+                      "module":  "accounts",
+                      "summary":  "La deconnexion necessite une requete POST (pas GET). Apres deconnexion, redirection vers la page d\u0027accueil.",
+                      "formal_expression":  "logout: require_POST; THEN redirect(\u0027home\u0027)",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "logout_view",
+                                                   "line_start":  72,
+                                                   "line_end":  74,
+                                                   "code_snippet":  "@require_POST\ndef logout_view(request):\n    logout(request)\n    return redirect(\u0027home\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Requete GET sur /logout",
+                                             "expected_behavior":  "Retourne HTTP 405 Method Not Allowed"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-017",
+                      "domain":  "pagination",
+                      "module":  "accounts",
+                      "summary":  "Les profils affichent 10 articles par page (ARTICLES_PER_PAGE = 10). La page est determinee par le parametre GET \u0027page\u0027. Les valeurs invalides ou absentes donnent page 1.",
+                      "formal_expression":  "page = int(request.GET[\u0027page\u0027]) or 1; offset = (page - 1) * 10; LIMIT 10",
+                      "type":  "calculation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "_profile_view",
+                                                   "line_start":  12,
+                                                   "line_end":  12,
+                                                   "code_snippet":  "ARTICLES_PER_PAGE = 10"
+                                               },
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "_profile_view",
+                                                   "line_start":  87,
+                                                   "line_end":  102,
+                                                   "code_snippet":  "page = int(request.GET.get(\u0027page\u0027, 1))\nexcept (ValueError, TypeError):\n    page = 1\noffset = (page - 1) * ARTICLES_PER_PAGE\n...\ntotal_pages = (total + ARTICLES_PER_PAGE - 1) // ARTICLES_PER_PAGE"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "page=0 ou page negative",
+                                             "expected_behavior":  "Accepte tel quel (offset negatif, Django retourne vide)"
+                                         },
+                                         {
+                                             "description":  "page=\u0027abc\u0027 ou absent",
+                                             "expected_behavior":  "Fallback a page=1"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-018",
+                      "domain":  "social",
+                      "module":  "accounts",
+                      "summary":  "Le profil a deux onglets : \u0027my\u0027 (articles ecrits par l\u0027utilisateur) et \u0027favorites\u0027 (articles favoris de l\u0027utilisateur). Les articles sont tries par date de creation decroissante.",
+                      "formal_expression":  "IF tab=\u0027my\u0027 THEN articles.filter(author=profile_user) ELIF tab=\u0027favorites\u0027 THEN articles.filter(favorites=profile_user); ORDER BY -created",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "_profile_view",
+                                                   "line_start":  95,
+                                                   "line_end":  99,
+                                                   "code_snippet":  "if tab == \u0027favorites\u0027:\n    queryset = queryset.filter(favorites=profile_user)\nelse:\n    queryset = queryset.filter(author=profile_user)\nqueryset = queryset.order_by(\u0027-created\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-017"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur sans articles",
+                                             "expected_behavior":  "Liste vide, pas de pagination"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-019",
+                      "domain":  "social",
+                      "module":  "accounts",
+                      "summary":  "Follow/unfollow est un toggle : si l\u0027utilisateur suit deja, il se desabonne ; sinon il s\u0027abonne. Un utilisateur ne peut pas se suivre lui-meme. Necessite authentification et methode POST.",
+                      "formal_expression":  "IF profile_user == current_user THEN no-op (is_following=False); ELIF already_following THEN unfollow; ELSE follow",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "follow_view",
+                                                   "line_start":  126,
+                                                   "line_end":  145,
+                                                   "code_snippet":  "@login_required\n@require_POST\ndef follow_view(request, username):\n    profile_user = get_object_or_404(User, username=username)\n    if profile_user != request.user:\n        if profile_user.followers.filter(pk=request.user.id).exists():\n            profile_user.followers.remove(request.user)\n            is_following = False\n        else:\n            profile_user.followers.add(request.user)\n            is_following = True\n    else:\n        is_following = False"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-010",
+                                           "BR-001"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur tente de se suivre lui-meme",
+                                             "expected_behavior":  "Ignore silencieusement, is_following=False"
+                                         },
+                                         {
+                                             "description":  "Requete HTMX",
+                                             "expected_behavior":  "Retourne le partial follow_button.html au lieu de rediriger"
+                                         },
+                                         {
+                                             "description":  "Requete non-HTMX",
+                                             "expected_behavior":  "Redirection vers la page de profil"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-020",
+                      "domain":  "authentication",
+                      "module":  "accounts",
+                      "summary":  "La page des parametres (settings) et le follow necessitent une authentification. Les utilisateurs non connectes sont rediriges vers /login.",
+                      "formal_expression":  "settings_view: @login_required; follow_view: @login_required",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "settings_view",
+                                                   "line_start":  55,
+                                                   "line_end":  55,
+                                                   "code_snippet":  "@login_required\ndef settings_view(request):"
+                                               },
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "follow_view",
+                                                   "line_start":  126,
+                                                   "line_end":  127,
+                                                   "code_snippet":  "@login_required\n@require_POST\ndef follow_view(request, username):"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-005"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-021",
+                      "domain":  "user_management",
+                      "module":  "accounts",
+                      "summary":  "Profil inexistant (username inconnu) retourne une page 404 dediee (profile_404.html) avec le username en contexte, au lieu d\u0027une erreur generique.",
+                      "formal_expression":  "IF User.DoesNotExist THEN render(\u0027profile_404.html\u0027, status=404)",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/accounts/views.py",
+                                                   "function":  "_profile_view",
+                                                   "line_start":  82,
+                                                   "line_end":  84,
+                                                   "code_snippet":  "try:\n    profile_user = User.objects.get(username=username)\nexcept User.DoesNotExist:\n    return render(request, \u0027accounts/profile_404.html\u0027, {\u0027username\u0027: username}, status=404)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  90,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  }
+              ],
+    "total_rules":  15,
+    "generated_at":  "2026-04-15T07:50:00.8850946ZZ"
+}

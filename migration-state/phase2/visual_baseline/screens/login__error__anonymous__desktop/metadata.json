@@ -1,0 +1,39 @@
+{
+  "route": "/login",
+  "route_slug": "login",
+  "state": "error",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "name": "Login - Credentials invalides",
+  "description": "\"Invalid email or password.\" affiché après soumission de mauvais identifiants",
+  "navigation_path": [
+    "fill wrong credentials",
+    "click \"Sign in\""
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Formulaire avec message d'erreur non-field",
+      "business_rules": [
+        "BR-002"
+      ]
+    },
+    {
+      "type": "error_message",
+      "region": "form",
+      "description": "\"Invalid email or password.\"",
+      "business_rules": [
+        "BR-002"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "POST /login"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-002"
+  ],
+  "captured_at": "2026-04-15T09:03:19.073Z"
+}

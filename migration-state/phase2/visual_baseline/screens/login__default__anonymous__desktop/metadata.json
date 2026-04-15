@@ -1,0 +1,39 @@
+{
+  "route": "/login",
+  "route_slug": "login",
+  "state": "default",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "name": "Login",
+  "description": "Formulaire de connexion par email + password",
+  "navigation_path": [
+    "click \"Sign in\" in navbar"
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Champs: email, password — bouton \"Sign in\"",
+      "business_rules": [
+        "BR-002",
+        "BR-005"
+      ]
+    },
+    {
+      "type": "link",
+      "region": "form",
+      "description": "Lien \"Need an account? Sign up\"",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /login",
+    "POST /login"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-002",
+    "BR-005"
+  ],
+  "captured_at": "2026-04-15T09:03:15.212Z"
+}

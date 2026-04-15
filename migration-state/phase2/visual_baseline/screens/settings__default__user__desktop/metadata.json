@@ -1,0 +1,54 @@
+{
+  "route": "/settings",
+  "route_slug": "settings",
+  "state": "default",
+  "role": "user",
+  "viewport": "desktop",
+  "name": "Settings",
+  "description": "Configuration du profil: image URL, username, bio, email, password optionnel",
+  "navigation_path": [
+    "login",
+    "click Settings in navbar"
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Champs pré-remplis: image (URL), username, bio (textarea), email, password (optionnel)",
+      "business_rules": [
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009"
+      ]
+    },
+    {
+      "type": "button",
+      "region": "form",
+      "description": "Bouton \"Update Settings\"",
+      "business_rules": []
+    },
+    {
+      "type": "button_logout",
+      "region": "bottom",
+      "description": "Bouton/Lien \"Or click here to logout.\" (BR-007)",
+      "business_rules": [
+        "BR-007"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /settings",
+    "POST /settings"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-005",
+    "BR-006",
+    "BR-007",
+    "BR-008",
+    "BR-009"
+  ],
+  "captured_at": "2026-04-15T09:03:35.089Z"
+}

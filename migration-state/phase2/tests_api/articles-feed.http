@@ -1,0 +1,160 @@
+# =============================================================================
+# CONTRACT TESTS — Articles Feed & Home
+# =============================================================================
+# Format      : REST Client (.http) — VS Code extension
+# Environment : select "legacy" or "target" in the VS Code status bar
+#
+# Endpoints covered:
+#   GET /              home_view  (global feed, following feed, tag query param)
+#   GET /tag/<tag>     tag_view   (tag-filtered feed)
+#
+# Session Setup : Run auth.http "[SETUP] Get CSRF Token" then
+#                 auth.http "LOGIN - Nominal" to authenticate before
+#                 running following-feed tests.
+#
+# Business rules covered: BR-001, BR-026, BR-027, BR-028, BR-029
+# =============================================================================
+
+@BASE_URL = {{BASE_URL}}
+
+
+# ============================================================================
+# HOME FEED  —  GET /
+# ============================================================================
+
+### HOME - Nominal - Global feed (anonymous, default tab)
+# Pre-condition : none (public route)
+# Expected      : HTTP 200, HTML page with article list, pagination controls
+# BR            : BR-026 (default tab = global), BR-028 (10 per page)
+GET {{BASE_URL}}/ HTTP/1.1
+
+
+###
+
+### HOME - Nominal - Global feed page 2
+# Pre-condition : More than 10 articles exist in DB
+# Expected      : HTTP 200, HTML page 2 of articles (may be empty if < 11 articles)
+# BR            : BR-028 (ARTICLES_PER_PAGE = 10)
+GET {{BASE_URL}}/?page=2 HTTP/1.1
+
+
+###
+
+### HOME - Edge case - Invalid page value falls back to page 1
+# Pre-condition : none
+# Expected      : HTTP 200, page 1 content (no error raised)
+# BR            : BR-028 (edge case: ValueError caught, fallback page=1)
+GET {{BASE_URL}}/?page=notanumber HTTP/1.1
+
+
+###
+
+### HOME - Auth required - Following feed redirects anonymous to login
+# Pre-condition : NOT logged in (invalid session)
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-026 (feed=following AND NOT authenticated → redirect)
+GET {{BASE_URL}}/?feed=following HTTP/1.1
+Cookie: sessionid=contract_test_invalid_session_000
+
+
+###
+
+### HOME - Nominal - Following feed for authenticated user
+# Pre-condition : Logged in as TEST_USER (run auth.http "LOGIN - Nominal" first)
+# Expected      : HTTP 200, HTML with articles by followed users (may be empty)
+# BR            : BR-026 (feed=following + authenticated)
+GET {{BASE_URL}}/?feed=following HTTP/1.1
+
+
+###
+
+### HOME - Nominal - Tag filter via query param
+# Pre-condition : At least one article tagged "dragon" exists (or any existing tag)
+# Expected      : HTTP 200, HTML with articles filtered to that tag
+# BR            : BR-026 (tag filter path), BR-027 (cached tag list)
+GET {{BASE_URL}}/?tag=dragon HTTP/1.1
+
+
+###
+
+### HOME - Nominal - Tag filter with pagination
+# Pre-condition : Tag has more than 10 articles
+# Expected      : HTTP 200, page 2 of tag-filtered articles
+# BR            : BR-028 (pagination on filtered feed)
+GET {{BASE_URL}}/?tag=dragon&page=2 HTTP/1.1
+
+
+###
+
+### HOME - Nominal - HTMX partial request (global feed)
+# Pre-condition : none
+# Expected      : HTTP 200, PARTIAL HTML only (feed_content.html fragment)
+#                 Response must NOT contain full <html>/<head>/<body> wrapper
+# BR            : BR-001 (HX-Request: true), BR-029 (partial render)
+GET {{BASE_URL}}/ HTTP/1.1
+HX-Request: true
+
+
+###
+
+### HOME - Nominal - HTMX partial request (following feed, authenticated)
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 200, PARTIAL HTML of following feed
+# BR            : BR-001, BR-026, BR-029
+GET {{BASE_URL}}/?feed=following HTTP/1.1
+HX-Request: true
+
+
+###
+
+### HOME - Auth required - HTMX following feed redirects anonymous
+# Pre-condition : NOT logged in (invalid session)
+# Expected      : HTTP 302 redirect to /login (same behavior as non-HTMX)
+# BR            : BR-026 (auth check happens before HTMX rendering)
+GET {{BASE_URL}}/?feed=following HTTP/1.1
+HX-Request: true
+Cookie: sessionid=contract_test_invalid_session_000
+
+
+###
+
+
+# ============================================================================
+# TAG VIEW  —  GET /tag/<tag>
+# ============================================================================
+
+### TAG VIEW - Nominal - Existing tag with articles
+# Pre-condition : Tag "test-tag" exists with at least one article
+# Expected      : HTTP 200, HTML with article list filtered to tag, tag highlighted in sidebar
+# BR            : BR-026 (tag path), BR-027 (cached tags)
+GET {{BASE_URL}}/tag/test-tag HTTP/1.1
+
+
+###
+
+### TAG VIEW - Edge case - Tag with no matching articles
+# Pre-condition : none (tag "nonexistent-tag-xyz-000" does not exist)
+# Expected      : HTTP 200, empty article list (no 404, graceful empty state)
+GET {{BASE_URL}}/tag/nonexistent-tag-xyz-000 HTTP/1.1
+
+
+###
+
+### TAG VIEW - Nominal - Tag view with pagination
+# Pre-condition : Tag has more than 10 articles
+# Expected      : HTTP 200, page 2 of tag-filtered articles
+# BR            : BR-028
+GET {{BASE_URL}}/tag/popular-tag?page=2 HTTP/1.1
+
+
+###
+
+### TAG VIEW - Nominal - HTMX partial request on tag page
+# Pre-condition : Tag exists (or empty result is fine)
+# Expected      : HTTP 200, PARTIAL HTML (feed_content.html fragment)
+# BR            : BR-001, BR-029
+GET {{BASE_URL}}/tag/test-tag HTTP/1.1
+HX-Request: true
+
+
+###

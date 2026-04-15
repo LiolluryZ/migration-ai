@@ -1,0 +1,169 @@
+﻿{
+    "id":  "WF-010",
+    "name":  "Creation de Commentaire",
+    "domain":  "comments",
+    "trigger":  "Utilisateur authentifie soumet le formulaire de commentaire (POST /article/\u003cslug\u003e/comments/, @login_required @require_POST)",
+    "trigger_location":  {
+                             "file":  "apps/comments/views.py",
+                             "line":  11
+                         },
+    "states":  [
+                   {
+                       "name":  "body_received",
+                       "description":  "Corps du commentaire recu et trimme (strip). Article identifie par slug.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "get_object_or_404(Article, slug=slug)",
+                                             "body = request.POST.get(\u0027body\u0027, \u0027\u0027).strip() (ref BR-039)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "comment_created",
+                       "description":  "Commentaire cree en base. L\u0027auteur est l\u0027utilisateur courant.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "Comment.objects.create(article=article, author=request.user, content=body) (ref BR-040)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "comment_skipped",
+                       "description":  "Corps vide ou espaces seuls â€” aucun commentaire cree, aucune erreur affichee (comportement silencieux, ref BR-039).",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "response_sent",
+                       "description":  "Reponse HTMX (liste de commentaires partielle) ou redirection vers le detail envoyee.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "body_received",
+                            "to":  "comment_created",
+                            "condition":  "body.strip() != \u0027\u0027 (ref BR-039)",
+                            "condition_rules":  [
+                                                    "BR-039",
+                                                    "BR-040"
+                                                ],
+                            "actions":  [
+                                            "Comment.objects.create(article=article, author=request.user, content=body)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_create_view",
+                                                    "line":  16
+                                                }
+                        },
+                        {
+                            "from":  "body_received",
+                            "to":  "comment_skipped",
+                            "condition":  "body.strip() == \u0027\u0027 â€” corps vide ou espaces (ref BR-039) â€” skip silencieux",
+                            "condition_rules":  [
+                                                    "BR-039"
+                                                ],
+                            "actions":  [
+
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_create_view",
+                                                    "line":  15
+                                                }
+                        },
+                        {
+                            "from":  "comment_created",
+                            "to":  "response_sent",
+                            "condition":  "is_htmx(request) == True (ref BR-042, BR-001)",
+                            "condition_rules":  [
+                                                    "BR-042",
+                                                    "BR-001"
+                                                ],
+                            "actions":  [
+                                            "comments = article.comment_set.select_related(\u0027author\u0027).order_by(\u0027-created\u0027)",
+                                            "render(\u0027partials/comment_list.html\u0027, {comments, article})"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_create_view",
+                                                    "line":  18
+                                                }
+                        },
+                        {
+                            "from":  "comment_created",
+                            "to":  "response_sent",
+                            "condition":  "is_htmx(request) == False (ref BR-042)",
+                            "condition_rules":  [
+                                                    "BR-042"
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027article_detail\u0027, slug=slug)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_create_view",
+                                                    "line":  21
+                                                }
+                        },
+                        {
+                            "from":  "comment_skipped",
+                            "to":  "response_sent",
+                            "condition":  "is_htmx(request) == True (ref BR-042, BR-001)",
+                            "condition_rules":  [
+                                                    "BR-042",
+                                                    "BR-001"
+                                                ],
+                            "actions":  [
+                                            "comments = article.comment_set.select_related(\u0027author\u0027).order_by(\u0027-created\u0027)",
+                                            "render(\u0027partials/comment_list.html\u0027, {comments, article})"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_create_view",
+                                                    "line":  18
+                                                }
+                        },
+                        {
+                            "from":  "comment_skipped",
+                            "to":  "response_sent",
+                            "condition":  "is_htmx(request) == False (ref BR-042)",
+                            "condition_rules":  [
+                                                    "BR-042"
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027article_detail\u0027, slug=slug)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_create_view",
+                                                    "line":  21
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+
+                       ],
+    "confidence":  95,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e body_received\n  body_received --\u003e comment_created : body.strip() != empty (BR-039)\n  body_received --\u003e comment_skipped : body.strip() == empty (silent)\n  comment_created --\u003e response_sent : HTMX: partial comment_list\n  comment_created --\u003e response_sent : non-HTMX: redirect to detail\n  comment_skipped --\u003e response_sent : HTMX: partial comment_list\n  comment_skipped --\u003e response_sent : non-HTMX: redirect to detail\n  response_sent --\u003e [*]"
+}

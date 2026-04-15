@@ -1,0 +1,351 @@
+# =============================================================================
+# CONTRACT TESTS — Authentication
+# =============================================================================
+# Format      : REST Client (.http) — VS Code extension by Huachao Mao
+# Environment : select "legacy" or "target" in the VS Code status bar
+#               (http-client.env.json must be present alongside this file)
+#
+# HOW TO INITIALIZE CSRF & SESSION
+# ---------------------------------
+# 1. Run "### [SETUP] Get CSRF Token" below (click "Send Request")
+# 2. In the Response panel, open the "Cookies" tab and copy the value of csrftoken
+# 3. Paste that value into http-client.env.json under your active environment
+#    as "csrftoken": "<pasted value>"
+# 4. The REST Client cookie jar auto-manages the session cookie for subsequent requests
+#
+# TEST DATA PRE-CONDITIONS
+# -------------------------
+# • TEST_EMAIL / TEST_PASSWORD / TEST_USERNAME : existing user account
+# • OTHER_EMAIL / OTHER_USERNAME               : second existing user account
+#
+# Business rules covered:
+#   BR-005, BR-007, BR-011, BR-012, BR-013, BR-014, BR-015, BR-016, BR-020
+# =============================================================================
+
+@BASE_URL    = {{BASE_URL}}
+@TEST_EMAIL  = {{TEST_EMAIL}}
+@TEST_PASS   = {{TEST_PASSWORD}}
+@TEST_USER   = {{TEST_USERNAME}}
+@CSRF        = {{csrftoken}}
+
+
+# ============================================================================
+# SETUP
+# ============================================================================
+
+### [SETUP] Get CSRF Token — run first; copy csrftoken cookie value to env
+# Pre-condition : none
+# Expected      : HTTP 200, Set-Cookie header contains csrftoken=<value>
+# Teardown      : none
+GET {{BASE_URL}}/login HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# LOGIN  —  GET /login
+# ============================================================================
+
+### LOGIN - Nominal - Display login form
+# Pre-condition : none (public route)
+# Expected      : HTTP 200, HTML with login form
+# Teardown      : none
+GET {{BASE_URL}}/login HTTP/1.1
+
+
+###
+
+### LOGIN - Nominal - Display login form with next redirect param
+# Pre-condition : none
+# Expected      : HTTP 200, HTML login form
+GET {{BASE_URL}}/login?next=/editor HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# LOGIN  —  POST /login
+# ============================================================================
+
+### LOGIN - Nominal - Valid credentials
+# Pre-condition : User exists with TEST_EMAIL / TEST_PASSWORD (BR-007)
+# Expected      : HTTP 302 redirect to /
+# BR            : BR-011, BR-012
+# Teardown      : session saved in cookie jar for subsequent requests
+POST {{BASE_URL}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+email={{TEST_EMAIL}}&password={{TEST_PASS}}&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGIN - Error - Invalid credentials (wrong password)
+# Pre-condition : User with TEST_EMAIL exists
+# Expected      : HTTP 200, body contains text "Invalid email or password."
+# BR            : BR-011 (generic error message, no hint at field)
+POST {{BASE_URL}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+email={{TEST_EMAIL}}&password=completelywrongpassword&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGIN - Error - Invalid credentials (unknown email)
+# Pre-condition : Email nobody@example.invalid does NOT exist in DB
+# Expected      : HTTP 200, body contains "Invalid email or password."
+# BR            : BR-011 (same generic message — no enumeration of accounts)
+POST {{BASE_URL}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+email=nobody@example.invalid&password=anyvalue&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGIN - Validation - Missing email field
+# Pre-condition : none
+# Expected      : HTTP 200, form validation error on email field
+# BR            : BR-007 (email is required field)
+POST {{BASE_URL}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+password={{TEST_PASS}}&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGIN - Validation - Missing password field
+# Pre-condition : none
+# Expected      : HTTP 200, form validation error on password field
+POST {{BASE_URL}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+email={{TEST_EMAIL}}&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGIN - Validation - Invalid email format
+# Pre-condition : none
+# Expected      : HTTP 200, form validation error on email field
+POST {{BASE_URL}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+email=notanemail&password={{TEST_PASS}}&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+
+# ============================================================================
+# REGISTER  —  GET /register
+# ============================================================================
+
+### REGISTER - Nominal - Display registration form
+# Pre-condition : none (public route)
+# Expected      : HTTP 200, HTML with registration form
+GET {{BASE_URL}}/register HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# REGISTER  —  POST /register
+# ============================================================================
+
+### REGISTER - Nominal - New user registration (auto-login on success)
+# Pre-condition : Email and username NOT already taken
+# Expected      : HTTP 302 redirect to / (user auto-logged-in)
+# BR            : BR-013, BR-014
+# Teardown      : delete user contracttest_new@example.com if DB is shared
+POST {{BASE_URL}}/register HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=contracttestuser&email=contracttest_new@example.com&password=testpassword123&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### REGISTER - Error - Duplicate email
+# Pre-condition : TEST_EMAIL already exists in DB
+# Expected      : HTTP 200, body contains "This email has already been taken."
+# BR            : BR-013, BR-002 (IntegrityError parsing)
+POST {{BASE_URL}}/register HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=brandnewusername99&email={{TEST_EMAIL}}&password=testpassword123&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### REGISTER - Error - Duplicate username
+# Pre-condition : TEST_USERNAME already exists in DB
+# Expected      : HTTP 200, body contains "This username has already been taken."
+# BR            : BR-013, BR-002
+POST {{BASE_URL}}/register HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username={{TEST_USER}}&email=anotherfresh@example.com&password=testpassword123&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### REGISTER - Validation - All required fields empty
+# Pre-condition : none
+# Expected      : HTTP 200, form validation errors on username, email, password
+# BR            : BR-013 (all 3 fields required)
+POST {{BASE_URL}}/register HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=&email=&password=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### REGISTER - Validation - Username exceeds 60 characters
+# Pre-condition : none
+# Expected      : HTTP 200, form validation error on username field
+# BR            : BR-007 (username max_length=60)
+POST {{BASE_URL}}/register HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=thisisaverylongusernamethatexceedsthesixtycharacterlimitsetbytheusermodel&email=longname@example.com&password=testpassword123&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### REGISTER - Validation - Invalid email format
+# Pre-condition : none
+# Expected      : HTTP 200, form validation error on email field
+POST {{BASE_URL}}/register HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=validuser99&email=notanemail&password=testpassword123&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+
+# ============================================================================
+# SETTINGS  —  GET /settings
+# ============================================================================
+
+### SETTINGS - Nominal - View settings form (authenticated)
+# Pre-condition : Logged in as TEST_USER (session cookie in cookie jar)
+# Expected      : HTTP 200, HTML with pre-filled settings form
+# BR            : BR-015, BR-020
+GET {{BASE_URL}}/settings HTTP/1.1
+
+
+###
+
+### SETTINGS - Auth required - Unauthenticated redirect
+# Pre-condition : NOT logged in (invalid session)
+# Expected      : HTTP 302 redirect to /login?next=/settings
+# BR            : BR-005, BR-020 (@login_required)
+GET {{BASE_URL}}/settings HTTP/1.1
+Cookie: sessionid=contract_test_invalid_session_000
+
+
+###
+
+
+# ============================================================================
+# SETTINGS  —  POST /settings
+# ============================================================================
+
+### SETTINGS - Nominal - Update profile without changing password
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 302 redirect to /profile/<username>
+# BR            : BR-015 (password field empty → only other fields updated)
+POST {{BASE_URL}}/settings HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+image=https://example.com/avatar.jpg&username={{TEST_USER}}&bio=This is my contract test bio&email={{TEST_EMAIL}}&password=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### SETTINGS - Nominal - Change password (session maintained via re-login)
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 302 redirect to /profile/<username>, session still valid
+# BR            : BR-015 (set_password + login() to preserve session)
+# NOTE          : After this test, subsequent login requires the NEW password
+POST {{BASE_URL}}/settings HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+image=&username={{TEST_USER}}&bio=&email={{TEST_EMAIL}}&password=newcontractpassword123&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### SETTINGS - Validation - Required fields empty (username and email)
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 200, form re-rendered with validation errors
+# BR            : BR-015 (username and email are required)
+POST {{BASE_URL}}/settings HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+image=&username=&bio=&email=&password=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### SETTINGS - Auth required - Unauthenticated POST
+# Pre-condition : NOT logged in (invalid session)
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-005, BR-020
+POST {{BASE_URL}}/settings HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+username={{TEST_USER}}&email={{TEST_EMAIL}}&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+
+# ============================================================================
+# LOGOUT  —  POST /logout
+# ============================================================================
+
+### LOGOUT - Nominal - Authenticated user logout
+# Pre-condition : Logged in (session cookie present in cookie jar)
+# Expected      : HTTP 302 redirect to /
+# BR            : BR-016 (@require_POST)
+POST {{BASE_URL}}/logout HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGOUT - Edge case - Unauthenticated POST is a no-op (no @login_required)
+# Pre-condition : NOT logged in (invalid session)
+# Expected      : HTTP 302 redirect to / — logout() is no-op, not an error
+# BR            : BR-016 (ANOMALY: no @login_required on logout_view — documented)
+# NOTE          : This is the documented RBAC anomaly. The endpoint must accept
+#                 unauthenticated POSTs and return 302 without error.
+POST {{BASE_URL}}/logout HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### LOGOUT - Error - Method Not Allowed on GET
+# Pre-condition : none
+# Expected      : HTTP 405 Method Not Allowed
+# BR            : BR-016 (@require_POST)
+GET {{BASE_URL}}/logout HTTP/1.1
+
+
+###

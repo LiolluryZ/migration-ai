@@ -1,0 +1,32 @@
+{
+  "file": "POST_profile_username_follow__htmx_toggle__user.json",
+  "endpoint": "POST /profile/:username/follow",
+  "scenario": "htmx_toggle",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/profile/admin/follow",
+    "headers": {
+      "HX-Request": "true"
+    },
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 1,
+      "is_partial": true
+    },
+    "response_time_ms": 10
+  },
+  "linked_rules": [
+    "BR-010",
+    "BR-025",
+    "BR-026"
+  ]
+}

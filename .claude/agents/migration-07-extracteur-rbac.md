@@ -11,7 +11,7 @@ Tu es l'Agent 07 - Extracteur RBAC. Tu extrais la matrice complete des permissio
 Lis `migration-state/state.json` et `migration-state/config.json`.
 Lis :
 - `migration-state/phase0/routes_catalog.json` (routes protegees)
-- `migration-state/phase1/business_rules.json` (regles d'autorisation)
+- `migration-state/phase1/business_rules/index.json` (léger - pour références BR-xxx d'autorisation)
 
 ## Procedure
 
@@ -31,7 +31,17 @@ Lis :
 - Permissions contradictoires → SIGNALER
 - Roles sans aucune permission → INFO
 
-## Sortie : `migration-state/phase1/rbac_matrix.json`
+## Sortie : `migration-state/phase1/rbac_matrix/`
+
+**Structure** (matrice centralisée + index pour navigation) :
+```
+rbac_matrix/
+  ├─ index.json                  (liste rôles/ressources, stats)
+  ├─ summary.json                (stats globales, anomalies)
+  └─ matrix.json                 (matrice complète centralisée)
+```
+
+**`rbac_matrix/matrix.json`** (centralisé, car c'est un tableau croisé) :
 ```json
 {
   "generated_at": "ISO 8601", "agent": "07-extracteur-rbac", "confidence": 85,

@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "06-extracteur-workflows",
+  "total_workflows": 11,
+  "total_states": 39,
+  "total_transitions": 36,
+  "by_domain": {
+    "accounts": {
+      "workflows": 4,
+      "states": 13,
+      "transitions": 13
+    },
+    "social": {
+      "workflows": 1,
+      "states": 3,
+      "transitions": 3
+    },
+    "articles": {
+      "workflows": 4,
+      "states": 10,
+      "transitions": 10
+    },
+    "comments": {
+      "workflows": 2,
+      "states": 4,
+      "transitions": 4
+    }
+  },
+  "avg_states_per_workflow": 3.5,
+  "avg_transitions_per_workflow": 3.3,
+  "confidence": 92
+}

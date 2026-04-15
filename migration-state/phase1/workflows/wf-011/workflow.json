@@ -1,0 +1,170 @@
+﻿{
+    "id":  "WF-011",
+    "name":  "Suppression de Commentaire",
+    "domain":  "comments",
+    "trigger":  "Utilisateur authentifie (auteur du commentaire OU auteur de l\u0027article) soumet la suppression (POST /article/\u003cslug\u003e/comments/\u003cid\u003e/delete, @login_required @require_POST)",
+    "trigger_location":  {
+                             "file":  "apps/comments/views.py",
+                             "line":  25
+                         },
+    "states":  [
+                   {
+                       "name":  "authorization_check",
+                       "description":  "Article et commentaire recuperes, verification des droits en cours (ref BR-041, BR-044).",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "get_object_or_404(Article, slug=slug)",
+                                             "get_object_or_404(Comment, id=comment_id, article=article)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "authorized",
+                       "description":  "Utilisateur autorise: il est l\u0027auteur du commentaire OU l\u0027auteur de l\u0027article (droit de moderation).",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "forbidden",
+                       "description":  "Tentative de suppression par un utilisateur non autorise.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "return HttpResponseForbidden()"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "comment_deleted",
+                       "description":  "Commentaire supprime de la base.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "comment.delete()"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "response_sent",
+                       "description":  "Reponse HTMX (liste de commentaires partielle) ou redirection vers le detail envoyee.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "authorization_check",
+                            "to":  "authorized",
+                            "condition":  "comment.author == request.user OU article.author == request.user (ref BR-041)",
+                            "condition_rules":  [
+                                                    "BR-041",
+                                                    "BR-044"
+                                                ],
+                            "actions":  [
+
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_delete_view",
+                                                    "line":  29
+                                                }
+                        },
+                        {
+                            "from":  "authorization_check",
+                            "to":  "forbidden",
+                            "condition":  "Ni auteur du commentaire ni auteur de l\u0027article (ref BR-041)",
+                            "condition_rules":  [
+                                                    "BR-041"
+                                                ],
+                            "actions":  [
+                                            "return HttpResponseForbidden()"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_delete_view",
+                                                    "line":  31
+                                                }
+                        },
+                        {
+                            "from":  "authorized",
+                            "to":  "comment_deleted",
+                            "condition":  "Autorisation confirmee",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "comment.delete()"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_delete_view",
+                                                    "line":  32
+                                                }
+                        },
+                        {
+                            "from":  "comment_deleted",
+                            "to":  "response_sent",
+                            "condition":  "is_htmx(request) == True (ref BR-042, BR-001)",
+                            "condition_rules":  [
+                                                    "BR-042",
+                                                    "BR-001"
+                                                ],
+                            "actions":  [
+                                            "comments = article.comment_set.select_related(\u0027author\u0027).order_by(\u0027-created\u0027)",
+                                            "render(\u0027partials/comment_list.html\u0027, {comments, article})"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_delete_view",
+                                                    "line":  33
+                                                }
+                        },
+                        {
+                            "from":  "comment_deleted",
+                            "to":  "response_sent",
+                            "condition":  "is_htmx(request) == False (ref BR-042)",
+                            "condition_rules":  [
+                                                    "BR-042"
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027article_detail\u0027, slug=slug)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/comments/views.py",
+                                                    "function":  "comment_delete_view",
+                                                    "line":  36
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "authorization_check",
+                               "to":  null,
+                               "condition":  "comment_id valide mais n\u0027appartient pas a l\u0027article du slug (ref BR-044)",
+                               "rollback_actions":  [
+                                                        "get_object_or_404(Comment, id=comment_id, article=article) echoue â†’ 404 Not Found"
+                                                    ]
+                           }
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e authorization_check\n  authorization_check --\u003e authorized : comment.author==user OR article.author==user (BR-041)\n  authorization_check --\u003e forbidden : aucun des deux roles\n  forbidden --\u003e [*] : HTTP 403 Forbidden\n  authorized --\u003e comment_deleted : comment.delete()\n  comment_deleted --\u003e response_sent : HTMX: partial comment_list\n  comment_deleted --\u003e response_sent : non-HTMX: redirect to detail\n  response_sent --\u003e [*]\n  note right of authorization_check : 404 si comment_id hors article (BR-044)"
+}

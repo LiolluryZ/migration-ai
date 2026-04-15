@@ -1,0 +1,647 @@
+[
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:19.247Z",
+    "method": "GET",
+    "path": "/login",
+    "request": {
+      "headers": {
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "2944",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:53:19 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 2944,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 329
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:19.328Z",
+    "method": "GET",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U",
+      "duration_ms": 84
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:19.334Z",
+    "method": "GET",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9eca1009dd81041b-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 89
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.417Z",
+    "method": "POST",
+    "path": "/login",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/login",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": "csrfmiddlewaretoken=%7B%7BCSRF_TOKEN%7D%7D&email=%7B%7BUSER_EMAIL%7D%7D&password=%7B%7BPASSWORD%7D%7D",
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 302,
+      "status_text": "Found",
+      "headers": {
+        "content-length": "0",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:53:21 GMT",
+        "location": "/",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": null,
+      "duration_ms": 1300
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.443Z",
+    "method": "GET",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9eca1009dd81041b-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 1
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.471Z",
+    "method": "GET",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U",
+      "duration_ms": 0
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.471Z",
+    "method": "GET",
+    "path": "/",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/login",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "15632",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:53:21 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 15595,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 17
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.574Z",
+    "method": "GET",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9eca1009dd81041b-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 2
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.582Z",
+    "method": "GET",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U",
+      "duration_ms": 2
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:21.582Z",
+    "method": "GET",
+    "path": "/editor",
+    "request": {
+      "headers": {
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "5241",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:53:21 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 5241,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 10
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:22.252Z",
+    "method": "POST",
+    "path": "/editor",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/editor",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": "csrfmiddlewaretoken=%7B%7BCSRF_TOKEN%7D%7D&title=Agent12+HTTP+Test+Article&description=Description+for+HTTP+recording+test&body=Body+content+created+by+agent-12+to+capture+HTTP+POST+%2Feditor+traffic.&tags=migration",
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 302,
+      "status_text": "Found",
+      "headers": {
+        "content-length": "0",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:53:22 GMT",
+        "location": "/article/agent12-http-test-article",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": null,
+      "duration_ms": 52
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:22.288Z",
+    "method": "GET",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9eca1009dd81041b-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 2
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:22.289Z",
+    "method": "GET",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:53:20 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U",
+      "duration_ms": 3
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-D_article-create",
+    "timestamp": "2026-04-15T09:53:22.301Z",
+    "method": "GET",
+    "path": "/article/agent12-http-test-article",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/editor",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "5561",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:53:22 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 5561,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 22
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  }
+]

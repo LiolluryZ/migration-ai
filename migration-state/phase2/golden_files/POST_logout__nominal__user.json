@@ -1,0 +1,29 @@
+{
+  "file": "POST_logout__nominal__user.json",
+  "endpoint": "POST /logout",
+  "scenario": "nominal",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/logout",
+    "headers": {},
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/"
+    },
+    "body": {
+      "redirects_to": "/",
+      "session_cleared": true
+    },
+    "response_time_ms": 18
+  },
+  "linked_rules": [
+    "BR-022"
+  ]
+}

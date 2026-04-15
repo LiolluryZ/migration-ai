@@ -1,0 +1,57 @@
+{
+  "route": "/",
+  "route_slug": "home",
+  "state": "default",
+  "role": "user",
+  "viewport": "tablet",
+  "name": "Home - Global Feed (authentifié)",
+  "description": "Page accueil pour utilisateur connecté: \"Your Feed\" tab visible, boutons Favorite actifs",
+  "navigation_path": [
+    "login",
+    "navigate to /"
+  ],
+  "ui_components": [
+    {
+      "type": "navbar",
+      "region": "top",
+      "description": "Navbar: Home, New Article, Settings, username avatar",
+      "business_rules": [
+        "BR-007"
+      ]
+    },
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglets: Your Feed + Global Feed (actif)",
+      "business_rules": [
+        "BR-007",
+        "BR-010"
+      ]
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Articles avec boutons Favorite actifs (HTMX toggle)",
+      "business_rules": [
+        "BR-038",
+        "BR-039"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates de publication"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-007",
+    "BR-010",
+    "BR-038",
+    "BR-039"
+  ],
+  "captured_at": "2026-04-15T09:03:54.898Z"
+}

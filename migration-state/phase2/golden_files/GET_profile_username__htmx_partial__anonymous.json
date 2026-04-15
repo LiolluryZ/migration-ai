@@ -1,0 +1,28 @@
+{
+  "file": "GET_profile_username__htmx_partial__anonymous.json",
+  "endpoint": "GET /profile/:username",
+  "scenario": "htmx_partial",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/profile/admin",
+    "headers": {
+      "HX-Request": "true"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 13376
+    },
+    "response_time_ms": 26
+  },
+  "linked_rules": [
+    "BR-001",
+    "BR-024"
+  ]
+}

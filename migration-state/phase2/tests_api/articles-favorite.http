@@ -1,0 +1,109 @@
+# =============================================================================
+# CONTRACT TESTS — Article Favorite Toggle
+# =============================================================================
+# Format      : REST Client (.http) — VS Code extension
+# Environment : select "legacy" or "target" in the VS Code status bar
+#
+# Endpoint covered:
+#   POST /article/<slug>/favorite    article_favorite_view (toggle)
+#
+# REQUIRED TEST DATA
+# ------------------
+# • TEST_ARTICLE_SLUG : an existing article (may be owned by TEST_USER)
+# • TEST_USER logged in (run auth.http "LOGIN - Nominal" first)
+#
+# Business rules covered: BR-001, BR-025, BR-036
+# =============================================================================
+
+@BASE_URL          = {{BASE_URL}}
+@CSRF              = {{csrftoken}}
+@TEST_ARTICLE_SLUG = {{TEST_ARTICLE_SLUG}}
+
+
+# ============================================================================
+# FAVORITE TOGGLE  —  POST /article/<slug>/favorite
+# ============================================================================
+
+### FAVORITE - Nominal - Toggle add (article not yet in user's favorites)
+# Pre-condition : Logged in as TEST_USER; article is NOT in TEST_USER's favorites
+# Expected      : HTTP 302 redirect to /article/<slug>
+# BR            : BR-036 (toggle add — favorites.add(user))
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/favorite HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FAVORITE - Nominal - Toggle remove (article already favorited — run after previous)
+# Pre-condition : Logged in as TEST_USER; article IS in TEST_USER's favorites
+# Expected      : HTTP 302 redirect to /article/<slug>
+# BR            : BR-036 (toggle remove — favorites.remove(user))
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/favorite HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FAVORITE - Auth required - Anonymous redirected to login
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-036 (@login_required)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/favorite HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FAVORITE - Not found - Article slug does not exist
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 404
+# BR            : BR-036 (get_object_or_404 on Article)
+POST {{BASE_URL}}/article/nonexistent-article-slug-xyz-000/favorite HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FAVORITE - Edge case - Author favorites their own article (no restriction)
+# Pre-condition : Logged in as TEST_USER; TEST_ARTICLE_SLUG is authored by TEST_USER
+# Expected      : HTTP 302 redirect to /article/<slug> (self-favoriting is allowed)
+# BR            : BR-036 (no restriction on auto-favoriting own article)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/favorite HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FAVORITE - Nominal - HTMX request returns partial HTML (not redirect)
+# Pre-condition : Logged in as TEST_USER; article exists
+# Expected      : HTTP 200, PARTIAL HTML (favorite_button.html fragment)
+#                 Response must not be a redirect; must contain updated button markup
+# BR            : BR-001 (HX-Request detection), BR-036 (HTMX path)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/favorite HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+HX-Request: true
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FAVORITE - Error - Method Not Allowed on GET
+# Pre-condition : none
+# Expected      : HTTP 405 Method Not Allowed
+# BR            : BR-036 (@require_POST)
+GET {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/favorite HTTP/1.1
+
+
+###

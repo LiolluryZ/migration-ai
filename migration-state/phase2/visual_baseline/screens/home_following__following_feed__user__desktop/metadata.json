@@ -1,0 +1,46 @@
+{
+  "route": "/?feed=following",
+  "route_slug": "home_following",
+  "state": "following_feed",
+  "role": "user",
+  "viewport": "desktop",
+  "name": "Home - Your Feed (following)",
+  "description": "Flux des articles des utilisateurs suivis (peut être vide)",
+  "navigation_path": [
+    "login",
+    "click \"Your Feed\" tab"
+  ],
+  "ui_components": [
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglet \"Your Feed\" (actif)",
+      "business_rules": [
+        "BR-010",
+        "BR-047"
+      ]
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Articles des utilisateurs suivis ou message \"No articles yet\"",
+      "business_rules": [
+        "BR-047"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /?feed=following"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates de publication"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-010",
+    "BR-047"
+  ],
+  "captured_at": "2026-04-15T09:03:30.695Z"
+}

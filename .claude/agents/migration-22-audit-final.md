@@ -9,10 +9,15 @@ Tu es l'Agent 22 - Audit Final. Tu produis le certificat de conformite de la mig
 
 ## Avant de commencer
 Lis `migration-state/state.json` et `migration-state/config.json`.
-Lis :
-- `migration-state/phase1/business_rules.json`
-- `migration-state/phase1/workflows.json`
-- `migration-state/phase1/rbac_matrix.json`
+Lis les résumés (navigation rapide) :
+- `migration-state/phase1/business_rules/index.json` et `summary.json`
+- `migration-state/phase1/workflows/index.json` et `summary.json`
+- `migration-state/phase1/rbac_matrix/index.json` et `summary.json`
+
+**Puis charge TOUT le contenu exhaustif** (car c'est un audit final à 100%) :
+- `migration-state/phase1/business_rules/modules/*/rules.json` (TOUS les modules)
+- `migration-state/phase1/workflows/*/workflow.json` (TOUS les workflows)
+- `migration-state/phase1/rbac_matrix/matrix.json`
 - Tous les `migration-state/phase4/modules/*/review_report.json`
 - Tous les `migration-state/phase4/modules/*/conformity_report.json`
 

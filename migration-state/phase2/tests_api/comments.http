@@ -1,0 +1,229 @@
+# =============================================================================
+# CONTRACT TESTS — Comments
+# =============================================================================
+# Format      : REST Client (.http) — VS Code extension
+# Environment : select "legacy" or "target" in the VS Code status bar
+#
+# Endpoints covered:
+#   POST /article/<slug>/comment               comment_create_view
+#   POST /article/<slug>/comment/<id>/delete   comment_delete_view
+#
+# REQUIRED TEST DATA
+# ------------------
+# • TEST_ARTICLE_SLUG              : article owned by TEST_USER
+# • OTHER_ARTICLE_SLUG             : article owned by OTHER_USER
+# • OWN_COMMENT_ID                 : ID of a comment on TEST_ARTICLE_SLUG by TEST_USER
+#                                    (create one manually or run the create test first)
+# • OTHER_COMMENT_ON_OWN_ART_ID    : ID of a comment on TEST_ARTICLE_SLUG by OTHER_USER
+#                                    (update the numeric ID below accordingly)
+# • THIRD_PARTY_COMMENT_ON_OTHER   : ID of a comment on OTHER_ARTICLE_SLUG by TEST_USER
+#                                    (TEST_USER is NEITHER comment author NOR article author)
+# • TEST_USER logged in
+#
+# Business rules covered: BR-001, BR-039, BR-040, BR-041, BR-042, BR-043, BR-044
+# =============================================================================
+
+@BASE_URL           = {{BASE_URL}}
+@CSRF               = {{csrftoken}}
+@TEST_ARTICLE_SLUG  = {{TEST_ARTICLE_SLUG}}
+@OTHER_ARTICLE_SLUG = {{OTHER_ARTICLE_SLUG}}
+
+
+# ============================================================================
+# COMMENT CREATE  —  POST /article/<slug>/comment
+# ============================================================================
+
+### COMMENT CREATE - Nominal - Valid comment, non-HTMX (redirect response)
+# Pre-condition : Logged in as TEST_USER; article exists
+# Expected      : HTTP 302 redirect to /article/<slug>
+# BR            : BR-040 (@login_required, @require_POST), BR-039 (body not empty)
+# Teardown      : delete the created comment
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+body=This is a contract test comment&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT CREATE - Nominal - Valid comment, HTMX (partial HTML response)
+# Pre-condition : Logged in as TEST_USER; article exists
+# Expected      : HTTP 200, PARTIAL HTML (comment_list.html) — full updated comment list
+# BR            : BR-042 (HTMX → render partial comment_list.html)
+# Teardown      : delete the created comment
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+HX-Request: true
+
+body=This is a contract test HTMX comment&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT CREATE - Edge case - Empty body silently ignored (no comment created)
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 302 redirect (no error, no new comment in DB)
+# BR            : BR-039 (body.strip() == '' → skip creation)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+body=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT CREATE - Edge case - Whitespace-only body silently ignored
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 302, no comment created (stripped body is empty string)
+# BR            : BR-039 (body.strip() removes all whitespace)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+body=+++++++&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT CREATE - Auth required - Anonymous redirected to login
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-040 (@login_required)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+body=Attempted anonymous comment&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT CREATE - Not found - Article slug does not exist
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 404
+# BR            : BR-040 (get_object_or_404 on Article by slug)
+POST {{BASE_URL}}/article/nonexistent-article-slug-xyz-000/comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+body=Comment on nonexistent article&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT CREATE - Error - Method Not Allowed on GET
+# Pre-condition : none
+# Expected      : HTTP 405 Method Not Allowed
+# BR            : BR-040 (@require_POST)
+GET {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# COMMENT DELETE  —  POST /article/<slug>/comment/<id>/delete
+# ============================================================================
+
+### COMMENT DELETE - Nominal - Comment author deletes own comment
+# Pre-condition : Logged in as TEST_USER; comment ID below is authored by TEST_USER
+#                 on article TEST_ARTICLE_SLUG
+# Expected      : HTTP 302 redirect to /article/<slug>
+# BR            : BR-041 (comment.author == request.user → allowed), BR-044
+# NOTE          : Replace "1" with actual OWN_COMMENT_ID before running
+# Teardown      : comment no longer exists
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/1/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Nominal - Article author moderates (deletes other user's comment)
+# Pre-condition : Logged in as TEST_USER (article author); comment below is by OTHER_USER
+#                 on TEST_ARTICLE_SLUG (which is owned by TEST_USER)
+# Expected      : HTTP 302 redirect (article author CAN delete any comment on their article)
+# BR            : BR-041 (article.author == request.user → allowed, even if not comment author)
+# NOTE          : Replace "2" with actual OTHER_COMMENT_ON_OWN_ART_ID
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/2/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Nominal - HTMX request returns updated partial
+# Pre-condition : Logged in as TEST_USER (comment author or article author)
+# Expected      : HTTP 200, PARTIAL HTML (comment_list.html) — updated list after deletion
+# BR            : BR-042 (HTMX → partial response after delete)
+# NOTE          : Replace "3" with an actual deletable comment ID
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/3/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+HX-Request: true
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Error - Forbidden (neither comment author nor article author)
+# Pre-condition : Logged in as TEST_USER; comment below is on OTHER_ARTICLE_SLUG
+#                 (owned by OTHER_USER); TEST_USER is also NOT the comment author
+# Expected      : HTTP 403 Forbidden
+# BR            : BR-041 (CRITICAL — this is the ONLY endpoint returning HTTP 403)
+# NOTE          : Replace "4" with a comment ID on OTHER_ARTICLE_SLUG not by TEST_USER
+POST {{BASE_URL}}/article/{{OTHER_ARTICLE_SLUG}}/comment/4/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Auth required - Anonymous redirected to login
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-044 (@login_required)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/1/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Not found - Comment ID does not exist
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 404
+# BR            : BR-044 (get_object_or_404 on Comment)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/999999/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Not found - Comment exists but belongs to a different article
+# Pre-condition : Logged in as TEST_USER; comment ID below belongs to OTHER_ARTICLE_SLUG
+#                 but this request targets TEST_ARTICLE_SLUG
+# Expected      : HTTP 404 (get_object_or_404 filters by article=article)
+# BR            : BR-044 (slug + comment_id mismatch → 404)
+# NOTE          : Replace "5" with a comment that belongs to OTHER_ARTICLE_SLUG
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/5/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### COMMENT DELETE - Error - Method Not Allowed on GET
+# Pre-condition : none
+# Expected      : HTTP 405 Method Not Allowed
+# BR            : BR-044 (@require_POST)
+GET {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/comment/1/delete HTTP/1.1
+
+
+###

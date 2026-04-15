@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "articles",
+    "name":  "Suppression d\u0027Article",
+    "id":  "WF-008",
+    "transitions_count":  1,
+    "states_count":  2
+}

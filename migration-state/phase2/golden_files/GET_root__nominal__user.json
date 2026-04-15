@@ -1,0 +1,29 @@
+{
+  "file": "GET_root__nominal__user.json",
+  "endpoint": "GET /",
+  "scenario": "nominal",
+  "role": "user",
+  "request": {
+    "method": "GET",
+    "path": "/",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 16510,
+      "contains_following_feed": true,
+      "contains_global_feed": true
+    },
+    "response_time_ms": 32
+  },
+  "linked_rules": [
+    "BR-001",
+    "BR-003",
+    "BR-031"
+  ]
+}

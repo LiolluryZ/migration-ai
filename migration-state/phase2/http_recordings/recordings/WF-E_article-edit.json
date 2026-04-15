@@ -1,0 +1,675 @@
+[
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:54.084Z",
+    "method": "GET",
+    "url": "http://localhost:8000/login",
+    "path": "/login",
+    "request": {
+      "headers": {
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "2944",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:41:53 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 2944,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 326
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:54.165Z",
+    "method": "GET",
+    "url": "https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;\n}\n/* symbols */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM2T7I-NP.woff2) format('woff2');\n  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0",
+      "duration_ms": 83
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:54.420Z",
+    "method": "GET",
+    "url": "https://unpkg.com/htmx.org@2.0.4",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9ec9ff4f997a9f09-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 336
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.284Z",
+    "method": "POST",
+    "url": "http://localhost:8000/login",
+    "path": "/login",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/login",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": "csrfmiddlewaretoken=%7B%7BCSRF_TOKEN%7D%7D&email=%7B%7BUSER_EMAIL%7D%7D&password=%7B%7BPASSWORD%7D%7D",
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 302,
+      "status_text": "Found",
+      "headers": {
+        "content-length": "0",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "location": "/",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": null,
+      "duration_ms": 1125
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.315Z",
+    "method": "GET",
+    "url": "https://unpkg.com/htmx.org@2.0.4",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9ec9ff4f997a9f09-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 0
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.316Z",
+    "method": "GET",
+    "url": "https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;\n}\n/* symbols */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM2T7I-NP.woff2) format('woff2');\n  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0",
+      "duration_ms": 0
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.316Z",
+    "method": "GET",
+    "url": "http://localhost:8000/",
+    "path": "/",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/login",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "16813",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 16767,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 22
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.936Z",
+    "method": "GET",
+    "url": "https://unpkg.com/htmx.org@2.0.4",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9ec9ff4f997a9f09-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 0
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.938Z",
+    "method": "GET",
+    "url": "https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;\n}\n/* symbols */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM2T7I-NP.woff2) format('woff2');\n  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0",
+      "duration_ms": 0
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:56.938Z",
+    "method": "GET",
+    "url": "http://localhost:8000/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "request": {
+      "headers": {
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "9218",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 9091,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 12
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:57.583Z",
+    "method": "POST",
+    "url": "http://localhost:8000/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": "csrfmiddlewaretoken=%7B%7BCSRF_TOKEN%7D%7D&title=Article+de+test+agent-12+%28%C3%A9dit%C3%A9%29&description=Apr%C3%A8s+l%27exp%C3%A9rience+massive+du+t%C3%A9l%C3%A9travail%2C+quels+sont+les+enseignements+%3F+Comment+travailler+efficacement+depuis+chez+soi+et+maintenir+l%27%C3%A9quilibre+vie+pro%2Fvie+perso+%3F&body=%23%23+Du+bureau+au+salon+%3A+une+r%C3%A9volution+forc%C3%A9e%0D%0A%0D%0ALa+pand%C3%A9mie+de+COVID-19+a+pr%C3%A9cipit%C3%A9+le+monde+entier+dans+une+exp%C3%A9rience+massive+de+t%C3%A9l%C3%A9travail.+Du+jour+au+lendemain%2C+des+millions+de+travailleurs+ont+d%C3%BB+r%C3%A9organiser+leur+vie+pour+travailler+depuis+leur+domicile.+Ce+qui+semblait+impossible+devint+soudainement+la+norme.%0D%0A%0D%0APlusieurs+ann%C3%A9es+apr%C3%A8s%2C+les+enseignements+sont+nombreux+et+les+pratiques+ont+profond%C3%A9ment+%C3%A9volu%C3%A9.+Le+t%C3%A9l%C3%A9travail+a+r%C3%A9v%C3%A9l%C3%A9+%C3%A0+la+fois+ses+atouts+consid%C3%A9rables+et+ses+d%C3%A9fis+r%C3%A9els.%0D%0A%0D%0A%23%23+Les+avantages+ind%C3%A9niables%0D%0A%0D%0A**Le+gain+de+temps+sur+les+transports+%3A**+Pour+beaucoup%2C+supprimer+un+trajet+de+1+%C3%A0+2+heures+par+jour+repr%C3%A9sente+un+gain+de+qualit%C3%A9+de+vie+consid%C3%A9rable.+Ce+temps+r%C3%A9cup%C3%A9r%C3%A9+peut+%C3%AAtre+consacr%C3%A9+%C3%A0+la+famille%2C+%C3%A0+l%27exercice+ou+au+sommeil.%0D%0A%0D%0A**Une+plus+grande+autonomie+%3A**+Le+t%C3%A9l%C3%A9travail+responsabilise.+On+est+jug%C3%A9+sur+ses+r%C3%A9sultats%2C+non+sur+sa+pr%C3%A9sence+physique.+Cette+%C3%A9volution+culturelle+profite+aux+collaborateurs+qui+savent+s%27organiser.%0D%0A%0D%0A**Une+meilleure+concentration+%3A**+Sans+les+interruptions+du+bureau+ouvert+%28open+space%29%2C+beaucoup+de+t%C3%A9l%C3%A9travailleurs+rapportent+une+concentration+accrue+pour+les+t%C3%A2ches+n%C3%A9cessitant+une+attention+soutenue.%0D%0A%0D%0A**La+flexibilit%C3%A9+horaire+%3A**+Possibilit%C3%A9+d%27adapter+ses+horaires+%C3%A0+son+rythme+biologique%2C+%C3%A0+ses+contraintes+familiales+ou+%C3%A0+la+nature+de+ses+t%C3%A2ches.%0D%0A%0D%0A%23%23+Les+d%C3%A9fis+%C3%A0+ne+pas+sous-estimer%0D%0A%0D%0A**L%27isolement+social+%3A**+Le+bureau+n%27est+pas+qu%27un+lieu+de+travail.+C%27est+aussi+un+lieu+de+socialisation%2C+de+cr%C3%A9ativit%C3%A9+spontan%C3%A9e%2C+d%27appartenance+%C3%A0+un+collectif.+L%27isolement+du+t%C3%A9l%C3%A9travail+peut+peser+sur+la+sant%C3%A9+mentale.%0D%0A%0D%0A**La+fronti%C3%A8re+floue+entre+vie+pro+et+vie+perso+%3A**+Sans+coupure+physique+entre+le+travail+et+la+maison%2C+il+est+facile+de+glisser+vers+le+surengagement+ou%2C+%C3%A0+l%27inverse%2C+d%27%C3%AAtre+distrait+par+les+obligations+domestiques.%0D%0A%0D%0A**Les+in%C3%A9galit%C3%A9s+de+conditions+%3A**+Le+t%C3%A9l%C3%A9travail+n%27est+pas+v%C3%A9cu+de+la+m%C3%AAme+fa%C3%A7on+selon+qu%27on+habite+un+appartement+de+25m%C2%B2+ou+une+maison+avec+jardin%2C+selon+qu%27on+a+des+enfants+en+bas+%C3%A2ge+ou+pas.%0D%0A%0D%0A**La+transmission+des+savoirs+%3A**+Le+mentoring+informel%2C+l%27apprentissage+par+observation%2C+l%27int%C3%A9gration+des+nouveaux+collaborateurs+%3A+tout+cela+est+plus+difficile+%C3%A0+distance.%0D%0A%0D%0A%23%23+Les+cl%C3%A9s+d%27un+t%C3%A9l%C3%A9travail+r%C3%A9ussi%0D%0A%0D%0A**Cr%C3%A9er+un+espace+d%C3%A9di%C3%A9+%3A**+M%C3%AAme+dans+un+petit+logement%2C+d%C3%A9limiter+un+espace+de+travail+aide+%C3%A0+activer+le+%22mode+travail%22+et+%C3%A0+en+sortir+le+soir.%0D%0A%0D%0A**Structurer+sa+journ%C3%A9e+%3A**+Horaires+fixes%2C+pauses+r%C3%A9guli%C3%A8res%2C+rituel+de+d%C3%A9but+et+de+fin+de+journ%C3%A9e+%28une+promenade%2C+un+caf%C3%A9%29+%3A+la+structure+est+essentielle.%0D%0A%0D%0A**Maintenir+le+lien+social+%3A**+Appels+vid%C3%A9o+informels%2C+caf%C3%A9+virtuels%2C+sorties+avec+des+amis+ou+coll%C3%A8gues+%3A+il+faut+compenser+activement+l%27isolement.%0D%0A%0D%0A**Ma%C3%AEtriser+les+outils+de+collaboration+%3A**+Slack%2C+Notion%2C+Zoom%2C+Trello...+La+productivit%C3%A9+en+t%C3%A9l%C3%A9travail+passe+par+une+bonne+ma%C3%AEtrise+des+outils+num%C3%A9riques.%0D%0A%0D%0A%23%23+Vers+le+travail+hybride%0D%0A%0D%0ALe+mod%C3%A8le+qui+s%27impose+progressivement+est+le+travail+hybride+%3A+quelques+jours+au+bureau+pour+les+r%C3%A9unions%2C+la+cr%C3%A9ativit%C3%A9+collective+et+le+lien+social%2C+quelques+jours+%C3%A0+distance+pour+le+travail+de+fond.+Ce+mod%C3%A8le+cherche+%C3%A0+cumuler+les+avantages+des+deux+modes+sans+leurs+inconv%C3%A9nients+respectifs.%0D%0A%0D%0A%23%23+Conclusion%0D%0A%0D%0ALe+t%C3%A9l%C3%A9travail+est+l%C3%A0+pour+rester.+Il+a+d%C3%A9finitivement+transform%C3%A9+notre+rapport+au+travail%2C+aux+espaces+et+au+temps.+Les+entreprises+qui+sauront+offrir+de+la+flexibilit%C3%A9+tout+en+pr%C3%A9servant+la+coh%C3%A9sion+collective+auront+un+avantage+comp%C3%A9titif+majeur+pour+attirer+et+retenir+les+talents.&tags=travail",
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 302,
+      "status_text": "Found",
+      "headers": {
+        "content-length": "0",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:41:57 GMT",
+        "location": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": null,
+      "duration_ms": 40
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:57.614Z",
+    "method": "GET",
+    "url": "https://unpkg.com/htmx.org@2.0.4",
+    "path": "/htmx.org@2.0.4",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 301,
+      "status_text": "",
+      "headers": {
+        "location": "/htmx.org@2.0.4/dist/htmx.min.js",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "cf-ray": "9ec9ff4f997a9f09-CDG",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "content-length": "47",
+        "date": "Wed, 15 Apr 2026 09:41:56 GMT",
+        "content-type": "text/plain;charset=UTF-8",
+        "server": "cloudflare"
+      },
+      "body": null,
+      "duration_ms": 1
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:57.615Z",
+    "method": "GET",
+    "url": "https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+    "request": {
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "body": null,
+      "content_type": null
+    },
+    "response": {
+      "status": 200,
+      "status_text": "",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Wed, 15 Apr 2026 09:41:55 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      },
+      "body": "/* cyrillic-ext */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');\n  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;\n}\n/* cyrillic */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMw77I-NP.woff2) format('woff2');\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\n}\n/* math */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM3b7I-NP.woff2) format('woff2');\n  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;\n}\n/* symbols */\n@font-face {\n  font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuM2T7I-NP.woff2) format('woff2');\n  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0",
+      "duration_ms": 1
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  },
+  {
+    "workflow": "WF-E_article-edit",
+    "timestamp": "2026-04-15T09:41:57.615Z",
+    "method": "GET",
+    "url": "http://localhost:8000/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "request": {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+        "origin": "http://localhost:8000",
+        "referer": "http://localhost:8000/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.7727.15 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "body": null,
+      "content_type": "application/x-www-form-urlencoded"
+    },
+    "response": {
+      "status": 200,
+      "status_text": "OK",
+      "headers": {
+        "content-length": "10247",
+        "content-type": "text/html; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "date": "Wed, 15 Apr 2026 09:41:57 GMT",
+        "referrer-policy": "same-origin",
+        "server": "WSGIServer/0.2 CPython/3.12.9",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "body": {
+        "type": "html",
+        "length": 10127,
+        "excerpt": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;"
+      },
+      "duration_ms": 20
+    },
+    "anonymized_fields": [
+      "cookie",
+      "set-cookie",
+      "authorization",
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ]
+  }
+]

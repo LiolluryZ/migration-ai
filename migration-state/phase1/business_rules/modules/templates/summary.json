@@ -1,0 +1,14 @@
+﻿{
+    "module":  "templates",
+    "by_type":  {
+                    "authorization":  3,
+                    "transformation":  2,
+                    "constraint":  5
+                },
+    "by_domain":  {
+                      "navigation":  1,
+                      "security":  1,
+                      "ui":  8
+                  },
+    "total_rules":  10
+}

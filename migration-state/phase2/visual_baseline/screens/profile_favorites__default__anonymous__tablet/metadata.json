@@ -1,0 +1,44 @@
+{
+  "route": "/profile/admin/favorites",
+  "route_slug": "profile_favorites",
+  "state": "default",
+  "role": "anonymous",
+  "viewport": "tablet",
+  "name": "Profile Favorites - admin",
+  "description": "Onglet \"Favorited Articles\" du profil",
+  "navigation_path": [
+    "go to profile",
+    "click \"Favorited Articles\" tab"
+  ],
+  "ui_components": [
+    {
+      "type": "profile_header",
+      "region": "top",
+      "description": "Même header de profil",
+      "business_rules": []
+    },
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglet \"Favorited Articles\" (actif)",
+      "business_rules": []
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Articles favoris de cet utilisateur",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /profile/admin/favorites"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates des articles favoris"
+    }
+  ],
+  "business_rules_observed": [],
+  "captured_at": "2026-04-15T09:03:48.352Z"
+}

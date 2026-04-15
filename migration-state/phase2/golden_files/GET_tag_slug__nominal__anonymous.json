@@ -1,0 +1,27 @@
+{
+  "file": "GET_tag_slug__nominal__anonymous.json",
+  "endpoint": "GET /tag/intelligence-artificielle",
+  "scenario": "nominal",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/tag/intelligence-artificielle",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 6052,
+      "tag_value": "intelligence-artificielle"
+    },
+    "response_time_ms": 18
+  },
+  "linked_rules": [
+    "BR-001",
+    "BR-040"
+  ]
+}

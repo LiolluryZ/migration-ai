@@ -1,0 +1,30 @@
+{
+  "route": "/settings → redirect /login?next=/settings",
+  "route_slug": "settings",
+  "state": "redirect_unauthenticated",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "name": "Settings - Redirect (non authentifié)",
+  "description": "Accès à /settings sans auth → redirection automatique vers /login (BR-007)",
+  "navigation_path": [
+    "direct URL /settings (no login)"
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Formulaire login avec ?next=/settings en URL",
+      "business_rules": [
+        "BR-007"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /settings (302 → GET /login)"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-007"
+  ],
+  "captured_at": "2026-04-15T09:03:23.130Z"
+}

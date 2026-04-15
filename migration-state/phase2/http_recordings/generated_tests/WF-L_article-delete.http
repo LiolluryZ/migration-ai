@@ -1,0 +1,55 @@
+# Agent 12 — WF-L_article-delete
+# @baseUrl = http://localhost:8000
+
+### GET /login → 200
+GET {{baseUrl}}/login
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+# Expected: 200
+
+### GET /css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap → 200
+GET {{baseUrl}}/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+# Expected: 200
+
+### GET /htmx.org@2.0.4 → 301
+GET {{baseUrl}}/htmx.org@2.0.4
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+# Expected: 301
+
+### POST /login → 302
+POST {{baseUrl}}/login
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+csrfmiddlewaretoken=%7B%7BCSRF_TOKEN%7D%7D&email=%7B%7BUSER_EMAIL%7D%7D&password=%7B%7BPASSWORD%7D%7D
+
+# Expected: 302
+
+### GET / → 200
+GET {{baseUrl}}/
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+# Expected: 200
+
+### GET /article/agent12-http-test-article → 200
+GET {{baseUrl}}/article/agent12-http-test-article
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+# Expected: 200
+
+### POST /article/agent12-http-test-article/delete → 302
+POST {{baseUrl}}/article/agent12-http-test-article/delete
+x-csrftoken: {{CSRF_TOKEN}}
+Cookie: {{SESSION_COOKIE}}
+
+csrfmiddlewaretoken=%7B%7BCSRF_TOKEN%7D%7D
+
+# Expected: 302

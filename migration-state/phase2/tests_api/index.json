@@ -1,0 +1,79 @@
+{
+  "generated_at": "2026-04-15T09:00:00Z",
+  "agent": "09-generateur-tests-api",
+  "confidence": 88,
+  "format": "http",
+  "base_url_variable": "BASE_URL",
+  "total_endpoints": 17,
+  "total_test_cases": 100,
+  "endpoints": [
+    {
+      "method": "GET", "path": "/login", "endpoint_slug": "login_GET",
+      "module": "auth", "test_count": 3, "file": "endpoints/login_GET/tests.http"
+    },
+    {
+      "method": "POST", "path": "/login", "endpoint_slug": "login_POST",
+      "module": "auth", "test_count": 8, "file": "endpoints/login_POST/tests.http"
+    },
+    {
+      "method": "GET", "path": "/register", "endpoint_slug": "register_GET",
+      "module": "auth", "test_count": 2, "file": "endpoints/register_GET/tests.http"
+    },
+    {
+      "method": "POST", "path": "/register", "endpoint_slug": "register_POST",
+      "module": "auth", "test_count": 7, "file": "endpoints/register_POST/tests.http"
+    },
+    {
+      "method": "GET", "path": "/settings", "endpoint_slug": "settings_GET",
+      "module": "auth", "test_count": 2, "file": "endpoints/settings_GET/tests.http"
+    },
+    {
+      "method": "POST", "path": "/settings", "endpoint_slug": "settings_POST",
+      "module": "auth", "test_count": 5, "file": "endpoints/settings_POST/tests.http"
+    },
+    {
+      "method": "POST", "path": "/logout", "endpoint_slug": "logout_POST",
+      "module": "auth", "test_count": 3, "file": "endpoints/logout_POST/tests.http"
+    },
+    {
+      "method": "GET", "path": "/", "endpoint_slug": "root_GET",
+      "module": "feed", "test_count": 7, "file": "endpoints/root_GET/tests.http"
+    },
+    {
+      "method": "GET", "path": "/tag/:tag", "endpoint_slug": "tag_GET",
+      "module": "feed", "test_count": 4, "file": "endpoints/tag_GET/tests.http"
+    },
+    {
+      "method": "GET", "path": "/article/:slug", "endpoint_slug": "article_slug_GET",
+      "module": "articles", "test_count": 3, "file": "endpoints/article_slug_GET/tests.http"
+    },
+    {
+      "method": "GET", "path": "/editor", "endpoint_slug": "editor_GET",
+      "module": "articles", "test_count": 2, "file": "endpoints/editor_GET/tests.http"
+    },
+    {
+      "method": "POST", "path": "/editor", "endpoint_slug": "editor_POST",
+      "module": "articles", "test_count": 6, "file": "endpoints/editor_POST/tests.http"
+    },
+    {
+      "method": "GET", "path": "/editor/:slug", "endpoint_slug": "editor_slug_GET",
+      "module": "articles", "test_count": 2, "file": "endpoints/editor_slug_GET/tests.http"
+    },
+    {
+      "method": "POST", "path": "/editor/:slug", "endpoint_slug": "editor_slug_POST",
+      "module": "articles", "test_count": 5, "file": "endpoints/editor_slug_POST/tests.http"
+    },
+    {
+      "method": "POST", "path": "/article/:slug/delete", "endpoint_slug": "article_slug_delete_POST",
+      "module": "articles", "test_count": 5, "file": "endpoints/article_slug_delete_POST/tests.http"
+    },
+    {
+      "method": "POST", "path": "/profile/:username/follow", "endpoint_slug": "profile_username_follow_POST",
+      "module": "social", "test_count": 7, "file": "endpoints/profile_username_follow_POST/tests.http"
+    },
+    {
+      "method": "GET", "path": "/profile/:username", "endpoint_slug": "profile_username_GET",
+      "module": "social", "test_count": 6, "file": "endpoints/profile_username_GET/tests.http"
+    }
+  ]
+}

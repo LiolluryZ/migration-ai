@@ -28,29 +28,10 @@ Une regle metier est une decision qui **pourrait etre differente si le business 
 
 ## Procedure iterative
 
-### Etape 0 : Initialisation du fichier de sortie
-Avant d'analyser quoi que ce soit, cree `migration-state/phase1/business_rules.json` avec la structure vide :
-```json
-{
-  "generated_at": "<ISO 8601>",
-  "agent": "05-extracteur-regles",
-  "confidence": 0,
-  "status": "in_progress",
-  "modules_analyzed": [],
-  "modules_remaining": [],
-  "summary": {
-    "total_rules": 0,
-    "by_type": { "validation": 0, "calculation": 0, "authorization": 0, "workflow": 0, "transformation": 0, "constraint": 0 },
-    "by_domain": {},
-    "requiring_human_validation": 0,
-    "inconsistencies_found": 0
-  },
-  "rules": [],
-  "inconsistencies": [],
-  "questions_for_humans": []
-}
-```
-Remplis `modules_remaining` avec la liste des modules issue de `structure.json`.
+### Etape 0 : Initialisation de la structure de sortie
+Crée les dossiers `migration-state/phase1/business_rules/modules/` s'ils n'existent pas.
+Initialise un fichier de suivi temporaire en mémoire pour tracker les progress/modules_remaining/modules_analyzed.
+(Pas d'init de business_rules.json monolithique — les données seront fragmentées par module.)
 
 ### Etape 1 : Boucle module par module
 Pour chaque module dans `modules_remaining`, repete ce cycle :
@@ -78,11 +59,30 @@ Pour chaque fichier lu, identifie :
 
 **1d. Ecrire les resultats partiels immediatement**
 Apres chaque module (ou apres 3-4 fichiers si le module est gros) :
-- Lis `migration-state/phase1/business_rules.json` (version courante)
-- Ajoute les nouvelles regles au tableau `rules`
-- Mets a jour `summary.total_rules` et les compteurs `by_type`, `by_domain`
-- Deplace le module de `modules_remaining` vers `modules_analyzed`
-- Ecrase le fichier avec Edit
+
+**Ecris les donnees du module** dans `migration-state/phase1/business_rules/modules/{module}/` :
+
+1. `rules.json` :
+```json
+{
+  "module": "{module}",
+  "generated_at": "ISO 8601",
+  "total_rules": N,
+  "rules": [...]  // Les regles extraites
+}
+```
+
+2. `summary.json` :
+```json
+{
+  "module": "{module}",
+  "total_rules": N,
+  "by_type": { "validation": ..., "calculation": ..., ... },
+  "by_domain": { "authentication": ..., "articles": ..., ... }
+}
+```
+
+**Mets a jour** `migration-state/phase1/business_rules/index.json` et `summary.json` (globaux) avec les aggregations.
 
 **Ne passe au module suivant qu'apres avoir ecrit les resultats.**
 
@@ -96,8 +96,8 @@ Une fois tous les modules analyses :
 
 ### Etape 3 : Finalisation
 - Calcule la confiance globale (moyenne des confidences)
-- Passe `status` de "in_progress" a "completed"
-- Ecrase le fichier une derniere fois
+- Finalise `migration-state/phase1/business_rules/index.json` et `summary.json` avec les stats complètes
+- Mets à jour `migration-state/phase1/index.json` (meta-index) avec le statut de Phase 1
 
 ## Format d'une regle
 ```json

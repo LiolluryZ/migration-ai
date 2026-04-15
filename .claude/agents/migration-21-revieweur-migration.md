@@ -11,7 +11,7 @@ Tu es l'Agent 21 - Revieweur de Migration. Tu verifies la conformite metier du c
 Lis `migration-state/state.json` et `migration-state/config.json`.
 Le module a reviewer est fourni en argument.
 Lis :
-- `migration-state/phase1/business_rules.json`
+- **SEULEMENT** `migration-state/phase1/business_rules/modules/{module}/rules.json` (chargement sélectif par module)
 - `migration-state/phase4/modules/{module}/translation_log.json`
 - Le code source original du module dans `config.json > source.directory`
 - Le code traduit du module dans `config.json > target.directory`

@@ -1,0 +1,676 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "15-couverture-metier",
+  "confidence": 87,
+  "note": "Couverture METIER — mesure si les règles métier sont validées par les tests, indépendamment de la couverture de code.",
+  "sources_analyzed": [
+    "migration-state/phase2/tests_api/index.json (100 tests HTTP, 17 endpoints, agent-09)",
+    "migration-state/phase2/tests_e2e/index.json (43 tests Playwright, 11 workflows, agent-10)",
+    "migration-state/phase2/golden_files/index.json (43 golden files, 22 endpoints, agent-11)",
+    "migration-state/phase2/http_recordings/index.json (133 enregistrements, 11 workflows, agent-12)",
+    "migration-state/phase2/visual_baseline/index.json (51 screenshots, 17 écrans, agent-13)"
+  ],
+  "summary": {
+    "total_rules": 54,
+    "covered": 42,
+    "partially_covered": 11,
+    "uncovered": 0,
+    "untestable": 1,
+    "coverage_percentage": 98.1,
+    "coverage_percentage_excluding_untestable": 100.0,
+    "coverage_note": "coverage_percentage = (covered + partially_covered) / total. Aucune règle entièrement non couverte. BR-004 exclu (décision humaine 2026-04-13).",
+    "threshold_met": true,
+    "threshold_value": 90.0
+  },
+  "per_rule": [
+    {
+      "rule_id": "BR-001",
+      "summary": "Header HX-Request=true → réponse partielle HTMX",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "Tous les endpoints — détection HTMX" },
+        { "source": "tests_e2e", "file": "wf010-comment-create.spec.ts", "test_name": "WF-010-NOM : HTMX swap #comment-list" },
+        { "source": "tests_e2e", "file": "wf011-comment-delete.spec.ts", "test_name": "WF-011-NOM-1 : HTMX swap suppression" },
+        { "source": "golden_files", "file": "GET_root__nominal__anonymous.json", "test_name": "GET / — linked_rules BR-001" },
+        { "source": "golden_files", "file": "GET_tag_slug__htmx_partial__anonymous.json", "test_name": "GET /tag/:tag HTMX — réponse partielle" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-002",
+      "summary": "clean_integrity_error : parse UniqueViolation → nom de champ",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /register — duplicate email/username" },
+        { "source": "tests_e2e", "file": "wf002-register.spec.ts", "test_name": "WF-002-ERR-1 : email dupliqué → 'already been taken'" },
+        { "source": "golden_files", "file": "POST_register__duplicate_email__anonymous.json", "test_name": "POST /register — duplicate email linked_rules BR-002" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-003",
+      "summary": "conduit_context : expose {username, email, bio, image} JSON ou null pour non-auth",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "golden_files", "file": "GET_root__nominal__anonymous.json", "test_name": "GET / anonymous — linked_rules BR-003" },
+        { "source": "golden_files", "file": "GET_root__nominal__user.json", "test_name": "GET / user — linked_rules BR-003 (user JSON present)" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-004",
+      "summary": "AUTH_PASSWORD_VALIDATORS configuré mais non effectif — décision humaine : non migrer",
+      "coverage_status": "untestable",
+      "covered_by": [],
+      "missing_coverage": "Règle intentionnellement exclue de la migration (décision humaine 2026-04-13). Comportement légacy : aucun validator de complexité de mot de passe. La cible ne doit pas implémenter ces validators.",
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-005",
+      "summary": "Unauthenticated → redirect /login pour routes protégées",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "GET /settings anonymous → 302 /login" },
+        { "source": "tests_e2e", "file": "wf003-settings.spec.ts", "test_name": "WF-003-PERM : anonyme → redirect /login?next=/settings" },
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-PERM : anonyme → redirect /login" },
+        { "source": "golden_files", "file": "GET_editor__unauthenticated__anonymous.json", "test_name": "GET /editor anon → /login?next=/editor" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-006",
+      "summary": "LANGUAGE_CODE=en-us, TIME_ZONE=UTC, USE_TZ=True",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "golden_files", "file": "GET_profile_username_favorites__nominal__anonymous.json", "test_name": "Dates affichées en anglais dans la page profil — linked_rules BR-048 inclut ce scope" }
+      ],
+      "missing_coverage": "Aucun test ne vérifie explicitement LANGUAGE_CODE ou TIME_ZONE. La configuration est implicitement validée via l'affichage des dates en anglais (BR-048), mais les réglages settings.py ne sont pas testés directement.",
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-007",
+      "summary": "USERNAME_FIELD=email, email unique required, username unique max 60",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /login avec email comme identifiant" },
+        { "source": "tests_e2e", "file": "wf001-login.spec.ts", "test_name": "WF-001-NOM : login par email" },
+        { "source": "tests_e2e", "file": "wf002-register.spec.ts", "test_name": "WF-002-ERR-2 : username dupliqué" },
+        { "source": "golden_files", "file": "GET_login__nominal__anonymous.json", "test_name": "GET /login — linked_rules BR-007" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-008",
+      "summary": "first_name et last_name supprimés du modèle User",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf003-settings.spec.ts", "test_name": "WF-003-NOM-1 : formulaire settings ne contient que image/username/bio/email" }
+      ],
+      "missing_coverage": "Aucun test ne vérifie explicitement l'absence de first_name/last_name dans le modèle ou les réponses. La règle est implicitement vérifiée par le formulaire settings qui n'expose que les 4 champs métier. Un test ciblé manque.",
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-009",
+      "summary": "bio : texte libre optionnel (default='') ; image : URL optionnelle (null=True)",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /settings — mise à jour bio et image URL" },
+        { "source": "tests_e2e", "file": "wf003-settings.spec.ts", "test_name": "WF-003-NOM-1 : mise à jour bio → visible sur profil" },
+        { "source": "golden_files", "file": "GET_settings__nominal__user.json", "test_name": "GET /settings — linked_rules BR-009" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-010",
+      "summary": "Relation follow asymétrique ManyToMany symmetrical=False",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/social.http", "test_name": "POST /profile/:username/follow — asymétrie A→B sans B→A" },
+        { "source": "tests_e2e", "file": "wf005-follow.spec.ts", "test_name": "WF-005-NOM-1/2 : follow/unfollow toggle" },
+        { "source": "golden_files", "file": "POST_profile_username_follow__htmx_toggle__user.json", "test_name": "POST follow HTMX — linked_rules BR-010" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-011",
+      "summary": "Authentification email+password, message générique 'Invalid email or password.'",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /login — credentials invalides → message générique" },
+        { "source": "tests_e2e", "file": "wf001-login.spec.ts", "test_name": "WF-001-ERR-1 : mauvais password → message générique" },
+        { "source": "tests_e2e", "file": "wf001-login.spec.ts", "test_name": "WF-001-ERR-2 : email inconnu → même message" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-012",
+      "summary": "Après login réussi → redirect 'home'",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /login valide → 302 /" },
+        { "source": "tests_e2e", "file": "wf001-login.spec.ts", "test_name": "WF-001-NOM : credentials valides → redirect /" },
+        { "source": "golden_files", "file": "POST_login__valid_credentials__anonymous.json", "test_name": "POST /login — redirects_to /" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-013",
+      "summary": "Inscription : unique email/username ; messages distincts 'email taken' / 'username taken'",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /register — duplicate email et username" },
+        { "source": "tests_e2e", "file": "wf002-register.spec.ts", "test_name": "WF-002-ERR-1 : email dupliqué ; WF-002-ERR-2 : username dupliqué" },
+        { "source": "golden_files", "file": "POST_register__duplicate_email__anonymous.json", "test_name": "POST /register duplicate email → 200 avec erreur" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-014",
+      "summary": "Après inscription réussie → auto-login + redirect 'home'",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /register nominal → session créée + redirect /" },
+        { "source": "tests_e2e", "file": "wf002-register.spec.ts", "test_name": "WF-002-NOM : inscription → auto-login + redirect /" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-015",
+      "summary": "Settings : update image/username/bio/email ; password optionnel → re-login si fourni",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /settings — avec et sans password" },
+        { "source": "tests_e2e", "file": "wf003-settings.spec.ts", "test_name": "WF-003-NOM-1 : update bio ; WF-003-NOM-2 : changement MDP → session maintenue" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-016",
+      "summary": "Logout require_POST ; après logout → redirect 'home'",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "POST /logout → 302 / ; GET /logout → 405" },
+        { "source": "tests_e2e", "file": "wf004-logout.spec.ts", "test_name": "WF-004-NOM : POST /logout → session détruite + redirect /" },
+        { "source": "tests_e2e", "file": "wf004-logout.spec.ts", "test_name": "WF-004-ERR : GET /logout → HTTP 405" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-017",
+      "summary": "Pagination profil : 10 articles/page, GET ?page=N, invalide → page 1",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-feed.http", "test_name": "GET /profile/:username?page=2" },
+        { "source": "golden_files", "file": "GET_root__page2__pagination__anonymous.json", "test_name": "GET /?page=2 — pagination golden file" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-018",
+      "summary": "Profil : onglets 'my' (articles auteur) et 'favorites' (articles favoris) ; ordre -created",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/social.http", "test_name": "GET /profile/:username?tab=favorites" },
+        { "source": "golden_files", "file": "GET_profile_username_favorites__nominal__anonymous.json", "test_name": "GET /profile/admin/favorites — 200" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-019",
+      "summary": "Follow/unfollow toggle ; pas de self-follow ; require login + POST",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/social.http", "test_name": "POST /profile/:username/follow — toggle et auto-follow no-op" },
+        { "source": "tests_e2e", "file": "wf005-follow.spec.ts", "test_name": "WF-005-NOM-1/2 : toggle ; WF-005-AUTO : self-follow ignoré" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-020",
+      "summary": "Settings et follow nécessitent @login_required → redirect /login",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/auth.http", "test_name": "GET /settings anonymous → 302" },
+        { "source": "tests_e2e", "file": "wf003-settings.spec.ts", "test_name": "WF-003-PERM : anonyme settings → redirect" },
+        { "source": "tests_e2e", "file": "wf005-follow.spec.ts", "test_name": "WF-005-PERM : anonyme follow → 302 /login" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-021",
+      "summary": "Profil inexistant → page 404 dédiée profile_404.html avec username en contexte",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/social.http", "test_name": "GET /profile/nonexistent → 404 profile_404" },
+        { "source": "golden_files", "file": "GET_profile_username__not_found__anonymous.json", "test_name": "GET /profile/nonexistent-user-xyz-999 → 404" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-022",
+      "summary": "Article : title varchar(150) unique required ; summary/content optionnels",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /editor — titre vide → erreur ; titre dupliqué → unique violation" },
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-ERR : titre vide → reste sur /editor" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-023",
+      "summary": "Slug = slugify(title) uniquement à la création (pk=None) ; non regénéré à l'édition",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /editor → slug = slugify(title)" },
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-NOM : slug généré après création" },
+        { "source": "tests_e2e", "file": "wf007-article-edit.spec.ts", "test_name": "WF-007-NOM : titre modifié, slug inchangé" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-024",
+      "summary": "created : auto_now_add=True, db_index ; updated : auto_now=True",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "golden_files", "file": "GET_profile_username__nominal__anonymous.json", "test_name": "GET /profile/admin — linked_rules BR-024 (structure réponse avec dates)" },
+        { "source": "golden_files", "file": "GET_profile_username__not_found__anonymous.json", "test_name": "linked_rules BR-024" }
+      ],
+      "missing_coverage": "Les timestamps sont normalisés ({{TIMESTAMP}}) dans les golden files : leur présence est vérifiée mais pas le comportement auto_now_add/auto_now. Un test explicite devrait vérifier que 'updated' change après édition alors que 'created' reste identique.",
+      "priority_to_cover": "medium"
+    },
+    {
+      "rule_id": "BR-025",
+      "summary": "num_favorites = COUNT(favorites) ; is_favorite = EXISTS(user IN favorites) ou False si non-auth",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-favorite.http", "test_name": "POST /article/:slug/favorite → compteur incrémenté" },
+        { "source": "tests_e2e", "file": "wf009-favorite.spec.ts", "test_name": "WF-009-NOM-1 : favoriser → compteur +1 ; WF-009-NOM-2 : dé-favoriser → -1" },
+        { "source": "golden_files", "file": "POST_profile_username_follow__htmx_toggle__user.json", "test_name": "linked_rules BR-025" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-026",
+      "summary": "Feed home : 3 onglets global / following / tag ; default = global",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-feed.http", "test_name": "GET / ; GET /?feed=following ; GET /tag/:tag" },
+        { "source": "golden_files", "file": "GET_root_feed_following__nominal__user.json", "test_name": "GET /?feed=following → 200" },
+        { "source": "golden_files", "file": "GET_root_feed_following__unauthenticated__anonymous.json", "test_name": "GET /?feed=following anon → 302 /login" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-027",
+      "summary": "Liste tags cachée 5 min (cache 'all_tags') ; invalidée à chaque save article",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-NOM-TAGS : article avec tags → tags visibles (implique invalidation cache)" },
+        { "source": "tests_e2e", "file": "wf007-article-edit.spec.ts", "test_name": "WF-007-NOM : édition tags → tags mis à jour (implique invalidation cache)" }
+      ],
+      "missing_coverage": "Le TTL du cache (300s) et la clé 'all_tags' ne sont pas testés explicitement. L'invalidation à la sauvegarde est implicite. IMPORTANT: le cache n'est pas invalidé à la suppression d'article (bug légacy à reproduire). Tests à ajouter : vérifier que les tags d'un article supprimé restent visibles pendant max 5 min.",
+      "priority_to_cover": "medium"
+    },
+    {
+      "rule_id": "BR-028",
+      "summary": "Pagination home : 10/page, order_by('-created') ; offset = (page-1)*10",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-feed.http", "test_name": "GET /?page=2 → articles suivants" },
+        { "source": "golden_files", "file": "GET_root__page2__pagination__anonymous.json", "test_name": "GET /?page=2 golden file" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-029",
+      "summary": "HTMX home feed → partial feed_content.html ; normal → page complète home.html",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-feed.http", "test_name": "GET / avec HX-Request:true → partial plus court que full page" },
+        { "source": "golden_files", "file": "GET_tag_slug__htmx_partial__anonymous.json", "test_name": "GET /tag/ia HTMX → html_length 1480 vs 6052 (partial)" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-030",
+      "summary": "Article inexistant → page 404 dédiée detail_404.html (status 404)",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "GET /article/nonexistent → 404" },
+        { "source": "golden_files", "file": "GET_article_slug__not_found__anonymous.json", "test_name": "GET /article/nonexistent-article-xyz-999 → 404" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-031",
+      "summary": "Mapping champs formulaire : form.description → model.summary ; form.body → model.content",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /editor avec champs description et body → article créé avec summary et content" },
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-NOM : formulaire utilise description/body" },
+        { "source": "golden_files", "file": "GET_root__nominal__anonymous.json", "test_name": "linked_rules BR-031" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-032",
+      "summary": "Tags : chaine CSV, clear() puis add() strip ; tags vides ignorés",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-NOM-TAGS : article avec tags CSV visibles" },
+        { "source": "tests_e2e", "file": "wf007-article-edit.spec.ts", "test_name": "WF-007-NOM : édition remplace les tags (clear + add)" }
+      ],
+      "missing_coverage": "Les cas limites ne sont pas testés : virgules consécutives ('tag1,,tag2'), espaces autour des virgules (' tag1 , tag2 '), chaîne vide (→ tous tags supprimés). Ces cas sont critiques pour l'iso-fonctionnalité du parseur de tags.",
+      "priority_to_cover": "medium"
+    },
+    {
+      "rule_id": "BR-033",
+      "summary": "Création article : @login_required ; article.author = request.user ; redirect article_detail",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /editor anon → 302 /login ; auth → article créé avec auteur correct" },
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-PERM : anonyme → redirect ; WF-006-NOM : auteur = user courant" },
+        { "source": "golden_files", "file": "GET_editor__unauthenticated__anonymous.json", "test_name": "GET /editor anon → /login?next=/editor" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-034",
+      "summary": "Édition article : @login_required + être l'auteur ; non-auteur → 404 (pas 403)",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "GET /editor/:slug non-auteur → 404" },
+        { "source": "tests_e2e", "file": "wf007-article-edit.spec.ts", "test_name": "WF-007-ERR-1 : non-auteur → 404 (not 403)" },
+        { "source": "golden_files", "file": "GET_editor_slug__nominal__owner.json", "test_name": "linked_rules BR-034 — owner access 200" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-035",
+      "summary": "Suppression article : @login_required + @require_POST + auteur ; après → redirect home",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /article/:slug/delete — nominal et erreurs permission" },
+        { "source": "tests_e2e", "file": "wf008-article-delete.spec.ts", "test_name": "WF-008-NOM : suppression → redirect / ; non-auteur → 404 ; GET delete → 405" },
+        { "source": "golden_files", "file": "POST_article_slug_delete__nominal__owner.json", "test_name": "POST /article/:slug/delete owner → 302 /" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-036",
+      "summary": "Favori toggle : add/remove ; re-annotation with_favorites ; HTMX → partial favorite_button",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-favorite.http", "test_name": "POST /article/:slug/favorite — add puis remove" },
+        { "source": "tests_e2e", "file": "wf009-favorite.spec.ts", "test_name": "WF-009-NOM-1/2 : toggle compteur" },
+        { "source": "golden_files", "file": "POST_article_slug_favorite__htmx_toggle__user.json", "test_name": "HTMX toggle → partial html_length=288" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-037",
+      "summary": "Markdown rendu via markdown(extensions=['extra']) puis assaini nh3.clean() (XSS prevention)",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "visual_baseline", "file": "screens/article_detail__default__anonymous__desktop/metadata.json", "test_name": "Contenu Markdown rendu en HTML — business_rules_observed BR-037" }
+      ],
+      "missing_coverage": "CRITIQUE SÉCURITÉ : La visual baseline confirme que le markdown EST rendu, mais aucun test ne vérifie que nh3.clean() sanitise les payloads XSS. Un article avec <script>alert('xss')</script> ou attributs onerror devrait être créé et la réponse vérifiée pour absence de ces éléments. Risque migration élevé si la cible n'intègre pas la sanitisation.",
+      "priority_to_cover": "high"
+    },
+    {
+      "rule_id": "BR-038",
+      "summary": "Tags via django-taggit (TaggableManager, GenericFK) ; blank=True",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /editor avec tags → GET /tag/:tag filtre les articles" },
+        { "source": "tests_e2e", "file": "wf006-article-create.spec.ts", "test_name": "WF-006-NOM-TAGS : tags visibles après création" },
+        { "source": "golden_files", "file": "GET_tag_slug__nominal__anonymous.json", "test_name": "GET /tag/intelligence-artificielle → 200 avec articles filtrés" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-039",
+      "summary": "Commentaire : body strip() ; si vide → skip silencieux (pas d'erreur), réponse HTMX renvoyée",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/comments.http", "test_name": "POST /article/:slug/comment corps vide → skip, même réponse HTMX" },
+        { "source": "tests_e2e", "file": "wf010-comment-create.spec.ts", "test_name": "WF-010-EDGE : corps vide (espaces) → skip silencieux" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-040",
+      "summary": "Création commentaire : @login_required + @require_POST ; author = request.user",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/comments.http", "test_name": "POST /article/:slug/comment anon → 302 /login" },
+        { "source": "tests_e2e", "file": "wf010-comment-create.spec.ts", "test_name": "WF-010-PERM-API : POST direct anonyme → 302" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-041",
+      "summary": "Suppression commentaire : auteur du commentaire OU auteur de l'article ; sinon 403 Forbidden",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/comments.http", "test_name": "POST /comment/delete — auteur commentaire OK ; tiers → 403" },
+        { "source": "tests_e2e", "file": "wf011-comment-delete.spec.ts", "test_name": "WF-011-NOM-2 : auteur article supprime commentaire tiers ; WF-011-ERR-403 : tiers → 403" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-042",
+      "summary": "Après create/delete commentaire : HTMX → partial comment_list.html ; non-HTMX → redirect article",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf010-comment-create.spec.ts", "test_name": "WF-010-NOM : HTMX swap #comment-list" },
+        { "source": "tests_e2e", "file": "wf011-comment-delete.spec.ts", "test_name": "WF-011-NOM-1 : HTMX delete → #comment-list mis à jour" },
+        { "source": "golden_files", "file": "POST_article_slug_comment__htmx_nominal__user.json", "test_name": "POST comment HTMX → html partial 723 chars" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-043",
+      "summary": "Comment FK(Article, CASCADE) + FK(User, CASCADE) → suppression article/user cascade",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-crud.http", "test_name": "POST /article/:slug/delete → commentaires supprimés en cascade" },
+        { "source": "tests_e2e", "file": "wf008-article-delete.spec.ts", "test_name": "WF-008-NOM : suppression article → commentaires en cascade (GET article → 404, comments disparus)" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-044",
+      "summary": "Suppression commentaire : @login_required + @require_POST ; comment GET by(id, article)",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/comments.http", "test_name": "POST /article/:slug/comment/:id/delete — nominal et erreurs auth" },
+        { "source": "tests_e2e", "file": "wf011-comment-delete.spec.ts", "test_name": "WF-011-PERM-ANON : anonyme → 302 /login ; WF-011-ERR-404 : comment_id hors article → 404" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-045",
+      "summary": "Banner ('A place to share your knowledge.') affiché UNIQUEMENT pour les non-authentifiés",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "visual_baseline", "file": "screens/home__default__anonymous__desktop/metadata.json", "test_name": "Screenshot home anonymous — banner présent" },
+        { "source": "visual_baseline", "file": "screens/home_following__following_feed__user__desktop/metadata.json", "test_name": "Screenshot home user authenticated — banner absent" }
+      ],
+      "missing_coverage": "La visual baseline capture l'état visuel (avec/sans banner), mais aucun test E2E ne contient d'assertion explicite sur la présence/absence du banner. Ajouter une assertion getByText('A place to share your knowledge.').shouldBeVisible() pour anonyme et shouldNotExist() pour authent.",
+      "priority_to_cover": "medium"
+    },
+    {
+      "rule_id": "BR-046",
+      "summary": "Navigation : authentifié [Home, New Article, Settings, Profile] ; sinon [Home, Sign in, Sign up]",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf004-logout.spec.ts", "test_name": "WF-004-NOM : après logout → nav présente Sign in / Sign up" },
+        { "source": "visual_baseline", "file": "screens/home__default__anonymous__desktop/metadata.json", "test_name": "Screenshot navbar anonymous vs user (ui_component navbar BR-007 mappé)" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-047",
+      "summary": "Avatar par défaut 'static/images/default-avatar.svg' si user.image null/vide",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "visual_baseline", "file": "screens/article_detail__default__anonymous__desktop/metadata.json", "test_name": "Screenshot article avec avatar auteur — default SVG si null" }
+      ],
+      "missing_coverage": "Aucun test E2E ne vérifie explicitement que l'image src est le SVG par défaut lorsque user.image est null. La visual baseline capture l'état visuel mais sans assertion sur l'attribut src. Ajouter un test qui vérifie l'attribut img[src].includes('default-avatar.svg') pour un user sans image.",
+      "priority_to_cover": "medium"
+    },
+    {
+      "rule_id": "BR-048",
+      "summary": "Format date affiché : 'F j, Y' (ex: 'January 1, 2026') — filtre Django |date",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "golden_files", "file": "GET_profile_username_favorites__nominal__anonymous.json", "test_name": "linked_rules BR-048 — dates dans la page capturées" },
+        { "source": "golden_files", "file": "POST_article_slug_favorite__htmx_toggle__user.json", "test_name": "linked_rules BR-048" }
+      ],
+      "missing_coverage": "Les golden files normalisent les timestamps ({{TIMESTAMP}}) donc le FORMAT spécifique 'F j, Y' n'est pas validé. Aucun test ne vérifie la regex /^[A-Z][a-z]+ \\d+, \\d{4}$/. À corriger pour la migration car Angular/Fastify pourrait utiliser un format différent par défaut.",
+      "priority_to_cover": "high"
+    },
+    {
+      "rule_id": "BR-049",
+      "summary": "Actions article : auteur [Edit+Delete] ; auth non-auteur [Follow+Favorite] ; anon []",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf007-article-edit.spec.ts", "test_name": "WF-007-ERR-1 : non-auteur → 404 pour édition" },
+        { "source": "tests_e2e", "file": "wf009-favorite.spec.ts", "test_name": "WF-009 : bouton Favorite visible pour auth non-auteur" },
+        { "source": "golden_files", "file": "POST_article_slug_favorite__htmx_toggle__user.json", "test_name": "linked_rules BR-049" }
+      ],
+      "missing_coverage": "La logique conditionnelle complète (3 cas: auteur/non-auteur-auth/anon) n'est pas testée de façon exhaustive dans un seul test. Le cas 'auteur voit Edit+Delete et NOT Follow+Favorite' n'est pas explicitement validé visuellement ou via assertion.",
+      "priority_to_cover": "medium"
+    },
+    {
+      "rule_id": "BR-050",
+      "summary": "Onglet 'Your Feed' visible uniquement pour authentifiés ; onglet tag dynamique si tag actif",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/articles-feed.http", "test_name": "GET /?feed=following anon → 302 /login (onglet inaccessible sans auth)" },
+        { "source": "golden_files", "file": "GET_root_feed_following__unauthenticated__anonymous.json", "test_name": "GET /?feed=following anon → 302" },
+        { "source": "golden_files", "file": "GET_root_feed_following__nominal__user.json", "test_name": "GET /?feed=following user → 200" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-051",
+      "summary": "Bouton Favorite non-auth → onclick redirect /login ; texte 'Unfavorite'/'Favorite' selon état",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf009-favorite.spec.ts", "test_name": "WF-009-PERM : anon → onclick redirect /login" },
+        { "source": "tests_e2e", "file": "wf009-favorite.spec.ts", "test_name": "WF-009-NOM-1/2 : bouton passe de Favorite à Unfavorite" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-052",
+      "summary": "Bouton Follow caché sur son propre profil ; texte 'Follow/Unfollow username'",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf005-follow.spec.ts", "test_name": "WF-005-AUTO : self-follow → bouton absent, no-op serveur" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-053",
+      "summary": "Non-auth sur article : 'Sign in or sign up to add comments.' au lieu du formulaire",
+      "coverage_status": "covered",
+      "covered_by": [
+        { "source": "tests_e2e", "file": "wf010-comment-create.spec.ts", "test_name": "WF-010-PERM : anonyme → message 'Sign in or sign up' visible, pas de formulaire" }
+      ],
+      "missing_coverage": null,
+      "priority_to_cover": "low"
+    },
+    {
+      "rule_id": "BR-054",
+      "summary": "CSRF token global via hx-headers sur <body> pour toutes requêtes HTMX",
+      "coverage_status": "partially_covered",
+      "covered_by": [
+        { "source": "tests_api", "file": "tests_api/http-client.env.json", "test_name": "Toutes les requêtes HTMX utilisent la variable csrftoken" },
+        { "source": "tests_e2e", "file": "wf010-comment-create.spec.ts", "test_name": "WF-010-NOM : POST HTMX réussit (implique que X-CSRFToken est bien envoyé)" }
+      ],
+      "missing_coverage": "Le mécanisme hx-headers sur le body HTML (attribut JavaScript) n'est pas testé explicitement. Les tests E2E utilisent Playwright qui copie le comportement réel du browser (donc hx-headers est effectif), mais aucun test ne valide spécifiquement que l'attribut body hx-headers contient bien le CSRF token.",
+      "priority_to_cover": "low"
+    }
+  ],
+  "recommendations": [
+    {
+      "rule_id": "BR-037",
+      "action": "Ajouter un test POST /editor qui crée un article avec du contenu contenant '<script>alert(1)</script>' et un attribut 'onerror=...', puis vérifie que le GET /article/:slug ne contient PAS ces éléments dans le HTML rendu. Valide que nh3.clean() est appliqué.",
+      "priority": "high"
+    },
+    {
+      "rule_id": "BR-048",
+      "action": "Ajouter une assertion dans les tests E2E ou API qui vérifie que la date affichée dans les articles/commentaires correspond au pattern regex /^[A-Z][a-z]+ \\d+, \\d{4}$/ (ex: 'April 15, 2026'). Critical pour migration car Angular utilise différents formats par défaut.",
+      "priority": "high"
+    },
+    {
+      "rule_id": "BR-032",
+      "action": "Ajouter tests API pour les cas limites des tags : (1) chaine vide → tous tags supprimés, (2) '  tag1  ,  tag2  ' → strip OK, (3) 'tag1,,tag2' → tag vide ignoré. Garantit iso-fonctionnalité du parseur CSV.",
+      "priority": "medium"
+    },
+    {
+      "rule_id": "BR-027",
+      "action": "Documenter dans les notes de migration que la cible doit répliquer le comportement cache : all_tags mis en cache 300s, invalidé uniquement sur article save (PAS sur delete). Ce bug légacy doit être reproduit intentionnellement.",
+      "priority": "medium"
+    },
+    {
+      "rule_id": "BR-024",
+      "action": "Ajouter un test E2E qui édite un article et vérifie que GET /article/:slug retourne un 'updated' différent de 'created', et que 'created' est identique à celui pré-édition.",
+      "priority": "medium"
+    },
+    {
+      "rule_id": "BR-045",
+      "action": "Dans wf001-login.spec.ts ou un test dédié : vérifier que le selector '.banner' est visible pour anonymous et absent pour authenticated. Simple assertion complémentaire à la visual baseline.",
+      "priority": "medium"
+    },
+    {
+      "rule_id": "BR-049",
+      "action": "Ajouter un test E2E sur la page article detail qui vérifie : (1) pour l'auteur : boutons Edit et Delete visibles, Follow et Favorite absents ; (2) pour un autre utilisateur auth : Follow et Favorite visibles, Edit et Delete absents ; (3) pour anonymous : aucun bouton.",
+      "priority": "medium"
+    }
+  ]
+}

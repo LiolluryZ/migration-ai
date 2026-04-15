@@ -1,0 +1,18 @@
+npm warn Unknown user config "msvs_version". This will stop working in the next major version of npm.
+npm warn Unknown user config "python". This will stop working in the next major version of npm.
+
+> test
+> jest --runInBand
+
+[api-setup] DB backed up ÔåÆ D:\workspace\migration IA\legacy\db.sqlite3.api-test-backup
+TypeError: Jest: Got error running globalSetup - D:\workspace\migration IA\migration-state\phase2\tests_api\__tests__\global-setup.ts, reason: fetch failed
+    at node:internal/deps/undici/undici:15845:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async HttpClient.get (D:\workspace\migration IA\migration-state\phase2\tests_api\__tests__\helpers\client.ts:66:21)
+    at async HttpClient.ensureLoggedIn (D:\workspace\migration IA\migration-state\phase2\tests_api\__tests__\helpers\client.ts:132:9)
+    at async seedAll (D:\workspace\migration IA\migration-state\phase2\tests_api\__tests__\helpers\seeder.ts:42:5)
+    at async globalSetup (D:\workspace\migration IA\migration-state\phase2\tests_api\__tests__\global-setup.ts:48:5)
+    at async D:\workspace\migration IA\migration-state\phase2\tests_api\node_modules\@jest\core\build\runGlobalHook.js:109:13
+    at async waitForPromiseWithCleanup (D:\workspace\migration IA\migration-state\phase2\tests_api\node_modules\@jest\transform\build\ScriptTransformer.js:160:5)
+    at async ScriptTransformer.requireAndTranspileModule (D:\workspace\migration IA\migration-state\phase2\tests_api\node_modules\@jest\transform\build\ScriptTransformer.js:808:16)
+    at async runGlobalHook (D:\workspace\migration IA\migration-state\phase2\tests_api\node_modules\@jest\core\build\runGlobalHook.js:101:9)

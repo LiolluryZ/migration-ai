@@ -1,0 +1,33 @@
+{
+  "file": "POST_register__duplicate_email__anonymous.json",
+  "endpoint": "POST /register",
+  "scenario": "duplicate_email",
+  "role": "anonymous",
+  "request": {
+    "method": "POST",
+    "path": "/register",
+    "headers": {},
+    "body": {
+      "username": "newuniqueuser99",
+      "email": "test@email.com",
+      "password": "{{PASSWORD}}"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 3338,
+      "has_error": true,
+      "error_expected": "email already taken or similar"
+    },
+    "response_time_ms": 1965
+  },
+  "linked_rules": [
+    "BR-002",
+    "BR-007",
+    "BR-016"
+  ]
+}

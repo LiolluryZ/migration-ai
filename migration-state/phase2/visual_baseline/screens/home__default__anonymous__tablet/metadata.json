@@ -1,0 +1,60 @@
+{
+  "route": "/",
+  "route_slug": "home",
+  "state": "default",
+  "role": "anonymous",
+  "viewport": "tablet",
+  "name": "Home - Global Feed",
+  "description": "Page d'accueil avec le flux global d'articles (anonymous)",
+  "navigation_path": [
+    "direct URL /"
+  ],
+  "ui_components": [
+    {
+      "type": "navbar",
+      "region": "top",
+      "description": "Navigation avec liens Sign in / Sign up",
+      "business_rules": [
+        "BR-007"
+      ]
+    },
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglets: Global Feed (actif)",
+      "business_rules": [
+        "BR-007"
+      ]
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Liste paginée des articles (boutons Favorite désactivés)",
+      "business_rules": [
+        "BR-010",
+        "BR-038"
+      ]
+    },
+    {
+      "type": "tag_sidebar",
+      "region": "right",
+      "description": "Tags populaires cliquables",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates de publication des articles"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-007",
+    "BR-010",
+    "BR-038"
+  ],
+  "captured_at": "2026-04-15T09:03:38.826Z"
+}

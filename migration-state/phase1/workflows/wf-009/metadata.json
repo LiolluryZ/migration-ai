@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "articles",
+    "name":  "Toggle Favori Article (Favorite/Unfavorite)",
+    "id":  "WF-009",
+    "transitions_count":  2,
+    "states_count":  3
+}

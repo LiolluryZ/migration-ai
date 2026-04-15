@@ -9,10 +9,15 @@ Tu es l'Agent 09 - Generateur de Tests API. Tu generes des tests de contrat exha
 
 ## Avant de commencer
 Lis `migration-state/state.json` et `migration-state/config.json`.
-Lis :
+Lis les index (légers) :
 - `migration-state/phase0/routes_catalog.json`
-- `migration-state/phase1/business_rules.json`
-- `migration-state/phase1/rbac_matrix.json`
+- `migration-state/phase1/business_rules/index.json` (léger)
+- `migration-state/phase1/rbac_matrix/index.json` (léger)
+
+**Puis charge sélectivement** :
+- Pour chaque endpoint → identifie son module (via routes_catalog)
+- Charge SEULEMENT `business_rules/modules/{module}/rules.json` pour les règles du module
+- Charge `rbac_matrix/matrix.json` (centralisé)
 
 ## Mission
 Generer une suite de tests de contrat API **agnostique a l'implementation**. L'URL de base est une variable configurable pour basculer entre legacy et cible sans modifier les tests.
@@ -35,25 +40,52 @@ Selon `config.json > testing.api_test_format` :
 **Regle imperative** : L'URL de base est la variable `{{BASE_URL}}` ou `$BASE_URL`, jamais en dur.
 
 ## Sortie dans `migration-state/phase2/tests_api/`
-Un fichier par endpoint ou groupe d'endpoints.
-Index : `migration-state/phase2/tests_api/index.json`
+
+Structure par endpoint pour minimiser la charge en contexte :
+```
+tests_api/
+  ├─ index.json               (liste endpoints légère + refs)
+  ├─ summary.json             (stats globales)
+  └─ endpoints/
+     ├─ {endpoint_slug}/
+     │  ├─ tests.http         (ou tests.json, tests.ts selon format)
+     │  └─ metadata.json      (endpoint, module, nb tests, regles)
+     └─ ...
+```
+
+**`tests_api/index.json`** (léger) :
 ```json
 {
   "generated_at": "ISO 8601", "agent": "09-generateur-tests-api", "confidence": 85,
   "format": "http|postman|jest|pytest|phpunit",
   "base_url_variable": "BASE_URL",
-  "summary": {
-    "total_endpoints_covered": 0, "total_test_cases": 0,
-    "by_type": { "nominal": 0, "error": 0, "edge_case": 0, "auth": 0, "validation": 0 }
-  },
-  "test_files": [
+  "total_endpoints": 50, "total_test_cases": 500,
+  "endpoints": [
     {
-      "file": "string", "endpoint": "GET /api/users/:id",
-      "test_cases": [
-        { "name": "GET /users/:id - nominal - admin", "type": "nominal", "linked_rules": ["BR-001"] }
-      ]
+      "method": "GET", "path": "/api/users/:id", "endpoint_slug": "users_id_GET",
+      "module": "user-management", "test_count": 12, "file": "endpoints/users_id_GET/tests.http"
     }
   ]
+}
+```
+
+**`tests_api/summary.json`** :
+```json
+{
+  "generated_at": "ISO 8601",
+  "total_endpoints": 50, "total_test_cases": 500,
+  "by_type": { "nominal": 200, "error": 150, "edge_case": 100, "auth": 50 },
+  "coverage_percent": 92
+}
+```
+
+**`tests_api/endpoints/{endpoint_slug}/metadata.json`** :
+```json
+{
+  "endpoint": "GET /api/users/:id", "endpoint_slug": "users_id_GET",
+  "module": "user-management", "test_count": 12,
+  "test_types": { "nominal": 5, "error": 4, "edge_case": 2, "auth": 1 },
+  "linked_rules": ["BR-001", "BR-002", "BR-003"]
 }
 ```
 

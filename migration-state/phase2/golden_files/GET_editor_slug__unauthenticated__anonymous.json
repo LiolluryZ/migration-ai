@@ -1,0 +1,26 @@
+{
+  "file": "GET_editor_slug__unauthenticated__anonymous.json",
+  "endpoint": "GET /editor/:slug",
+  "scenario": "unauthenticated",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/login?next=/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+    },
+    "body": {
+      "redirects_to_login": true
+    },
+    "response_time_ms": 5
+  },
+  "linked_rules": [
+    "BR-005"
+  ]
+}

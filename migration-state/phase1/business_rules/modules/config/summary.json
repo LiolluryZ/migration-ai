@@ -1,0 +1,13 @@
+﻿{
+    "module":  "config",
+    "by_type":  {
+                    "validation":  1,
+                    "constraint":  2
+                },
+    "by_domain":  {
+                      "security":  1,
+                      "i18n":  1,
+                      "authentication":  1
+                  },
+    "total_rules":  3
+}

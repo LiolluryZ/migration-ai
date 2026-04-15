@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-04-15T09:00:00Z",
+  "agent": "09-generateur-tests-api",
+  "total_endpoints": 17,
+  "total_test_cases": 100,
+  "by_type": {
+    "nominal": 46,
+    "error": 23,
+    "edge_case": 10,
+    "auth": 12,
+    "validation": 9
+  },
+  "by_module": {
+    "auth": { "endpoints": 7, "test_cases": 30 },
+    "feed": { "endpoints": 2, "test_cases": 11 },
+    "articles": { "endpoints": 5, "test_cases": 23 },
+    "social": { "endpoints": 2, "test_cases": 13 }
+  },
+  "coverage_percent": 92,
+  "format": "http"
+}

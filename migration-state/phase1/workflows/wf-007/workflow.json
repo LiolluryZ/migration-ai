@@ -1,0 +1,111 @@
+﻿{
+    "id":  "WF-007",
+    "name":  "Edition d\u0027Article",
+    "domain":  "articles",
+    "trigger":  "Auteur authentifie soumet ArticleForm en edition (POST /article/\u003cslug\u003e/edit, @login_required)",
+    "trigger_location":  {
+                             "file":  "apps/articles/views.py",
+                             "line":  118
+                         },
+    "states":  [
+                   {
+                       "name":  "editing_form",
+                       "description":  "Formulaire pre-rempli avec les donnees actuelles (title, description=summary, body=content, tags).",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "get_object_or_404(Article, slug=slug, author=request.user) (ref BR-034)",
+                                             "ArticleForm(initial={title, description: summary, body: content, tags: comma-separated})"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "saving_article",
+                       "description":  "Formulaire valide, mise a jour des champs, re-calcul des tags, invalidation du cache.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "_save_article_form(form, article)",
+                                             "article.tags.clear() â†’ re-add tags (ref BR-032)",
+                                             "cache.delete(\u0027all_tags\u0027) (ref BR-027)",
+                                             "IMPORTANT: slug NE change PAS a l\u0027edition (ref BR-023)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "article_updated",
+                       "description":  "Article mis a jour, redirection vers le detail.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "redirect(\u0027article_detail\u0027, slug=article.slug)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "editing_form",
+                            "to":  "saving_article",
+                            "condition":  "POST + ArticleForm.is_valid() + article.author == request.user (ref BR-034, BR-031)",
+                            "condition_rules":  [
+                                                    "BR-034",
+                                                    "BR-031",
+                                                    "BR-032",
+                                                    "BR-023"
+                                                ],
+                            "actions":  [
+                                            "_save_article_form(form, article)",
+                                            "slug inchange (BR-023)",
+                                            "cache.delete(\u0027all_tags\u0027) (BR-027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/articles/views.py",
+                                                    "function":  "article_edit_view",
+                                                    "line":  122
+                                                }
+                        },
+                        {
+                            "from":  "saving_article",
+                            "to":  "article_updated",
+                            "condition":  "Sauvegarde reussie",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027article_detail\u0027, slug=article.slug)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/articles/views.py",
+                                                    "function":  "article_edit_view",
+                                                    "line":  128
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "editing_form",
+                               "to":  "editing_form",
+                               "condition":  "Formulaire invalide",
+                               "rollback_actions":  [
+                                                        "render(\u0027articles/editor.html\u0027) avec erreurs"
+                                                    ]
+                           },
+                           {
+                               "from":  "editing_form",
+                               "to":  null,
+                               "condition":  "Utilisateur authentifie mais non-auteur tente l\u0027edition",
+                               "rollback_actions":  [
+                                                        "get_object_or_404 echoue (filtre author=request.user) â†’ 404 Not Found (pas 403, ref BR-034)"
+                                                    ]
+                           }
+                       ],
+    "confidence":  95,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e editing_form : GET /article/slug/edit\n  editing_form --\u003e saving_article : POST + form_valid + author==user\n  saving_article --\u003e article_updated : save() + tags + cache_delete\n  article_updated --\u003e [*] : redirect to article detail\n  editing_form --\u003e editing_form : POST + form_invalid\n  note right of editing_form : 404 si non-auteur (BR-034)\n  note right of saving_article : slug INCHANGE (BR-023)"
+}

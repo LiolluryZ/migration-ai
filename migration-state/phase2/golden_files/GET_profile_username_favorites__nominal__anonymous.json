@@ -1,0 +1,26 @@
+{
+  "file": "GET_profile_username_favorites__nominal__anonymous.json",
+  "endpoint": "GET /profile/:username/favorites",
+  "scenario": "nominal",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/profile/admin/favorites",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 3304
+    },
+    "response_time_ms": 13
+  },
+  "linked_rules": [
+    "BR-024",
+    "BR-048"
+  ]
+}

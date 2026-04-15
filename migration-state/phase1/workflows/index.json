@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "06-extracteur-workflows",
+  "confidence": 92,
+  "total_workflows": 11,
+  "total_states": 39,
+  "total_transitions": 36,
+  "workflows": [
+    {
+      "id": "WF-001",
+      "name": "Authentification (Login)",
+      "domain": "accounts",
+      "states_count": 4,
+      "transitions_count": 4,
+      "file": "workflows/wf-001/workflow.json"
+    },
+    {
+      "id": "WF-002",
+      "name": "Inscription Utilisateur (Register)",
+      "domain": "accounts",
+      "states_count": 4,
+      "transitions_count": 4,
+      "file": "workflows/wf-002/workflow.json"
+    },
+    {
+      "id": "WF-003",
+      "name": "Mise à Jour du Profil (Settings)",
+      "domain": "accounts",
+      "states_count": 3,
+      "transitions_count": 3,
+      "file": "workflows/wf-003/workflow.json"
+    },
+    {
+      "id": "WF-004",
+      "name": "Déconnexion (Logout)",
+      "domain": "accounts",
+      "states_count": 2,
+      "transitions_count": 2,
+      "file": "workflows/wf-004/workflow.json"
+    },
+    {
+      "id": "WF-005",
+      "name": "Suivre un Utilisateur (Follow)",
+      "domain": "social",
+      "states_count": 3,
+      "transitions_count": 3,
+      "file": "workflows/wf-005/workflow.json"
+    },
+    {
+      "id": "WF-006",
+      "name": "Créer un Article (Create)",
+      "domain": "articles",
+      "states_count": 3,
+      "transitions_count": 3,
+      "file": "workflows/wf-006/workflow.json"
+    },
+    {
+      "id": "WF-007",
+      "name": "Modifier un Article (Edit)",
+      "domain": "articles",
+      "states_count": 3,
+      "transitions_count": 3,
+      "file": "workflows/wf-007/workflow.json"
+    },
+    {
+      "id": "WF-008",
+      "name": "Supprimer un Article (Delete)",
+      "domain": "articles",
+      "states_count": 2,
+      "transitions_count": 2,
+      "file": "workflows/wf-008/workflow.json"
+    },
+    {
+      "id": "WF-009",
+      "name": "Favoriser un Article (Favorite)",
+      "domain": "articles",
+      "states_count": 2,
+      "transitions_count": 2,
+      "file": "workflows/wf-009/workflow.json"
+    },
+    {
+      "id": "WF-010",
+      "name": "Créer un Commentaire (Create)",
+      "domain": "comments",
+      "states_count": 2,
+      "transitions_count": 2,
+      "file": "workflows/wf-010/workflow.json"
+    },
+    {
+      "id": "WF-011",
+      "name": "Supprimer un Commentaire (Delete)",
+      "domain": "comments",
+      "states_count": 2,
+      "transitions_count": 2,
+      "file": "workflows/wf-011/workflow.json"
+    }
+  ]
+}

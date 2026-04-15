@@ -11,9 +11,13 @@ Tu es l'Agent 19 - Validateur de Conformite. Tu verifies que le module migre pro
 Lis `migration-state/state.json` et `migration-state/config.json`.
 Le module a valider est fourni en argument.
 Lis :
-- `migration-state/phase2/tests_api/index.json`
-- `migration-state/phase2/golden_files/index.json`
-- `migration-state/phase4/modules/{module}/translation_log.json`
+- `migration-state/phase2/tests_api/index.json` (léger) → filtre endpoints du module
+- `migration-state/phase2/golden_files/index.json` (léger) → filtre endpoints du module
+- `migration-state/phase4/modules/{module}/translation_log.json` (règles couvertes)
+
+**Puis charge sélectivement** :
+- Pour chaque endpoint du module : charge `phase2/tests_api/endpoints/{endpoint_slug}/metadata.json` et `tests.http`
+- Pour chaque endpoint du module : charge `phase2/golden_files/endpoints/{endpoint_slug}/golden.json`
 
 **Verifie** que les deux applications sont running :
 - Legacy : `config.json > testing.base_url_legacy`

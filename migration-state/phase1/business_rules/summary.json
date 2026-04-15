@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "05-extracteur-regles",
+  "total_rules": 54,
+  "by_type": {
+    "validation": 12,
+    "calculation": 2,
+    "authorization": 12,
+    "workflow": 3,
+    "transformation": 14,
+    "constraint": 11
+  },
+  "by_domain": {
+    "rendering": 4,
+    "error_handling": 1,
+    "authentication": 7,
+    "i18n": 1,
+    "security": 3,
+    "user_management": 5,
+    "social": 3,
+    "pagination": 3,
+    "articles": 9,
+    "tags": 3,
+    "favorites": 1,
+    "comments": 5,
+    "ui": 10,
+    "navigation": 1
+  },
+  "by_module": {
+    "helpers": 12,
+    "config": 4,
+    "accounts": 8,
+    "articles": 12,
+    "comments": 5,
+    "templates": 13
+  },
+  "confidence": 94,
+  "inconsistencies_found": 2,
+  "requiring_human_validation": 0
+}

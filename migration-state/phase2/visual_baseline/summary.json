@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-04-15T09:04:25.436Z",
+  "total_unique_screens": 17,
+  "total_screenshot_combinations": 51,
+  "coverage_by_role": {
+    "anonymous": 30,
+    "user": 21
+  },
+  "coverage_by_viewport": {
+    "desktop": 17,
+    "tablet": 17,
+    "mobile": 17
+  },
+  "total_dynamic_zones_masked": 30,
+  "viewports_captured": [
+    {
+      "label": "desktop",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "label": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "label": "mobile",
+      "width": 375,
+      "height": 812
+    }
+  ],
+  "screens_captured": [
+    "home__default__anonymous__desktop",
+    "home_tag__tag_filter__anonymous__desktop",
+    "article_detail__default__anonymous__desktop",
+    "article_detail__404__anonymous__desktop",
+    "login__default__anonymous__desktop",
+    "login__error__anonymous__desktop",
+    "register__default__anonymous__desktop",
+    "profile__default__anonymous__desktop",
+    "profile_favorites__default__anonymous__desktop",
+    "settings__redirect_unauthenticated__anonymous__desktop",
+    "home__default__user__desktop",
+    "home_following__following_feed__user__desktop",
+    "article_detail__default__user__desktop",
+    "editor__create__user__desktop",
+    "editor_edit__edit__user__desktop",
+    "settings__default__user__desktop",
+    "profile__default__user__desktop",
+    "home__default__anonymous__tablet",
+    "home_tag__tag_filter__anonymous__tablet",
+    "article_detail__default__anonymous__tablet",
+    "article_detail__404__anonymous__tablet",
+    "login__default__anonymous__tablet",
+    "login__error__anonymous__tablet",
+    "register__default__anonymous__tablet",
+    "profile__default__anonymous__tablet",
+    "profile_favorites__default__anonymous__tablet",
+    "settings__redirect_unauthenticated__anonymous__tablet",
+    "home__default__user__tablet",
+    "home_following__following_feed__user__tablet",
+    "article_detail__default__user__tablet",
+    "editor__create__user__tablet",
+    "editor_edit__edit__user__tablet",
+    "settings__default__user__tablet",
+    "profile__default__user__tablet",
+    "home__default__anonymous__mobile",
+    "home_tag__tag_filter__anonymous__mobile",
+    "article_detail__default__anonymous__mobile",
+    "article_detail__404__anonymous__mobile",
+    "login__default__anonymous__mobile",
+    "login__error__anonymous__mobile",
+    "register__default__anonymous__mobile",
+    "profile__default__anonymous__mobile",
+    "profile_favorites__default__anonymous__mobile",
+    "settings__redirect_unauthenticated__anonymous__mobile",
+    "home__default__user__mobile",
+    "home_following__following_feed__user__mobile",
+    "article_detail__default__user__mobile",
+    "editor__create__user__mobile",
+    "editor_edit__edit__user__mobile",
+    "settings__default__user__mobile",
+    "profile__default__user__mobile"
+  ]
+}

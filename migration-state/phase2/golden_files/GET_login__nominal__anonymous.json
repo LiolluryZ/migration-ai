@@ -1,0 +1,27 @@
+{
+  "file": "GET_login__nominal__anonymous.json",
+  "endpoint": "GET /login",
+  "scenario": "nominal",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/login",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 2944,
+      "has_form": true
+    },
+    "response_time_ms": 5
+  },
+  "linked_rules": [
+    "BR-007",
+    "BR-014"
+  ]
+}

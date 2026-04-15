@@ -1,0 +1,29 @@
+{
+  "file": "GET_root__nominal__anonymous.json",
+  "endpoint": "GET /",
+  "scenario": "nominal",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 15087,
+      "content_preview": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap\">\n  <link rel=\"stylesheet\" href=\"https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css\">\n  <link rel=\"stylesheet\" href=\"/static/css/styles.css\">\n  <script src=\"https...[HTML truncated]",
+      "contains_global_feed": true
+    },
+    "response_time_ms": 24
+  },
+  "linked_rules": [
+    "BR-001",
+    "BR-003",
+    "BR-031"
+  ]
+}

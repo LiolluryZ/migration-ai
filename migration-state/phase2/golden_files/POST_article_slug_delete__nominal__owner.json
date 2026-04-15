@@ -1,0 +1,30 @@
+{
+  "file": "POST_article_slug_delete__nominal__owner.json",
+  "endpoint": "POST /article/:slug/delete",
+  "scenario": "nominal",
+  "role": "owner",
+  "request": {
+    "method": "POST",
+    "path": "/article/golden-test-article-1776149922/delete",
+    "headers": {},
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/"
+    },
+    "body": {
+      "redirects_to": "/",
+      "article_deleted": true
+    },
+    "response_time_ms": 28
+  },
+  "linked_rules": [
+    "BR-034",
+    "BR-037"
+  ]
+}

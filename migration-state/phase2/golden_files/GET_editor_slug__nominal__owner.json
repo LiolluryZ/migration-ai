@@ -1,0 +1,29 @@
+{
+  "file": "GET_editor_slug__nominal__owner.json",
+  "endpoint": "GET /editor/:slug",
+  "scenario": "nominal",
+  "role": "owner",
+  "request": {
+    "method": "GET",
+    "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 9060,
+      "has_form": true,
+      "slug_tested": "teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+    },
+    "response_time_ms": 12
+  },
+  "linked_rules": [
+    "BR-005",
+    "BR-033",
+    "BR-034"
+  ]
+}

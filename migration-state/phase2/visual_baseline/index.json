@@ -1,0 +1,283 @@
+{
+  "generated_at": "2026-04-15T09:04:25.431Z",
+  "agent": "13-navigateur-visuel",
+  "confidence": 88,
+  "application": "legacy",
+  "base_url": "http://localhost:8000",
+  "total_unique_screens": 17,
+  "total_screenshots": 51,
+  "screens": [
+    {
+      "route": "/",
+      "route_slug": "home",
+      "state": "default",
+      "name": "Home - Global Feed",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/home__default__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/tag/intelligence-artificielle",
+      "route_slug": "home_tag",
+      "state": "tag_filter",
+      "name": "Home - Tag \"intelligence-artificielle\"",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/home_tag__tag_filter__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "route_slug": "article_detail",
+      "state": "default",
+      "name": "Article Detail (anonymous)",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/article_detail__default__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/article/this-article-does-not-exist-404",
+      "route_slug": "article_detail",
+      "state": "404",
+      "name": "Article Detail - 404",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/article_detail__404__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/login",
+      "route_slug": "login",
+      "state": "default",
+      "name": "Login",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/login__default__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/login",
+      "route_slug": "login",
+      "state": "error",
+      "name": "Login - Credentials invalides",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/login__error__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/register",
+      "route_slug": "register",
+      "state": "default",
+      "name": "Register - Formulaire d'inscription",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/register__default__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/profile/admin",
+      "route_slug": "profile",
+      "state": "default",
+      "name": "Profile - admin (anonymous)",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/profile__default__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/profile/admin/favorites",
+      "route_slug": "profile_favorites",
+      "state": "default",
+      "name": "Profile Favorites - admin",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/profile_favorites__default__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/settings → redirect /login?next=/settings",
+      "route_slug": "settings",
+      "state": "redirect_unauthenticated",
+      "name": "Settings - Redirect (non authentifié)",
+      "roles": [
+        "anonymous"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/settings__redirect_unauthenticated__anonymous__desktop/metadata.json"
+    },
+    {
+      "route": "/",
+      "route_slug": "home",
+      "state": "default",
+      "name": "Home - Global Feed (authentifié)",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/home__default__user__desktop/metadata.json"
+    },
+    {
+      "route": "/?feed=following",
+      "route_slug": "home_following",
+      "state": "following_feed",
+      "name": "Home - Your Feed (following)",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/home_following__following_feed__user__desktop/metadata.json"
+    },
+    {
+      "route": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "route_slug": "article_detail",
+      "state": "default",
+      "name": "Article Detail (propriétaire)",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/article_detail__default__user__desktop/metadata.json"
+    },
+    {
+      "route": "/editor",
+      "route_slug": "editor",
+      "state": "create",
+      "name": "Editor - Créer un article",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/editor__create__user__desktop/metadata.json"
+    },
+    {
+      "route": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "route_slug": "editor_edit",
+      "state": "edit",
+      "name": "Editor - Modifier un article",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/editor_edit__edit__user__desktop/metadata.json"
+    },
+    {
+      "route": "/settings",
+      "route_slug": "settings",
+      "state": "default",
+      "name": "Settings",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/settings__default__user__desktop/metadata.json"
+    },
+    {
+      "route": "/profile/admin",
+      "route_slug": "profile",
+      "state": "default",
+      "name": "Profile - admin (self)",
+      "roles": [
+        "user"
+      ],
+      "viewports": [
+        "desktop",
+        "tablet",
+        "mobile"
+      ],
+      "screenshots": 3,
+      "metadata_file": "screens/profile__default__user__desktop/metadata.json"
+    }
+  ]
+}

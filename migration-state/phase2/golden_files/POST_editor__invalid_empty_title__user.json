@@ -1,0 +1,33 @@
+{
+  "file": "POST_editor__invalid_empty_title__user.json",
+  "endpoint": "POST /editor",
+  "scenario": "invalid_empty_title",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/editor",
+    "headers": {},
+    "body": {
+      "title": "",
+      "description": "Description",
+      "body": "Body",
+      "tags": "",
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 5341,
+      "shows_form_again": true,
+      "has_error": true
+    },
+    "response_time_ms": 11
+  },
+  "linked_rules": [
+    "BR-033"
+  ]
+}

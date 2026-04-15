@@ -1,0 +1,225 @@
+﻿{
+    "module":  "comments",
+    "agent":  "05-extracteur-regles",
+    "rules":  [
+                  {
+                      "id":  "BR-039",
+                      "domain":  "comments",
+                      "module":  "comments",
+                      "summary":  "Le contenu d\u0027un commentaire est obligatoire (TextField sans blank=True). Le body est trimme (strip) et si vide, aucun commentaire n\u0027est cree mais la reponse HTMX est quand meme retournee.",
+                      "formal_expression":  "body = request.POST[\u0027body\u0027].strip(); IF body THEN create Comment ELSE skip (no error)",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/comments/views.py",
+                                                   "function":  "comment_create_view",
+                                                   "line_start":  15,
+                                                   "line_end":  17,
+                                                   "code_snippet":  "body = request.POST.get(\u0027body\u0027, \u0027\u0027).strip()\nif body:\n    Comment.objects.create(article=article, author=request.user, content=body)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Body compose uniquement d\u0027espaces",
+                                             "expected_behavior":  "Strip les rend vides, pas de creation"
+                                         },
+                                         {
+                                             "description":  "Body absent du POST",
+                                             "expected_behavior":  "Default a string vide, pas de creation"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-040",
+                      "domain":  "comments",
+                      "module":  "comments",
+                      "summary":  "La creation de commentaire necessite l\u0027authentification et la methode POST. L\u0027auteur est automatiquement l\u0027utilisateur courant. Le commentaire est lie a l\u0027article identifie par slug.",
+                      "formal_expression":  "@login_required AND @require_POST; comment.author = request.user; comment.article = get_by_slug",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/comments/views.py",
+                                                   "function":  "comment_create_view",
+                                                   "line_start":  11,
+                                                   "line_end":  17,
+                                                   "code_snippet":  "@login_required\n@require_POST\ndef comment_create_view(request, slug):\n    article = get_object_or_404(Article, slug=slug)\n    body = request.POST.get(\u0027body\u0027, \u0027\u0027).strip()\n    if body:\n        Comment.objects.create(article=article, author=request.user, content=body)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-005"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-041",
+                      "domain":  "comments",
+                      "module":  "comments",
+                      "summary":  "La suppression d\u0027un commentaire est autorisee pour DEUX roles : l\u0027auteur du commentaire OU l\u0027auteur de l\u0027article. Toute autre tentative retourne HTTP 403 Forbidden.",
+                      "formal_expression":  "IF comment.author == request.user OR article.author == request.user THEN delete ELSE 403 Forbidden",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/comments/views.py",
+                                                   "function":  "comment_delete_view",
+                                                   "line_start":  28,
+                                                   "line_end":  32,
+                                                   "code_snippet":  "comment = get_object_or_404(Comment, id=comment_id, article=article)\nif comment.author != request.user and article.author != request.user:\n    return HttpResponseForbidden()\ncomment.delete()"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur est l\u0027auteur de l\u0027article mais pas du commentaire",
+                                             "expected_behavior":  "Suppression autorisee (moderation par l\u0027auteur de l\u0027article)"
+                                         },
+                                         {
+                                             "description":  "Admin ou superuser",
+                                             "expected_behavior":  "Pas de privilege special dans le code (seulement via admin Django)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-042",
+                      "domain":  "rendering",
+                      "module":  "comments",
+                      "summary":  "Apres creation ou suppression de commentaire, une requete HTMX retourne le partial comment_list.html (liste complete des commentaires mise a jour). Une requete non-HTMX redirige vers le detail de l\u0027article.",
+                      "formal_expression":  "IF is_htmx THEN render(\u0027partials/comment_list.html\u0027, comments=article.comments.order_by(\u0027-created\u0027)) ELSE redirect(\u0027article_detail\u0027)",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/comments/views.py",
+                                                   "function":  "comment_create_view",
+                                                   "line_start":  18,
+                                                   "line_end":  21,
+                                                   "code_snippet":  "if is_htmx(request):\n    comments = article.comment_set.select_related(\u0027author\u0027).order_by(\u0027-created\u0027)\n    return render(request, \u0027partials/comment_list.html\u0027, {\u0027comments\u0027: comments, \u0027article\u0027: article})\nreturn redirect(\u0027article_detail\u0027, slug=slug)"
+                                               },
+                                               {
+                                                   "file":  "apps/comments/views.py",
+                                                   "function":  "comment_delete_view",
+                                                   "line_start":  33,
+                                                   "line_end":  36,
+                                                   "code_snippet":  "if is_htmx(request):\n    comments = article.comment_set.select_related(\u0027author\u0027).order_by(\u0027-created\u0027)\n    return render(request, \u0027partials/comment_list.html\u0027, {\u0027comments\u0027: comments, \u0027article\u0027: article})\nreturn redirect(\u0027article_detail\u0027, slug=slug)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-001"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-043",
+                      "domain":  "comments",
+                      "module":  "comments",
+                      "summary":  "Un commentaire est lie a un article et un auteur par FK avec ON DELETE CASCADE. La suppression d\u0027un article entraine la suppression de tous ses commentaires. La suppression d\u0027un utilisateur aussi.",
+                      "formal_expression":  "comment.article: FK(Article, CASCADE); comment.author: FK(User, CASCADE)",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/comments/models.py",
+                                                   "function":  "Comment",
+                                                   "line_start":  6,
+                                                   "line_end":  11,
+                                                   "code_snippet":  "class Comment(models.Model):\n    article = models.ForeignKey(Article, on_delete=models.CASCADE)\n    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)\n    content = models.TextField()\n    created = models.DateTimeField(auto_now_add=True, db_index=True)\n    updated = models.DateTimeField(auto_now=True)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-022",
+                                           "BR-007"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-044",
+                      "domain":  "comments",
+                      "module":  "comments",
+                      "summary":  "La suppression de commentaire necessite l\u0027authentification et la methode POST. Le commentaire est identifie par son ID numerique dans l\u0027URL, et doit appartenir a l\u0027article identifie par slug.",
+                      "formal_expression":  "@login_required AND @require_POST; comment = get_by(id=comment_id, article=get_by(slug=slug))",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/comments/views.py",
+                                                   "function":  "comment_delete_view",
+                                                   "line_start":  25,
+                                                   "line_end":  29,
+                                                   "code_snippet":  "@login_required\n@require_POST\ndef comment_delete_view(request, slug, comment_id):\n    article = get_object_or_404(Article, slug=slug)\n    comment = get_object_or_404(Comment, id=comment_id, article=article)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-041"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "comment_id valide mais n\u0027appartient pas a l\u0027article du slug",
+                                             "expected_behavior":  "404 Not Found"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  }
+              ],
+    "total_rules":  6,
+    "generated_at":  "2026-04-15T07:50:00.8936224ZZ"
+}

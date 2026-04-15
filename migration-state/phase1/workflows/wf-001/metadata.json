@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "accounts",
+    "name":  "Authentification (Login)",
+    "id":  "WF-001",
+    "transitions_count":  4,
+    "states_count":  4
+}

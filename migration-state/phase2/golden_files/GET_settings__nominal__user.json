@@ -1,0 +1,30 @@
+{
+  "file": "GET_settings__nominal__user.json",
+  "endpoint": "GET /settings",
+  "scenario": "nominal",
+  "role": "user",
+  "request": {
+    "method": "GET",
+    "path": "/settings",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 4316,
+      "has_form": true,
+      "username_in_page": true
+    },
+    "response_time_ms": 14
+  },
+  "linked_rules": [
+    "BR-005",
+    "BR-007",
+    "BR-009",
+    "BR-021"
+  ]
+}

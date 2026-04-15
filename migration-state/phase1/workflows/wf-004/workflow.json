@@ -1,0 +1,68 @@
+﻿{
+    "id":  "WF-004",
+    "name":  "Deconnexion (Logout)",
+    "domain":  "accounts",
+    "trigger":  "Utilisateur soumet le formulaire de deconnexion (POST /logout, @require_POST)",
+    "trigger_location":  {
+                             "file":  "apps/accounts/views.py",
+                             "line":  72
+                         },
+    "states":  [
+                   {
+                       "name":  "session_active",
+                       "description":  "Session utilisateur active (authentifie ou anonyme).",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "logged_out",
+                       "description":  "Session detruite, utilisateur redevenu anonyme, redirection vers home.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "logout(request)",
+                                             "redirect(\u0027home\u0027)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "session_active",
+                            "to":  "logged_out",
+                            "condition":  "POST /logout (ref BR-016)",
+                            "condition_rules":  [
+                                                    "BR-016"
+                                                ],
+                            "actions":  [
+                                            "logout(request)",
+                                            "redirect(\u0027home\u0027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "logout_view",
+                                                    "line":  73
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "session_active",
+                               "to":  "session_active",
+                               "condition":  "GET /logout (methode non autorisee)",
+                               "rollback_actions":  [
+                                                        "Django retourne automatiquement HTTP 405 Method Not Allowed (@require_POST)"
+                                                    ]
+                           }
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e session_active\n  session_active --\u003e logged_out : POST /logout (BR-016)\n  logged_out --\u003e [*] : redirect to home\n  note right of session_active : GET /logout â†’ HTTP 405"
+}

@@ -1,0 +1,31 @@
+{
+  "file": "POST_article_slug_comment__empty_body__user.json",
+  "endpoint": "POST /article/:slug/comment",
+  "scenario": "empty_body",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment",
+    "headers": {
+      "HX-Request": "true"
+    },
+    "body": {
+      "body": "",
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 1424,
+      "silently_ignored": true
+    },
+    "response_time_ms": 13
+  },
+  "linked_rules": [
+    "BR-052"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "07-extracteur-rbac",
+  "confidence": 95,
+  "total_roles": 3,
+  "total_resources": 10,
+  "total_permissions": 34,
+  "roles": [
+    {
+      "name": "anonymous",
+      "description": "Visiteur non authentifié",
+      "inherited_by": [],
+      "permissions_count": 8
+    },
+    {
+      "name": "authenticated",
+      "description": "Utilisateur connecté",
+      "inherited_by": ["staff"],
+      "permissions_count": 21
+    },
+    {
+      "name": "staff",
+      "description": "Administrateur",
+      "inherited_by": [],
+      "permissions_count": 5
+    }
+  ],
+  "resources": [
+    "home_feed", "article_detail", "article_create", "article_edit",
+    "article_delete", "comment_create", "comment_delete", "profile",
+    "profile_follow", "settings"
+  ],
+  "matrix_file": "rbac_matrix/matrix.json"
+}

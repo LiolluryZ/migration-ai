@@ -1,0 +1,18 @@
+﻿{
+    "module":  "accounts",
+    "by_type":  {
+                    "workflow":  3,
+                    "transformation":  1,
+                    "validation":  4,
+                    "authorization":  3,
+                    "constraint":  3,
+                    "calculation":  1
+                },
+    "by_domain":  {
+                      "pagination":  1,
+                      "user_management":  6,
+                      "authentication":  5,
+                      "social":  3
+                  },
+    "total_rules":  15
+}

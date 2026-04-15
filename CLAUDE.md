@@ -73,6 +73,45 @@ L'agent `migration-init` copie les templates vers `./migration-state/` puis remp
 - **claude-sonnet-4-6** : Agents standard (orchestrateur, init, 01-04, 06-17, 19-20, 24)
 - **claude-haiku-4-5** : Agent status (lecture seule, reponse rapide)
 
+### Phase 2 - Architecture Modulable (Index + Chunking)
+
+Phase 2 produit des données volumineuses (100s de tests, 100s de golden files, 100s de screenshots). Pour minimiser la charge contexte des agents Phase 4/5, la structure est modulable via des **index légers** et un **découpage par endpoint/écran**.
+
+**Structure** :
+```
+phase2/
+  tests_api/
+    ├─ index.json           <- liste endpoints + stats globales (léger)
+    ├─ summary.json         <- stats synthétiques
+    └─ endpoints/
+       └─ {endpoint_slug}/
+          ├─ tests.http     <- tests de cet endpoint uniquement
+          └─ metadata.json  <- endpoint, module, nb tests, regles
+
+  golden_files/
+    ├─ index.json           <- liste endpoints + stats (léger)
+    ├─ summary.json         <- normalization rules, perf baseline
+    └─ endpoints/
+       └─ {endpoint_slug}/
+          ├─ golden.json    <- réponses normalisées de cet endpoint
+          └─ metadata.json  <- endpoint, module, scenarios
+
+  visual_baseline/
+    ├─ index.json           <- liste screens + stats (léger)
+    ├─ summary.json         <- coverage par role/viewport
+    └─ screens/
+       └─ {route_slug}__{state}__{role}__{viewport}/
+          ├─ screenshot.png
+          ├─ screenshot_normalized.png
+          └─ metadata.json  <- écran, composants, zones dynamiques
+```
+
+**Chargement sélectif (Phase 4/5)** :
+- Agent 19 (validateur) : lis index → filtre par module → charge seulement les endpoints du module
+- Agent 14 (diff visuel, mode module) : lis index → filtre par routes du module → charge seulement ces screens
+
+Cela réduit la charge contexte de ~50MB → ~2MB par module.
+
 ### Regles
 - Chaque agent est **stateless** : il lit ses entrees depuis `migration-state/`, produit ses sorties, et met a jour `state.json`
 - **ZERO ajout de fonctionnalite** : la migration doit etre iso-fonctionnelle

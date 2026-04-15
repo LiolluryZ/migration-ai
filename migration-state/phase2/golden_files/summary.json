@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-04-15T09:00:00Z",
+  "agent": "11-golden-file",
+  "total_endpoints": 10,
+  "total_test_cases": 21,
+  "by_module": {
+    "auth": { "endpoints": 3, "test_cases": 4 },
+    "feed": { "endpoints": 2, "test_cases": 5 },
+    "articles": { "endpoints": 3, "test_cases": 7 },
+    "social": { "endpoints": 2, "test_cases": 5 }
+  },
+  "coverage_percent": 87,
+  "normalization_rules": [
+    { "pattern": "UUID v4 regex", "replacement": "{{UUID}}" },
+    { "pattern": "ISO 8601 timestamp", "replacement": "{{TIMESTAMP}}" },
+    { "pattern": "JWT/session token", "replacement": "{{TOKEN}}" }
+  ],
+  "avg_response_time_ms": 52
+}

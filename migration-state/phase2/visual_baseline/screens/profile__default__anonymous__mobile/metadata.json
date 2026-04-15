@@ -1,0 +1,49 @@
+{
+  "route": "/profile/admin",
+  "route_slug": "profile",
+  "state": "default",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "name": "Profile - admin (anonymous)",
+  "description": "Page de profil vue par un visiteur non connecté",
+  "navigation_path": [
+    "click author name on article"
+  ],
+  "ui_components": [
+    {
+      "type": "profile_header",
+      "region": "top",
+      "description": "Avatar (url), username, bio, bouton Follow (BR-047)",
+      "business_rules": [
+        "BR-047",
+        "BR-048"
+      ]
+    },
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglets: My Articles / Favorited Articles",
+      "business_rules": []
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Articles publiés par l'utilisateur",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /profile/admin"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates de publication"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-047",
+    "BR-048"
+  ],
+  "captured_at": "2026-04-15T09:04:11.782Z"
+}

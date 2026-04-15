@@ -1,0 +1,12 @@
+﻿{
+    "module":  "helpers",
+    "by_type":  {
+                    "transformation":  3
+                },
+    "by_domain":  {
+                      "rendering":  1,
+                      "authentication":  1,
+                      "error_handling":  1
+                  },
+    "total_rules":  3
+}

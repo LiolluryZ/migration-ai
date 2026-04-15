@@ -1,0 +1,329 @@
+# =============================================================================
+# CONTRACT TESTS — Articles CRUD
+# =============================================================================
+# Format      : REST Client (.http) — VS Code extension
+# Environment : select "legacy" or "target" in the VS Code status bar
+#
+# Endpoints covered:
+#   GET  /article/<slug>           article_detail_view
+#   GET  /editor                   article_create_view (form)
+#   POST /editor                   article_create_view (submit)
+#   GET  /editor/<slug>            article_edit_view   (form)
+#   POST /editor/<slug>            article_edit_view   (submit)
+#   POST /article/<slug>/delete    article_delete_view
+#
+# REQUIRED TEST DATA
+# ------------------
+# • TEST_ARTICLE_SLUG  : slug of an article authored by TEST_USER
+# • OTHER_ARTICLE_SLUG : slug of an article authored by OTHER_USER
+# • TEST_USER logged in (run auth.http "LOGIN - Nominal" first)
+# • OTHER_USER account exists (for ownership-violation tests)
+#
+# Business rules covered:
+#   BR-022, BR-023, BR-024, BR-025, BR-030, BR-031, BR-032,
+#   BR-033, BR-034, BR-035
+# =============================================================================
+
+@BASE_URL           = {{BASE_URL}}
+@CSRF               = {{csrftoken}}
+@TEST_ARTICLE_SLUG  = {{TEST_ARTICLE_SLUG}}
+@OTHER_ARTICLE_SLUG = {{OTHER_ARTICLE_SLUG}}
+
+
+# ============================================================================
+# ARTICLE DETAIL  —  GET /article/<slug>
+# ============================================================================
+
+### ARTICLE DETAIL - Nominal - Public article, anonymous viewer
+# Pre-condition : Article with TEST_ARTICLE_SLUG exists
+# Expected      : HTTP 200, HTML article page with content, author, comments section
+# BR            : BR-030
+GET {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+
+
+###
+
+### ARTICLE DETAIL - Not found - Unknown slug
+# Pre-condition : No article with slug "nonexistent-article-slug-xyz-000" exists
+# Expected      : HTTP 404, custom detail_404.html template (slug in context)
+# BR            : BR-030 (Article.DoesNotExist → render detail_404.html status=404)
+GET {{BASE_URL}}/article/nonexistent-article-slug-xyz-000 HTTP/1.1
+
+
+###
+
+### ARTICLE DETAIL - Nominal - Authenticated user sees interaction controls
+# Pre-condition : Logged in as TEST_USER, article exists
+# Expected      : HTTP 200, HTML contains favorite button and follow button
+# BR            : BR-025 (is_favorite annotated), BR-030
+GET {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# ARTICLE CREATE  —  GET /editor
+# ============================================================================
+
+### ARTICLE CREATE - Nominal - Display blank editor form (authenticated)
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 200, HTML editor form with empty fields
+# BR            : BR-033 (@login_required)
+GET {{BASE_URL}}/editor HTTP/1.1
+
+
+###
+
+### ARTICLE CREATE - Auth required - Anonymous redirected to login
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login?next=/editor
+# BR            : BR-005, BR-033
+GET {{BASE_URL}}/editor HTTP/1.1
+Cookie: sessionid=contract_test_invalid_session_000
+
+
+###
+
+
+# ============================================================================
+# ARTICLE CREATE  —  POST /editor
+# ============================================================================
+
+### ARTICLE CREATE - Nominal - Valid article with tags
+# Pre-condition : Logged in as TEST_USER; title "New Contract Test Article" is unique
+# Expected      : HTTP 302 redirect to /article/new-contract-test-article
+# BR            : BR-023 (slug = slugify(title)), BR-031 (form→model mapping),
+#                 BR-032 (tag processing), BR-033 (author = request.user)
+# Teardown      : delete the created article (slug: new-contract-test-article)
+POST {{BASE_URL}}/editor HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=New Contract Test Article&description=Summary for contract test&body=# Test Content%0A%0AThis is the article body written in Markdown.&tags=contract,testing&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE CREATE - Nominal - Minimal article (no optional fields)
+# Pre-condition : Logged in as TEST_USER; title "Minimal Contract Test Article" is unique
+# Expected      : HTTP 302 redirect to /article/minimal-contract-test-article
+# BR            : BR-022 (description and body optional, default '')
+# Teardown      : delete created article
+POST {{BASE_URL}}/editor HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=Minimal Contract Test Article&description=&body=&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE CREATE - Validation - Missing required title
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 200, form re-rendered with validation error on title field
+# BR            : BR-022 (title is required, blank=False)
+POST {{BASE_URL}}/editor HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=&description=Some description&body=Some content&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE CREATE - Validation - Title exceeds 150 characters
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 200, form validation error on title (max_length=150)
+# BR            : BR-022 (title max_length=150)
+POST {{BASE_URL}}/editor HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=This title is deliberately crafted to exceed the maximum allowed length of one hundred and fifty characters imposed on article titles in this application&description=&body=&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE CREATE - Auth required - Anonymous POST redirected
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login?next=/editor
+# BR            : BR-033
+POST {{BASE_URL}}/editor HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+title=Test Article&description=&body=&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE CREATE - Edge case - Tags with extra spaces and consecutive commas
+# Pre-condition : Logged in as TEST_USER; title "Article With Edge Case Tags" is unique
+# Expected      : HTTP 302, article saved with only "tag1" and "tag2" (empty segments skipped)
+# BR            : BR-032 (strip() + skip empty segments)
+# Teardown      : delete created article
+POST {{BASE_URL}}/editor HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=Article With Edge Case Tags&description=&body=&tags=+tag1+%2C+%2C+tag2+%2C&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+
+# ============================================================================
+# ARTICLE EDIT  —  GET /editor/<slug>
+# ============================================================================
+
+### ARTICLE EDIT - Nominal - Article author views pre-filled edit form
+# Pre-condition : Logged in as TEST_USER; TEST_ARTICLE_SLUG is owned by TEST_USER
+# Expected      : HTTP 200, HTML editor form pre-filled with current article data
+# BR            : BR-034
+GET {{BASE_URL}}/editor/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+
+
+###
+
+### ARTICLE EDIT - Auth required - Anonymous redirected to login
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login?next=/editor/<slug>
+# BR            : BR-034
+GET {{BASE_URL}}/editor/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+Cookie: sessionid=contract_test_invalid_session_000
+
+
+###
+
+### ARTICLE EDIT - Authorization - Non-owner receives 404 (not 403)
+# Pre-condition : Logged in as TEST_USER; OTHER_ARTICLE_SLUG is owned by OTHER_USER
+# Expected      : HTTP 404 (intentional — ownership enforced via get_object_or_404
+#                 with author=request.user filter; non-owner appears as not-found)
+# BR            : BR-034 (NOTE: 404 not 403 is the specified behavior)
+GET {{BASE_URL}}/editor/{{OTHER_ARTICLE_SLUG}} HTTP/1.1
+
+
+###
+
+### ARTICLE EDIT - Not found - Slug does not exist
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 404
+# BR            : BR-034 (get_object_or_404)
+GET {{BASE_URL}}/editor/nonexistent-article-slug-xyz-000 HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# ARTICLE EDIT  —  POST /editor/<slug>
+# ============================================================================
+
+### ARTICLE EDIT - Nominal - Author successfully updates article
+# Pre-condition : Logged in as TEST_USER; TEST_ARTICLE_SLUG is owned by TEST_USER
+# Expected      : HTTP 302 redirect to /article/TEST_ARTICLE_SLUG
+#                 (slug NOT regenerated even if title changes — BR-023)
+# BR            : BR-023 (slug immutable after creation), BR-031, BR-032, BR-034
+POST {{BASE_URL}}/editor/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=Updated Contract Test Article&description=Updated summary&body=Updated Markdown content.&tags=updated,contract&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE EDIT - Nominal - Remove all tags (clear)
+# Pre-condition : Logged in as TEST_USER; TEST_ARTICLE_SLUG has existing tags
+# Expected      : HTTP 302, article saved with zero tags
+# BR            : BR-032 (tags.clear() when tag_string is empty)
+POST {{BASE_URL}}/editor/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title={{TEST_ARTICLE_SLUG}}&description=&body=&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE EDIT - Authorization - Non-owner POST returns 404
+# Pre-condition : Logged in as TEST_USER; OTHER_ARTICLE_SLUG is owned by OTHER_USER
+# Expected      : HTTP 404 (get_object_or_404 with author=request.user)
+# BR            : BR-034
+POST {{BASE_URL}}/editor/{{OTHER_ARTICLE_SLUG}} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=Attempted Hijack Edit&description=&body=&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE EDIT - Validation - Missing required title on update
+# Pre-condition : Logged in as TEST_USER; TEST_ARTICLE_SLUG owned by TEST_USER
+# Expected      : HTTP 200, form re-rendered with validation error on title
+# BR            : BR-022
+POST {{BASE_URL}}/editor/{{TEST_ARTICLE_SLUG}} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+title=&description=Some updated content&body=Updated body&tags=&csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+
+# ============================================================================
+# ARTICLE DELETE  —  POST /article/<slug>/delete
+# ============================================================================
+
+### ARTICLE DELETE - Nominal - Author deletes own article
+# Pre-condition : Logged in as TEST_USER; TEST_ARTICLE_SLUG is owned by TEST_USER
+# Expected      : HTTP 302 redirect to /
+# BR            : BR-035 (@login_required, @require_POST, author check, redirect home)
+# Teardown      : article no longer exists
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE DELETE - Auth required - Anonymous redirected
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-035 (@login_required)
+POST {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE DELETE - Authorization - Non-owner receives 404
+# Pre-condition : Logged in as TEST_USER; OTHER_ARTICLE_SLUG owned by OTHER_USER
+# Expected      : HTTP 404 (get_object_or_404 with author=request.user)
+# BR            : BR-035
+POST {{BASE_URL}}/article/{{OTHER_ARTICLE_SLUG}}/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE DELETE - Not found - Nonexistent slug
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 404
+# BR            : BR-035 (get_object_or_404)
+POST {{BASE_URL}}/article/nonexistent-article-slug-xyz-000/delete HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### ARTICLE DELETE - Error - Method Not Allowed on GET
+# Pre-condition : none
+# Expected      : HTTP 405 Method Not Allowed
+# BR            : BR-035 (@require_POST)
+GET {{BASE_URL}}/article/{{TEST_ARTICLE_SLUG}}/delete HTTP/1.1
+
+
+###

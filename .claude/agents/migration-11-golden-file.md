@@ -36,30 +36,59 @@ Avant de sauvegarder, remplace :
 - Garde les **donnees metier intactes** (noms, montants, statuts)
 
 ## Sortie dans `migration-state/phase2/golden_files/`
-Convention : `{METHOD}_{path_slug}__{scenario}__{role}.json`
-Exemple : `GET_api_users_id__nominal__admin.json`
 
-Index : `migration-state/phase2/golden_files/index.json`
+Structure modulable pour minimiser les charges contextuelles :
+```
+golden_files/
+  ├─ index.json               (liste endpoints + refs)
+  ├─ summary.json             (stats globales)
+  ├─ endpoints/
+  │  ├─ {endpoint_slug}/
+  │  │  ├─ golden.json        (agrégation de tous les scénarios/rôles pour cet endpoint)
+  │  │  └─ metadata.json      (endpoint, module, scenarios couverts)
+  │  └─ ...
+  └─ legacy/                  (fichiers non-normalisés pour archive)
+     └─ {METHOD}_{path_slug}__{scenario}__{role}.json
+```
+
+**`golden_files/index.json`** (léger) :
 ```json
 {
   "generated_at": "ISO 8601", "agent": "11-golden-file", "confidence": 90,
-  "application": "legacy",
-  "base_url": "string",
-  "fixtures_description": "string",
-  "normalization_rules": [
-    { "pattern": "UUID v4 regex", "replacement": "{{UUID}}" }
-  ],
-  "summary": { "total_golden_files": 0, "total_endpoints_covered": 0 },
-  "golden_files": [
+  "application": "legacy", "base_url": "string",
+  "total_endpoints": 50, "total_golden_files": 200,
+  "endpoints": [
     {
-      "file": "string", "endpoint": "GET /api/users/:id",
+      "method": "GET", "path": "/api/users/:id", "endpoint_slug": "users_id_GET",
+      "module": "user-management", "scenarios": ["nominal", "not_found", "unauthorized"],
+      "file": "endpoints/users_id_GET/golden.json"
+    }
+  ]
+}
+```
+
+**`golden_files/summary.json`** :
+```json
+{
+  "generated_at": "ISO 8601", "total_endpoints": 50, "total_test_cases": 200,
+  "normalization_rules": [
+    { "pattern": "UUID v4", "replacement": "{{UUID}}" },
+    { "pattern": "ISO 8601 timestamp", "replacement": "{{TIMESTAMP}}" }
+  ],
+  "avg_response_time_ms": 75
+}
+```
+
+**`golden_files/endpoints/{endpoint_slug}/golden.json`** :
+```json
+{
+  "endpoint": "GET /api/users/:id", "endpoint_slug": "users_id_GET",
+  "module": "user-management",
+  "test_cases": [
+    {
       "scenario": "nominal", "role": "admin",
-      "request": { "method": "GET", "path": "/api/users/1", "headers": {}, "body": null },
-      "response": {
-        "status": 200, "headers": { "content_type": "application/json" },
-        "body": { "id": "{{USER_ID}}", "name": "John Doe", "role": "admin", "created_at": "{{TIMESTAMP}}" },
-        "response_time_ms": 45
-      },
+      "request": { "method": "GET", "path": "/api/users/1" },
+      "response": { "status": 200, "body": { "id": "{{USER_ID}}", ... } },
       "linked_rules": ["BR-001"]
     }
   ]

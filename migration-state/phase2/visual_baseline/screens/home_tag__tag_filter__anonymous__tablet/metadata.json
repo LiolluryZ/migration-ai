@@ -1,0 +1,37 @@
+{
+  "route": "/tag/intelligence-artificielle",
+  "route_slug": "home_tag",
+  "state": "tag_filter",
+  "role": "anonymous",
+  "viewport": "tablet",
+  "name": "Home - Tag \"intelligence-artificielle\"",
+  "description": "Flux filtré par le tag \"intelligence-artificielle\"",
+  "navigation_path": [
+    "click tag in right sidebar"
+  ],
+  "ui_components": [
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglet actif: \"#intelligence-artificielle\"",
+      "business_rules": []
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Articles portant le tag intelligence-artificielle",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /tag/intelligence-artificielle"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates de publication"
+    }
+  ],
+  "business_rules_observed": [],
+  "captured_at": "2026-04-15T09:03:39.597Z"
+}

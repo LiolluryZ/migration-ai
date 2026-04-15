@@ -1,0 +1,14 @@
+﻿{
+    "module":  "comments",
+    "by_type":  {
+                    "authorization":  3,
+                    "validation":  1,
+                    "transformation":  1,
+                    "constraint":  1
+                },
+    "by_domain":  {
+                      "comments":  5,
+                      "rendering":  1
+                  },
+    "total_rules":  6
+}

@@ -1,0 +1,28 @@
+{
+  "file": "POST_article_slug_delete__not_found__user.json",
+  "endpoint": "POST /article/:slug/delete",
+  "scenario": "not_found",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/article/totally-nonexistent-article-xyz/delete",
+    "headers": {},
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "error": "article not found or not owner"
+    },
+    "response_time_ms": 17
+  },
+  "linked_rules": [
+    "BR-034",
+    "BR-037"
+  ]
+}

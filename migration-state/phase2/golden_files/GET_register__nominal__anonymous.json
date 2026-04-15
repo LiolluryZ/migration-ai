@@ -1,0 +1,27 @@
+{
+  "file": "GET_register__nominal__anonymous.json",
+  "endpoint": "GET /register",
+  "scenario": "nominal",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/register",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 3173,
+      "has_form": true
+    },
+    "response_time_ms": 6
+  },
+  "linked_rules": [
+    "BR-007",
+    "BR-016"
+  ]
+}

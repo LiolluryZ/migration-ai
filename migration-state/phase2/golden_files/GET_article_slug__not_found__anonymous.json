@@ -1,0 +1,25 @@
+{
+  "file": "GET_article_slug__not_found__anonymous.json",
+  "endpoint": "GET /article/:slug",
+  "scenario": "not_found",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/article/nonexistent-article-xyz-999",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "error": "article not found"
+    },
+    "response_time_ms": 11
+  },
+  "linked_rules": [
+    "BR-036"
+  ]
+}

@@ -1,0 +1,241 @@
+{
+  "generated_at": "2026-04-14T00:00:00Z",
+  "agent": "10-generateur-tests-e2e",
+  "confidence": 78,
+  "framework": "playwright",
+  "base_url_var": "BASE_URL",
+  "base_url_default": "http://localhost:8000",
+  "notes": "Tests generes a partir des 11 workflows (WF-001..WF-011). Selecteurs robustes : getByPlaceholder (widgets Django sans label explicite), getByRole, locator par id/class semantique. HTMX : waitForResponse sur les endpoints HTMX avant assertions DOM. Le test user seed (test@email.com/test) doit etre pre-charge en base. Les tests d'inscription utilisent des emails/usernames uniques horodates pour l'isolation.",
+  "summary": {
+    "total_workflows_covered": 11,
+    "total_test_scripts": 11,
+    "total_test_cases": 43,
+    "by_type": {
+      "nominal": 19,
+      "error": 14,
+      "permission": 10
+    },
+    "infrastructure_files": [
+      "playwright.config.ts",
+      "helpers/auth.ts"
+    ]
+  },
+  "test_files": [
+    {
+      "file": "wf001-login.spec.ts",
+      "workflow": "WF-001",
+      "name": "Authentification (Login)",
+      "role": "anonymous",
+      "type": "nominal|error",
+      "steps": [
+        "Naviguer vers /login",
+        "Remplir email + password",
+        "Cliquer 'Sign in'",
+        "Verifier redirection vers / ou message d'erreur .error-messages"
+      ],
+      "linked_rules": ["BR-011", "BR-012"],
+      "test_cases": [
+        "WF-001-NOM : Credentials valides → redirect /",
+        "WF-001-ERR-1 : Mot de passe incorrect → message generique",
+        "WF-001-ERR-2 : Email inconnu → message generique",
+        "WF-001-ERR-3 : Formulaire vide → reste sur /login"
+      ]
+    },
+    {
+      "file": "wf002-register.spec.ts",
+      "workflow": "WF-002",
+      "name": "Inscription Utilisateur (Register)",
+      "role": "anonymous",
+      "type": "nominal|error",
+      "steps": [
+        "Naviguer vers /register",
+        "Remplir username, email, password",
+        "Cliquer 'Sign up'",
+        "Verifier redirect / et session active, ou message d'erreur"
+      ],
+      "linked_rules": ["BR-002", "BR-013", "BR-014"],
+      "test_cases": [
+        "WF-002-NOM : Inscription valide → auto-login + redirect /",
+        "WF-002-ERR-1 : Email duplique → 'already been taken' + rollback",
+        "WF-002-ERR-2 : Username duplique → 'already been taken' + rollback",
+        "WF-002-ERR-3 : Formulaire vide → reste sur /register"
+      ]
+    },
+    {
+      "file": "wf003-settings.spec.ts",
+      "workflow": "WF-003",
+      "name": "Modification des Parametres Utilisateur (Settings)",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /settings (authentifie)",
+        "Modifier bio ou mot de passe",
+        "Cliquer 'Update Settings'",
+        "Verifier redirect /profile/<username>"
+      ],
+      "linked_rules": ["BR-015", "BR-020"],
+      "test_cases": [
+        "WF-003-PERM : Anonyme → redirect /login?next=/settings",
+        "WF-003-NOM-1 : Mise a jour bio → redirect profil, bio visible",
+        "WF-003-NOM-2 : Changement MDP → re-login interne, session maintenue",
+        "WF-003-ERR : Email vide → reste sur /settings"
+      ]
+    },
+    {
+      "file": "wf004-logout.spec.ts",
+      "workflow": "WF-004",
+      "name": "Deconnexion (Logout)",
+      "role": "authenticated",
+      "type": "nominal|error",
+      "steps": [
+        "Naviguer vers /settings (authentifie)",
+        "Cliquer 'Or click here to logout.'",
+        "Verifier redirect / et liens nav Sign in/Sign up"
+      ],
+      "linked_rules": ["BR-016"],
+      "test_cases": [
+        "WF-004-NOM : POST /logout → session detruite + redirect /",
+        "WF-004-ERR : GET /logout → HTTP 405"
+      ]
+    },
+    {
+      "file": "wf005-follow.spec.ts",
+      "workflow": "WF-005",
+      "name": "Toggle Suivi Utilisateur (Follow/Unfollow)",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /profile/<username>",
+        "Cliquer bouton 'Follow <username>' (HTMX hx-post)",
+        "Verifier swap HTMX → bouton 'Unfollow'",
+        "Recliquer → bouton revient en 'Follow'"
+      ],
+      "linked_rules": ["BR-010", "BR-019"],
+      "test_cases": [
+        "WF-005-PERM : Anonyme → 302 redirect /login",
+        "WF-005-NOM-1 : Follow → bouton Unfollow visible",
+        "WF-005-NOM-2 : Unfollow → bouton Follow restaure",
+        "WF-005-AUTO : Auto-follow → bouton absent, no-op serveur"
+      ]
+    },
+    {
+      "file": "wf006-article-create.spec.ts",
+      "workflow": "WF-006",
+      "name": "Creation d'Article",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /article/create (authentifie)",
+        "Remplir Article Title, body, tags optionnels",
+        "Cliquer 'Publish Article'",
+        "Verifier redirect /article/<slug> avec slug = slugify(title)"
+      ],
+      "linked_rules": ["BR-023", "BR-027", "BR-031", "BR-032", "BR-033"],
+      "test_cases": [
+        "WF-006-PERM : Anonyme → redirect /login",
+        "WF-006-NOM : Article valide → slug genere + redirect detail",
+        "WF-006-NOM-TAGS : Article avec tags → tags visibles sur detail",
+        "WF-006-ERR : Titre vide → reste sur /article/create"
+      ]
+    },
+    {
+      "file": "wf007-article-edit.spec.ts",
+      "workflow": "WF-007",
+      "name": "Edition d'Article",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /article/<slug>/edit (auteur authentifie)",
+        "Modifier le titre",
+        "Cliquer 'Publish Article'",
+        "Verifier redirect /article/<slug> AVEC LE MEME SLUG (BR-023)"
+      ],
+      "linked_rules": ["BR-023", "BR-027", "BR-031", "BR-032", "BR-034"],
+      "test_cases": [
+        "WF-007-PERM : Anonyme → redirect /login",
+        "WF-007-NOM : Edition valide → titre mis a jour, slug inchange",
+        "WF-007-ERR-1 : Non-auteur → 404 (not 403)",
+        "WF-007-ERR-2 : Titre vide → reste sur /edit"
+      ]
+    },
+    {
+      "file": "wf008-article-delete.spec.ts",
+      "workflow": "WF-008",
+      "name": "Suppression d'Article",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /article/<slug> (auteur authentifie)",
+        "Cliquer 'Delete Article'",
+        "Verifier redirect / et article inexistant (404)"
+      ],
+      "linked_rules": ["BR-035", "BR-043"],
+      "test_cases": [
+        "WF-008-PERM : Anonyme → redirect /login (POST direct)",
+        "WF-008-NOM : Auteur supprime → redirect /, 404 sur l'ancien slug, commentaires en cascade",
+        "WF-008-ERR-1 : Non-auteur → 404 (not 403)",
+        "WF-008-ERR-2 : GET /delete → HTTP 405"
+      ]
+    },
+    {
+      "file": "wf009-favorite.spec.ts",
+      "workflow": "WF-009",
+      "name": "Toggle Favori Article (Favorite/Unfavorite)",
+      "role": "authenticated",
+      "type": "nominal|permission",
+      "steps": [
+        "Naviguer vers /article/<slug> (authentifie)",
+        "Cliquer bouton 'Favorite' (HTMX hx-post + hx-swap='outerHTML')",
+        "Lire compteur .counter dans le bouton mis a jour",
+        "Cliquer 'Unfavorite' → compteur decremente"
+      ],
+      "linked_rules": ["BR-025", "BR-036", "BR-051"],
+      "test_cases": [
+        "WF-009-PERM : Anonyme → onclick redirect /login",
+        "WF-009-NOM-1 : Favoriser → compteur +1, bouton Unfavorite",
+        "WF-009-NOM-2 : Defavoriser → compteur -1, bouton Favorite"
+      ]
+    },
+    {
+      "file": "wf010-comment-create.spec.ts",
+      "workflow": "WF-010",
+      "name": "Creation de Commentaire",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /article/<slug> (authentifie)",
+        "Remplir le textarea 'Write a comment...'",
+        "Cliquer 'Post Comment' (HTMX hx-post → #comment-list updated)",
+        "Verifier le commentaire dans #comment-list"
+      ],
+      "linked_rules": ["BR-001", "BR-039", "BR-040", "BR-042", "BR-053"],
+      "test_cases": [
+        "WF-010-PERM : Anonyme → formulaire absent, message 'Sign in or sign up'",
+        "WF-010-PERM-API : POST direct anonyme → 302 redirect /login",
+        "WF-010-NOM : Corps non-vide → commentaire visible dans #comment-list",
+        "WF-010-EDGE : Corps vide (espaces) → skip silencieux, compteur inchange",
+        "WF-010-EDGE-2 : Corps completement vide → skip silencieux"
+      ]
+    },
+    {
+      "file": "wf011-comment-delete.spec.ts",
+      "workflow": "WF-011",
+      "name": "Suppression de Commentaire",
+      "role": "authenticated",
+      "type": "nominal|error|permission",
+      "steps": [
+        "Naviguer vers /article/<slug> (authentifie)",
+        "Cliquer l'icone trash i.ion-trash-a sur un commentaire (HTMX hx-post → #comment-list updated)",
+        "Verifier que le commentaire disparait de #comment-list"
+      ],
+      "linked_rules": ["BR-001", "BR-041", "BR-042", "BR-044"],
+      "test_cases": [
+        "WF-011-PERM-ANON : Anonyme → 302 redirect /login",
+        "WF-011-NOM-1 : Auteur commentaire supprime le sien → commentaire efface",
+        "WF-011-NOM-2 : Auteur article (moderation) supprime commentaire tiers → efface",
+        "WF-011-ERR-403 : Tiers non autorise → HTTP 403 Forbidden",
+        "WF-011-ERR-404 : comment_id hors article slug → HTTP 404"
+      ]
+    }
+  ]
+}

@@ -9,9 +9,9 @@ Tu es l'Agent 18 - Traducteur de Code. Tu convertis un module de la techno sourc
 
 ## Avant de commencer
 Lis `migration-state/state.json` et `migration-state/config.json`.
-Le module a migrer est fourni en argument (nom du module, correspond a un entree dans `migration_modules`).
+Le module a migrer est fourni en argument (nom du module).
 Lis :
-- `migration-state/phase1/business_rules.json` (filtre les regles du module)
+- **SEULEMENT** `migration-state/phase1/business_rules/modules/{module}/rules.json` (chargement sélectif par module)
 - `migration-state/phase3/tech_mapping.json`
 - `migration-state/phase3/migration_plan.json`
 - Le code source du module dans `config.json > source.directory`

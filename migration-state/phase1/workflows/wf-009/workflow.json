@@ -1,0 +1,93 @@
+﻿{
+    "id":  "WF-009",
+    "name":  "Toggle Favori Article (Favorite/Unfavorite)",
+    "domain":  "articles",
+    "trigger":  "Utilisateur authentifie clique sur Favorite/Unfavorite (POST /article/\u003cslug\u003e/favorite, @login_required @require_POST)",
+    "trigger_location":  {
+                             "file":  "apps/articles/views.py",
+                             "line":  152
+                         },
+    "states":  [
+                   {
+                       "name":  "not_favorited",
+                       "description":  "L\u0027article n\u0027est pas en favori pour l\u0027utilisateur courant.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "favorited",
+                       "description":  "L\u0027article est dejÃ  en favori pour l\u0027utilisateur courant.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "favorite_toggled",
+                       "description":  "Etat de favori inverse. Compteur num_favorites recalcule via re-annotation. Reponse HTMX ou redirect.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "Article.objects.with_favorites(request.user).select_related(\u0027author\u0027).get(pk=article.pk) â€” re-annotation pour compteur frais (ref BR-025)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "not_favorited",
+                            "to":  "favorite_toggled",
+                            "condition":  "article.favorites.filter(id=request.user.id).exists() == False (ref BR-036)",
+                            "condition_rules":  [
+                                                    "BR-036",
+                                                    "BR-025"
+                                                ],
+                            "actions":  [
+                                            "article.favorites.add(request.user)",
+                                            "Re-annotation avec with_favorites(request.user)",
+                                            "HTMX: render(\u0027partials/favorite_button.html\u0027, {article}) | non-HTMX: redirect(\u0027article_detail\u0027, slug)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/articles/views.py",
+                                                    "function":  "article_favorite_view",
+                                                    "line":  157
+                                                }
+                        },
+                        {
+                            "from":  "favorited",
+                            "to":  "favorite_toggled",
+                            "condition":  "article.favorites.filter(id=request.user.id).exists() == True (ref BR-036)",
+                            "condition_rules":  [
+                                                    "BR-036",
+                                                    "BR-025"
+                                                ],
+                            "actions":  [
+                                            "article.favorites.remove(request.user)",
+                                            "Re-annotation avec with_favorites(request.user)",
+                                            "HTMX: render(\u0027partials/favorite_button.html\u0027, {article}) | non-HTMX: redirect(\u0027article_detail\u0027, slug)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/articles/views.py",
+                                                    "function":  "article_favorite_view",
+                                                    "line":  155
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e not_favorited\n  [*] --\u003e favorited\n  not_favorited --\u003e favorite_toggled : favorites.add(user)\n  favorited --\u003e favorite_toggled : favorites.remove(user)\n  favorite_toggled --\u003e [*] : HTMX partial favorite_button | redirect to detail\n  note right of favorite_toggled : re-annotate with_favorites() (BR-025)\n  note right of favorite_toggled : auteur peut se mettre en favori (pas de restriction)"
+}

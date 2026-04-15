@@ -1,0 +1,43 @@
+{
+  "route": "/register",
+  "route_slug": "register",
+  "state": "default",
+  "role": "anonymous",
+  "viewport": "tablet",
+  "name": "Register - Formulaire d'inscription",
+  "description": "Inscription avec username, email, password",
+  "navigation_path": [
+    "click \"Sign up\" in navbar"
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Champs: username, email, password — bouton \"Sign up\"",
+      "business_rules": [
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-004"
+      ]
+    },
+    {
+      "type": "link",
+      "region": "form",
+      "description": "Lien \"Have an account? Sign in\"",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /register",
+    "POST /register"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-001",
+    "BR-002",
+    "BR-003",
+    "BR-004"
+  ],
+  "captured_at": "2026-04-15T09:03:46.381Z"
+}

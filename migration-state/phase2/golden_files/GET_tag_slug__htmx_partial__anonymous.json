@@ -1,0 +1,29 @@
+{
+  "file": "GET_tag_slug__htmx_partial__anonymous.json",
+  "endpoint": "GET /tag/intelligence-artificielle",
+  "scenario": "htmx_partial",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/tag/intelligence-artificielle",
+    "headers": {
+      "HX-Request": "true"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 1480,
+      "is_partial": true
+    },
+    "response_time_ms": 15
+  },
+  "linked_rules": [
+    "BR-001",
+    "BR-040"
+  ]
+}

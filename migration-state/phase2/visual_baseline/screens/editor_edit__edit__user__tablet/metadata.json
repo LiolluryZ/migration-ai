@@ -1,0 +1,43 @@
+{
+  "route": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+  "route_slug": "editor_edit",
+  "state": "edit",
+  "role": "user",
+  "viewport": "tablet",
+  "name": "Editor - Modifier un article",
+  "description": "Formulaire pré-rempli d'édition d'article (slug inchangé: BR-023)",
+  "navigation_path": [
+    "login",
+    "go to article detail",
+    "click Edit"
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Formulaire pré-rempli: title, description, body, tags",
+      "business_rules": [
+        "BR-014",
+        "BR-016",
+        "BR-023"
+      ]
+    },
+    {
+      "type": "button",
+      "region": "form",
+      "description": "Bouton \"Update Article\"",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+    "POST /editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-014",
+    "BR-016",
+    "BR-023"
+  ],
+  "captured_at": "2026-04-15T09:03:58.852Z"
+}

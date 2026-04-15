@@ -1,0 +1,30 @@
+{
+  "route": "/article/this-article-does-not-exist-404",
+  "route_slug": "article_detail",
+  "state": "404",
+  "role": "anonymous",
+  "viewport": "tablet",
+  "name": "Article Detail - 404",
+  "description": "Page 404 quand l'article n'existe pas (BR-030)",
+  "navigation_path": [
+    "direct URL with non-existent slug"
+  ],
+  "ui_components": [
+    {
+      "type": "error_page",
+      "region": "main",
+      "description": "Page 404 article non trouvé",
+      "business_rules": [
+        "BR-030"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /article/this-article-does-not-exist-404"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-030"
+  ],
+  "captured_at": "2026-04-15T09:03:41.495Z"
+}

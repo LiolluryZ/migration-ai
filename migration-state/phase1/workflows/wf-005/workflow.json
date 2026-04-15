@@ -1,0 +1,110 @@
+﻿{
+    "id":  "WF-005",
+    "name":  "Toggle Suivi Utilisateur (Follow/Unfollow)",
+    "domain":  "accounts",
+    "trigger":  "Utilisateur authentifie clique sur Follow ou Unfollow (POST /profile/\u003cusername\u003e/follow, @login_required @require_POST)",
+    "trigger_location":  {
+                             "file":  "apps/accounts/views.py",
+                             "line":  122
+                         },
+    "states":  [
+                   {
+                       "name":  "not_following",
+                       "description":  "L\u0027utilisateur courant ne suit pas encore le profil cible.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "following",
+                       "description":  "L\u0027utilisateur courant suit dejÃ  le profil cible.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "follow_toggled",
+                       "description":  "Etat de suivi inverse, reponse HTMX partielle ou redirect.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "not_following",
+                            "to":  "follow_toggled",
+                            "condition":  "profile_user != request.user ET pas dans followers (ref BR-019, BR-010)",
+                            "condition_rules":  [
+                                                    "BR-019",
+                                                    "BR-010"
+                                                ],
+                            "actions":  [
+                                            "profile_user.followers.add(request.user)",
+                                            "is_following = True",
+                                            "HTMX: render(\u0027partials/follow_button.html\u0027) | non-HTMX: redirect(\u0027profile\u0027, username)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "follow_view",
+                                                    "line":  131
+                                                }
+                        },
+                        {
+                            "from":  "following",
+                            "to":  "follow_toggled",
+                            "condition":  "profile_user != request.user ET deja dans followers (ref BR-019, BR-010)",
+                            "condition_rules":  [
+                                                    "BR-019",
+                                                    "BR-010"
+                                                ],
+                            "actions":  [
+                                            "profile_user.followers.remove(request.user)",
+                                            "is_following = False",
+                                            "HTMX: render(\u0027partials/follow_button.html\u0027) | non-HTMX: redirect(\u0027profile\u0027, username)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "follow_view",
+                                                    "line":  128
+                                                }
+                        },
+                        {
+                            "from":  "not_following",
+                            "to":  "follow_toggled",
+                            "condition":  "profile_user == request.user (auto-follow interdit â€” no-op, ref BR-019)",
+                            "condition_rules":  [
+                                                    "BR-019"
+                                                ],
+                            "actions":  [
+                                            "is_following = False (aucune modification DB)",
+                                            "HTMX: render(\u0027partials/follow_button.html\u0027) | non-HTMX: redirect(\u0027profile\u0027, username)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "follow_view",
+                                                    "line":  136
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e not_following\n  [*] --\u003e following\n  not_following --\u003e follow_toggled : add follower (is_following=True)\n  following --\u003e follow_toggled : remove follower (is_following=False)\n  not_following --\u003e follow_toggled : auto-follow attempt (no-op)\n  follow_toggled --\u003e [*] : HTMX partial follow_button | redirect to profile"
+}

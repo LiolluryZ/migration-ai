@@ -1,0 +1,190 @@
+﻿{
+    "id":  "WF-002",
+    "name":  "Inscription Utilisateur (Register)",
+    "domain":  "accounts",
+    "trigger":  "Utilisateur soumet le formulaire d\u0027inscription (POST /register)",
+    "trigger_location":  {
+                             "file":  "apps/accounts/views.py",
+                             "line":  29
+                         },
+    "states":  [
+                   {
+                       "name":  "form_displayed",
+                       "description":  "Formulaire d\u0027inscription vierge visible.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "creating_user",
+                       "description":  "Creation du compte en cours dans une transaction.atomic().",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "transaction.atomic()",
+                                             "User.objects.create_user(email, username, password)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "auto_logging_in",
+                       "description":  "Utilisateur cree, connexion automatique en cours.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "login(request, user)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "authenticated",
+                       "description":  "Utilisateur inscrit et connecte, redirection vers home.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "redirect(\u0027home\u0027)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "registration_failed",
+                       "description":  "Erreur d\u0027integrite (email ou username deja pris), formulaire re-affiche.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "clean_integrity_error(err)",
+                                             "form.add_error(field, message)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "form_displayed",
+                            "to":  "creating_user",
+                            "condition":  "POST + RegisterForm.is_valid() â€” username, email, password fournis (ref BR-013)",
+                            "condition_rules":  [
+                                                    "BR-013"
+                                                ],
+                            "actions":  [
+                                            "transaction.atomic()",
+                                            "User.objects.create_user(email=..., username=..., password=...)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "register_view",
+                                                    "line":  33
+                                                }
+                        },
+                        {
+                            "from":  "creating_user",
+                            "to":  "auto_logging_in",
+                            "condition":  "create_user() sans IntegrityError (ref BR-014)",
+                            "condition_rules":  [
+                                                    "BR-014"
+                                                ],
+                            "actions":  [
+                                            "login(request, user)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "register_view",
+                                                    "line":  40
+                                                }
+                        },
+                        {
+                            "from":  "auto_logging_in",
+                            "to":  "authenticated",
+                            "condition":  "Login automatique reussi (ref BR-014)",
+                            "condition_rules":  [
+                                                    "BR-014"
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027home\u0027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "register_view",
+                                                    "line":  41
+                                                }
+                        },
+                        {
+                            "from":  "creating_user",
+                            "to":  "registration_failed",
+                            "condition":  "IntegrityError â€” email ou username en doublon (ref BR-013, BR-002)",
+                            "condition_rules":  [
+                                                    "BR-013",
+                                                    "BR-002"
+                                                ],
+                            "actions":  [
+                                            "clean_integrity_error(err)",
+                                            "form.add_error(\u0027email\u0027, \u0027This email has already been taken.\u0027) | form.add_error(\u0027username\u0027, \u0027This username has already been taken.\u0027) | form.add_error(None, \u0027Registration failed.\u0027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "register_view",
+                                                    "line":  43
+                                                }
+                        },
+                        {
+                            "from":  "registration_failed",
+                            "to":  "form_displayed",
+                            "condition":  "Re-affichage du formulaire avec erreurs",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "render(\u0027accounts/register.html\u0027, {\u0027form\u0027: form})"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "register_view",
+                                                    "line":  52
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "creating_user",
+                               "to":  "registration_failed",
+                               "condition":  "IntegrityError email duplique",
+                               "rollback_actions":  [
+                                                        "transaction.atomic() rollback automatique",
+                                                        "form.add_error(\u0027email\u0027, \u0027This email has already been taken.\u0027)"
+                                                    ]
+                           },
+                           {
+                               "from":  "creating_user",
+                               "to":  "registration_failed",
+                               "condition":  "IntegrityError username duplique",
+                               "rollback_actions":  [
+                                                        "transaction.atomic() rollback automatique",
+                                                        "form.add_error(\u0027username\u0027, \u0027This username has already been taken.\u0027)"
+                                                    ]
+                           },
+                           {
+                               "from":  "creating_user",
+                               "to":  "registration_failed",
+                               "condition":  "IntegrityError champ non reconnu",
+                               "rollback_actions":  [
+                                                        "transaction.atomic() rollback automatique",
+                                                        "form.add_error(None, \u0027Registration failed.\u0027)"
+                                                    ]
+                           }
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e form_displayed\n  form_displayed --\u003e creating_user : POST + form_valid\n  creating_user --\u003e auto_logging_in : create_user() success\n  auto_logging_in --\u003e authenticated : login() success\n  authenticated --\u003e [*] : redirect to home\n  creating_user --\u003e registration_failed : IntegrityError\n  registration_failed --\u003e form_displayed : re-display with errors\n  form_displayed --\u003e form_displayed : POST + form_invalid"
+}

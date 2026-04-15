@@ -1,0 +1,628 @@
+﻿{
+    "module":  "articles",
+    "agent":  "05-extracteur-regles",
+    "rules":  [
+                  {
+                      "id":  "BR-022",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "Le titre d\u0027un article est obligatoire, unique et limite a 150 caracteres. Le summary et le content sont optionnels (blank=True, default vide).",
+                      "formal_expression":  "title: varchar(150), unique, required; summary: text, optional, default=\u0027\u0027; content: text, optional, default=\u0027\u0027",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/models.py",
+                                                   "function":  "Article",
+                                                   "line_start":  30,
+                                                   "line_end":  33,
+                                                   "code_snippet":  "title = models.CharField(max_length=150, unique=True, blank=False)\nsummary = models.TextField(blank=True)\ncontent = models.TextField(blank=True)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Titre duplique",
+                                             "expected_behavior":  "IntegrityError (unique constraint)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-023",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "Le slug est genere automatiquement a partir du titre via slugify() uniquement a la creation (quand pk est None). Il n\u0027est PAS regenere lors des mises a jour.",
+                      "formal_expression":  "IF NOT article.pk THEN article.slug = slugify(article.title)",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/models.py",
+                                                   "function":  "Article.save",
+                                                   "line_start":  43,
+                                                   "line_end":  45,
+                                                   "code_snippet":  "def save(self, *args, **kwargs) -\u003e None:\n    if not self.pk:\n        self.slug = slugify(self.title)\n    super().save(*args, **kwargs)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-022"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Titre modifie apres creation",
+                                             "expected_behavior":  "Le slug reste l\u0027ancien (celui de la creation)"
+                                         },
+                                         {
+                                             "description":  "Titres differents produisant le meme slug",
+                                             "expected_behavior":  "IntegrityError car slug est unique"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-024",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "Le champ created est auto-rempli a la creation (auto_now_add) et indexe. Le champ updated est auto-mis a jour a chaque sauvegarde (auto_now). Les deux sont des DateTimeField.",
+                      "formal_expression":  "created: auto_now_add=True, db_index=True; updated: auto_now=True",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/models.py",
+                                                   "function":  "Article",
+                                                   "line_start":  35,
+                                                   "line_end":  36,
+                                                   "code_snippet":  "created = models.DateTimeField(auto_now_add=True, db_index=True)\nupdated = models.DateTimeField(auto_now=True)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-025",
+                      "domain":  "favorites",
+                      "module":  "articles",
+                      "summary":  "Chaque article a un compteur de favoris (num_favorites) et un indicateur boolean (is_favorite) calcules par annotation SQL. Pour les utilisateurs non authentifies, is_favorite est toujours False.",
+                      "formal_expression":  "num_favorites = COUNT(article.favorites); is_favorite = EXISTS(user IN article.favorites) IF authenticated ELSE False",
+                      "type":  "calculation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/models.py",
+                                                   "function":  "ArticleQuerySet.with_favorites",
+                                                   "line_start":  13,
+                                                   "line_end":  22,
+                                                   "code_snippet":  "def with_favorites(self, user) -\u003e Self:\n    return self.annotate(\n        num_favorites=models.Count(\u0027favorites\u0027),\n        is_favorite=(\n            models.Exists(get_user_model().objects.filter(pk=user.id, favorites=models.OuterRef(\u0027pk\u0027)))\n            if user.is_authenticated\n            else models.Value(False, output_field=models.BooleanField())\n        ),\n    )"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur non authentifie",
+                                             "expected_behavior":  "is_favorite = False, num_favorites est toujours calcule"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-026",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "La page d\u0027accueil a 3 onglets de feed : \u0027global\u0027 (tous les articles), \u0027following\u0027 (articles des auteurs suivis), \u0027tag\u0027 (filtrage par tag). Le feed par defaut est \u0027global\u0027.",
+                      "formal_expression":  "IF feed=\u0027following\u0027 THEN articles.filter(author__in=user.following); ELIF tag THEN articles.filter(tags__name=tag); ELSE all articles",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_build_feed",
+                                                   "line_start":  18,
+                                                   "line_end":  45,
+                                                   "code_snippet":  "feed = request.GET.get(\u0027feed\u0027)\n...\nif feed == \u0027following\u0027 and not request.user.is_authenticated:\n    return redirect(\u0027login\u0027)\nif feed == \u0027following\u0027 and request.user.is_authenticated:\n    followed_authors = User.objects.filter(followers=request.user)\n    queryset = queryset.filter(author__in=followed_authors)\n    active_tab = \u0027following\u0027\nelif tag:\n    queryset = queryset.filter(tags__name=tag)\n    active_tab = \u0027tag\u0027\nelse:\n    active_tab = \u0027global\u0027"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-010"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur non authentifie demande feed=\u0027following\u0027",
+                                             "expected_behavior":  "Redirection vers /login"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-027",
+                      "domain":  "tags",
+                      "module":  "articles",
+                      "summary":  "La liste de tous les tags est cachee pendant 5 minutes (300 secondes). Le cache est invalide (\u0027all_tags\u0027 supprime) a chaque sauvegarde d\u0027article.",
+                      "formal_expression":  "tags = cache.get_or_set(\u0027all_tags\u0027, Tag.objects.all, timeout=300); ON article_save: cache.delete(\u0027all_tags\u0027)",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_build_feed",
+                                                   "line_start":  51,
+                                                   "line_end":  51,
+                                                   "code_snippet":  "tags = cache.get_or_set(\u0027all_tags\u0027, Tag.objects.all, timeout=300)"
+                                               },
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_save_article_form",
+                                                   "line_start":  106,
+                                                   "line_end":  106,
+                                                   "code_snippet":  "cache.delete(\u0027all_tags\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Suppression d\u0027un article",
+                                             "expected_behavior":  "Le cache n\u0027est PAS invalide (potentiel bug : tags orphelins visibles jusqu\u0027a expiration)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  90,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-028",
+                      "domain":  "pagination",
+                      "module":  "articles",
+                      "summary":  "Le feed d\u0027accueil pagine les articles par 10 par page, tries par date de creation decroissante. Meme logique de pagination que le profil.",
+                      "formal_expression":  "articles.order_by(\u0027-created\u0027); LIMIT 10 OFFSET (page-1)*10",
+                      "type":  "calculation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_build_feed",
+                                                   "line_start":  14,
+                                                   "line_end":  14,
+                                                   "code_snippet":  "ARTICLES_PER_PAGE = 10"
+                                               },
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_build_feed",
+                                                   "line_start":  44,
+                                                   "line_end":  48,
+                                                   "code_snippet":  "queryset = queryset.order_by(\u0027-created\u0027)\ntotal = queryset.count()\narticles = list(queryset[offset : offset + ARTICLES_PER_PAGE])"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+                                         "BR-017"
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-029",
+                      "domain":  "rendering",
+                      "module":  "articles",
+                      "summary":  "Les requetes HTMX sur la page d\u0027accueil retournent uniquement le partial feed_content.html (contenu du feed). Les requetes normales retournent la page complete home.html.",
+                      "formal_expression":  "IF is_htmx(request) THEN render(\u0027partials/feed_content.html\u0027) ELSE render(\u0027articles/home.html\u0027)",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_build_feed",
+                                                   "line_start":  60,
+                                                   "line_end":  62,
+                                                   "code_snippet":  "if is_htmx(request):\n    return render(request, \u0027partials/feed_content.html\u0027, context)\nreturn render(request, \u0027articles/home.html\u0027, context)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-001"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  90,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-030",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "Article inexistant (slug inconnu) retourne une page 404 dediee (detail_404.html) avec le slug en contexte. Les commentaires de l\u0027article sont affiches tries par date decroissante.",
+                      "formal_expression":  "IF Article.DoesNotExist THEN render(\u0027detail_404.html\u0027, status=404); comments.order_by(\u0027-created\u0027)",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "article_detail_view",
+                                                   "line_start":  71,
+                                                   "line_end":  89,
+                                                   "code_snippet":  "try:\n    article = Article.objects.with_favorites(request.user)...get(slug=slug)\nexcept Article.DoesNotExist:\n    return render(request, \u0027articles/detail_404.html\u0027, {\u0027slug\u0027: slug}, status=404)\ncomments = article.comment_set.select_related(\u0027author\u0027).order_by(\u0027-created\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-031",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "Le formulaire d\u0027article utilise des noms de champs differents du modele : form.description -\u003e model.summary, form.body -\u003e model.content. Ce mapping est une specificite du spec RealWorld.",
+                      "formal_expression":  "form.title -\u003e article.title; form.description -\u003e article.summary; form.body -\u003e article.content; form.tags -\u003e comma-separated tag names",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_save_article_form",
+                                                   "line_start":  93,
+                                                   "line_end":  96,
+                                                   "code_snippet":  "article.title = form.cleaned_data[\u0027title\u0027]\narticle.summary = form.cleaned_data.get(\u0027description\u0027, \u0027\u0027)\narticle.content = form.cleaned_data.get(\u0027body\u0027, \u0027\u0027)"
+                                               },
+                                               {
+                                                   "file":  "apps/articles/forms.py",
+                                                   "function":  "ArticleForm",
+                                                   "line_start":  4,
+                                                   "line_end":  25,
+                                                   "code_snippet":  "class ArticleForm(forms.Form):\n    title = forms.CharField(max_length=150, ...)\n    description = forms.CharField(required=False, ...)\n    body = forms.CharField(required=False, ...)\n    tags = forms.CharField(required=False, widget=forms.HiddenInput())"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-022"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "description ou body vides",
+                                             "expected_behavior":  "Defaut a string vide"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-032",
+                      "domain":  "tags",
+                      "module":  "articles",
+                      "summary":  "Les tags sont envoyes comme une chaine separee par des virgules. A la sauvegarde, tous les tags existants sont d\u0027abord supprimes (clear), puis les nouveaux sont ajoutes un par un apres strip des espaces. Les tags vides sont ignores.",
+                      "formal_expression":  "article.tags.clear(); FOR tag_name IN tags.split(\u0027,\u0027) IF tag_name.strip() THEN article.tags.add(tag_name.strip())",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "_save_article_form",
+                                                   "line_start":  98,
+                                                   "line_end":  105,
+                                                   "code_snippet":  "tag_string = form.cleaned_data.get(\u0027tags\u0027, \u0027\u0027)\narticle.tags.clear()\nif tag_string:\n    for tag_name in tag_string.split(\u0027,\u0027):\n        tag_name = tag_name.strip()\n        if tag_name:\n            article.tags.add(tag_name)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-027"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Chaine de tags vide",
+                                             "expected_behavior":  "Tous les tags sont supprimes (clear), aucun ajoute"
+                                         },
+                                         {
+                                             "description":  "Virgules consecutives ou espaces",
+                                             "expected_behavior":  "Tags vides ignores grace au strip + if"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-033",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "La creation d\u0027article necessite l\u0027authentification. L\u0027auteur est automatiquement defini comme l\u0027utilisateur courant. Apres creation, redirection vers le detail de l\u0027article.",
+                      "formal_expression":  "@login_required; article.author = request.user; redirect(\u0027article_detail\u0027, slug)",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "article_create_view",
+                                                   "line_start":  108,
+                                                   "line_end":  115,
+                                                   "code_snippet":  "@login_required\ndef article_create_view(request):\n    if request.method == \u0027POST\u0027:\n        form = ArticleForm(request.POST)\n        if form.is_valid():\n            article = Article(author=request.user)\n            _save_article_form(form, article)\n            return redirect(\u0027article_detail\u0027, slug=article.slug)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-023",
+                                           "BR-031"
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-034",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "L\u0027edition d\u0027un article necessite l\u0027authentification ET etre l\u0027auteur de l\u0027article. Un utilisateur ne peut modifier que ses propres articles. Le slug sert d\u0027identifiant URL.",
+                      "formal_expression":  "@login_required; get_object_or_404(Article, slug=slug, author=request.user)",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "article_edit_view",
+                                                   "line_start":  118,
+                                                   "line_end":  119,
+                                                   "code_snippet":  "@login_required\ndef article_edit_view(request, slug):\n    article = get_object_or_404(Article, slug=slug, author=request.user)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-022"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Utilisateur tente d\u0027editer un article d\u0027un autre",
+                                             "expected_behavior":  "404 Not Found (pas 403 Forbidden)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-035",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "La suppression d\u0027un article necessite l\u0027authentification, la methode POST et etre l\u0027auteur. Apres suppression, redirection vers la page d\u0027accueil.",
+                      "formal_expression":  "@login_required AND @require_POST AND author=request.user; article.delete(); redirect(\u0027home\u0027)",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "article_delete_view",
+                                                   "line_start":  131,
+                                                   "line_end":  135,
+                                                   "code_snippet":  "@login_required\n@require_POST\ndef article_delete_view(request, slug):\n    article = get_object_or_404(Article, slug=slug, author=request.user)\n    article.delete()\n    return redirect(\u0027home\u0027)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Suppression en cascade",
+                                             "expected_behavior":  "Les commentaires de l\u0027article sont supprimes automatiquement (ON DELETE CASCADE)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-036",
+                      "domain":  "articles",
+                      "module":  "articles",
+                      "summary":  "Le favori est un toggle : si deja en favori, on retire ; sinon on ajoute. Necessite authentification et POST. Le compteur est recalcule apres l\u0027operation. HTMX retourne le partial favorite_button.html.",
+                      "formal_expression":  "IF article.favorites.filter(user).exists() THEN remove(user) ELSE add(user); re-annotate with_favorites",
+                      "type":  "authorization",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/views.py",
+                                                   "function":  "article_favorite_view",
+                                                   "line_start":  138,
+                                                   "line_end":  151,
+                                                   "code_snippet":  "@login_required\n@require_POST\ndef article_favorite_view(request, slug):\n    article = get_object_or_404(Article, slug=slug)\n    if article.favorites.filter(id=request.user.id).exists():\n        article.favorites.remove(request.user)\n    else:\n        article.favorites.add(request.user)\n    article = Article.objects.with_favorites(request.user)...get(pk=article.pk)"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-025",
+                                           "BR-001"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Auteur favori son propre article",
+                                             "expected_behavior":  "Autorise (pas de restriction)"
+                                         },
+                                         {
+                                             "description":  "Requete HTMX",
+                                             "expected_behavior":  "Retourne le partial favorite_button.html"
+                                         },
+                                         {
+                                             "description":  "Requete non-HTMX",
+                                             "expected_behavior":  "Redirection vers le detail de l\u0027article"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-037",
+                      "domain":  "security",
+                      "module":  "articles",
+                      "summary":  "Le contenu Markdown est rendu en HTML via la librairie markdown (extension \u0027extra\u0027) puis assaini par nh3.clean() pour prevenir les attaques XSS. Le resultat est marque safe pour le template.",
+                      "formal_expression":  "render_markdown(value) = mark_safe(nh3.clean(markdown(value, extensions=[\u0027extra\u0027])))",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/templatetags/markdown_filter.py",
+                                                   "function":  "render_markdown",
+                                                   "line_start":  9,
+                                                   "line_end":  11,
+                                                   "code_snippet":  "@register.filter(name=\u0027render_markdown\u0027)\ndef render_markdown(value):\n    return mark_safe(nh3.clean(md.markdown(value, extensions=[\u0027extra\u0027])))"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Contenu avec balises HTML malveillantes",
+                                             "expected_behavior":  "Assaini par nh3.clean (XSS prevention)"
+                                         },
+                                         {
+                                             "description":  "Contenu vide",
+                                             "expected_behavior":  "Retourne string vide"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  98,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-038",
+                      "domain":  "tags",
+                      "module":  "articles",
+                      "summary":  "Un article peut avoir des tags via django-taggit (TaggableManager). Les tags sont geres par GenericForeignKey. Un artcile sans tags est valide (blank=True).",
+                      "formal_expression":  "tags = TaggableManager(blank=True); storage via taggit_taggeditem (GenericFK)",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "apps/articles/models.py",
+                                                   "function":  "Article",
+                                                   "line_start":  38,
+                                                   "line_end":  38,
+                                                   "code_snippet":  "tags = TaggableManager(blank=True)"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  90,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  }
+              ],
+    "total_rules":  17,
+    "generated_at":  "2026-04-15T07:50:00.9023671ZZ"
+}

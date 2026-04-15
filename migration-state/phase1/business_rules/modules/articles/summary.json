@@ -1,0 +1,19 @@
+﻿{
+    "module":  "articles",
+    "by_type":  {
+                    "calculation":  2,
+                    "transformation":  6,
+                    "authorization":  4,
+                    "constraint":  2,
+                    "validation":  3
+                },
+    "by_domain":  {
+                      "security":  1,
+                      "tags":  3,
+                      "rendering":  1,
+                      "favorites":  1,
+                      "pagination":  1,
+                      "articles":  10
+                  },
+    "total_rules":  17
+}

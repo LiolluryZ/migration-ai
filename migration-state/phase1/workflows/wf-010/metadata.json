@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "comments",
+    "name":  "Creation de Commentaire",
+    "id":  "WF-010",
+    "transitions_count":  6,
+    "states_count":  4
+}

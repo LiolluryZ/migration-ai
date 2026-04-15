@@ -1,0 +1,207 @@
+# =============================================================================
+# CONTRACT TESTS — Social: Profile & Follow
+# =============================================================================
+# Format      : REST Client (.http) — VS Code extension
+# Environment : select "legacy" or "target" in the VS Code status bar
+#
+# Endpoints covered:
+#   GET  /profile/<username>            profile_view (authored articles)
+#   GET  /profile/<username>/favorites  profile_favorites_view
+#   POST /profile/<username>/follow     follow_view (toggle follow/unfollow)
+#
+# REQUIRED TEST DATA
+# ------------------
+# • TEST_USERNAME  : username of TEST_USER (logged-in user)
+# • OTHER_USERNAME : username of another existing user
+# • TEST_USER logged in (run auth.http "LOGIN - Nominal" first)
+#
+# Business rules covered:
+#   BR-001, BR-010, BR-017, BR-018, BR-019, BR-020, BR-021
+# =============================================================================
+
+@BASE_URL        = {{BASE_URL}}
+@CSRF            = {{csrftoken}}
+@TEST_USERNAME   = {{TEST_USERNAME}}
+@OTHER_USERNAME  = {{OTHER_USERNAME}}
+
+
+# ============================================================================
+# PROFILE  —  GET /profile/<username>
+# ============================================================================
+
+### PROFILE - Nominal - View existing public profile (anonymous)
+# Pre-condition : User with OTHER_USERNAME exists
+# Expected      : HTTP 200, HTML profile page with authored articles list
+# BR            : BR-018 (default tab = authored articles), BR-010 (follow status)
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}} HTTP/1.1
+
+
+###
+
+### PROFILE - Not found - Nonexistent username
+# Pre-condition : Username "nonexistent-user-xyz-000" does NOT exist
+# Expected      : HTTP 404, custom profile_404.html with username in context
+# BR            : BR-021 (User.DoesNotExist → render profile_404.html status=404)
+GET {{BASE_URL}}/profile/nonexistent-user-xyz-000 HTTP/1.1
+
+
+###
+
+### PROFILE - Nominal - View profile with pagination (page 2)
+# Pre-condition : OTHER_USERNAME has more than 10 authored articles
+# Expected      : HTTP 200, HTML page 2 of authored articles
+# BR            : BR-017 (ARTICLES_PER_PAGE = 10)
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}}?page=2 HTTP/1.1
+
+
+###
+
+### PROFILE - Edge case - Invalid page value falls back to page 1
+# Pre-condition : User exists
+# Expected      : HTTP 200, page 1 content (no error, ValueError caught)
+# BR            : BR-017 (edge case: invalid page → fallback to 1)
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}}?page=notanumber HTTP/1.1
+
+
+###
+
+### PROFILE - Nominal - Authenticated user views own profile
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 200, own profile page with authored articles
+# BR            : BR-018
+GET {{BASE_URL}}/profile/{{TEST_USERNAME}} HTTP/1.1
+
+
+###
+
+### PROFILE - Nominal - HTMX partial request
+# Pre-condition : User exists
+# Expected      : HTTP 200, PARTIAL HTML (profile page section via hx-select)
+# BR            : BR-001 (HX-Request detection)
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}} HTTP/1.1
+HX-Request: true
+
+
+###
+
+
+# ============================================================================
+# PROFILE FAVORITES  —  GET /profile/<username>/favorites
+# ============================================================================
+
+### PROFILE FAVORITES - Nominal - View favorited articles (anonymous)
+# Pre-condition : User with OTHER_USERNAME exists (favorited articles may be empty)
+# Expected      : HTTP 200, HTML profile page showing favorites tab active
+# BR            : BR-018 (tab=favorites → articles filtered by favorites=profile_user)
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}}/favorites HTTP/1.1
+
+
+###
+
+### PROFILE FAVORITES - Not found - Nonexistent username
+# Pre-condition : Username does not exist
+# Expected      : HTTP 404, custom profile_404.html
+# BR            : BR-021
+GET {{BASE_URL}}/profile/nonexistent-user-xyz-000/favorites HTTP/1.1
+
+
+###
+
+### PROFILE FAVORITES - Nominal - With pagination
+# Pre-condition : OTHER_USERNAME has more than 10 favorited articles
+# Expected      : HTTP 200, page 2 of favorited articles
+# BR            : BR-017
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}}/favorites?page=2 HTTP/1.1
+
+
+###
+
+
+# ============================================================================
+# FOLLOW TOGGLE  —  POST /profile/<username>/follow
+# ============================================================================
+
+### FOLLOW - Nominal - Follow a user (not yet following)
+# Pre-condition : Logged in as TEST_USER; TEST_USER does NOT currently follow OTHER_USER
+# Expected      : HTTP 302 redirect to /profile/<username>
+# BR            : BR-019 (toggle add: followers.add(request.user))
+POST {{BASE_URL}}/profile/{{OTHER_USERNAME}}/follow HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FOLLOW - Nominal - Unfollow a user (run after previous test)
+# Pre-condition : Logged in as TEST_USER; TEST_USER IS currently following OTHER_USER
+# Expected      : HTTP 302 redirect to /profile/<username>
+# BR            : BR-019 (toggle remove: followers.remove(request.user))
+POST {{BASE_URL}}/profile/{{OTHER_USERNAME}}/follow HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FOLLOW - Auth required - Anonymous redirected to login
+# Pre-condition : NOT logged in
+# Expected      : HTTP 302 redirect to /login
+# BR            : BR-019, BR-020 (@login_required @require_POST)
+POST {{BASE_URL}}/profile/{{OTHER_USERNAME}}/follow HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Cookie: sessionid=contract_test_invalid_session_000
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FOLLOW - Edge case - Self-follow is silently ignored (no-op)
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 302 redirect to /profile/<own-username>
+#                 State: is_following = False (no relationship created)
+# BR            : BR-019 (profile_user == current_user → no-op, is_following=False)
+POST {{BASE_URL}}/profile/{{TEST_USERNAME}}/follow HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FOLLOW - Not found - Username does not exist
+# Pre-condition : Logged in as TEST_USER
+# Expected      : HTTP 404
+# BR            : BR-019 (get_object_or_404(User, username=username))
+POST {{BASE_URL}}/profile/nonexistent-user-xyz-000/follow HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FOLLOW - Nominal - HTMX request returns partial HTML (not redirect)
+# Pre-condition : Logged in as TEST_USER; OTHER_USERNAME exists
+# Expected      : HTTP 200, PARTIAL HTML (follow_button.html fragment)
+#                 Response must NOT be a redirect
+# BR            : BR-001 (HX-Request), BR-019 (HTMX path)
+POST {{BASE_URL}}/profile/{{OTHER_USERNAME}}/follow HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+HX-Request: true
+
+csrfmiddlewaretoken={{CSRF}}
+
+
+###
+
+### FOLLOW - Error - Method Not Allowed on GET
+# Pre-condition : none
+# Expected      : HTTP 405 Method Not Allowed
+# BR            : BR-019 (@require_POST)
+GET {{BASE_URL}}/profile/{{OTHER_USERNAME}}/follow HTTP/1.1
+
+
+###

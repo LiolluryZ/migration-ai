@@ -1,0 +1,69 @@
+{
+  "route": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+  "route_slug": "article_detail",
+  "state": "default",
+  "role": "user",
+  "viewport": "tablet",
+  "name": "Article Detail (propriétaire)",
+  "description": "Détail d'article vu par son auteur: boutons Edit + Delete visibles",
+  "navigation_path": [
+    "login",
+    "click article title"
+  ],
+  "ui_components": [
+    {
+      "type": "article_header",
+      "region": "top",
+      "description": "Boutons Edit/Delete visibles pour le propriétaire (BR-021/BR-022)",
+      "business_rules": [
+        "BR-021",
+        "BR-022",
+        "BR-040"
+      ]
+    },
+    {
+      "type": "article_body",
+      "region": "main",
+      "description": "Contenu Markdown",
+      "business_rules": [
+        "BR-031"
+      ]
+    },
+    {
+      "type": "comment_form",
+      "region": "bottom",
+      "description": "Formulaire de commentaire actif (BR-036)",
+      "business_rules": [
+        "BR-036"
+      ]
+    },
+    {
+      "type": "comment_list",
+      "region": "bottom",
+      "description": "Commentaires avec bouton Delete sur ses propres commentaires (BR-041)",
+      "business_rules": [
+        "BR-041",
+        "BR-042"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Date de publication"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-021",
+    "BR-022",
+    "BR-031",
+    "BR-036",
+    "BR-040",
+    "BR-041",
+    "BR-042"
+  ],
+  "captured_at": "2026-04-15T09:03:57.301Z"
+}

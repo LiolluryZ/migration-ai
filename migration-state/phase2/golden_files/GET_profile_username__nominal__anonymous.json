@@ -1,0 +1,27 @@
+{
+  "file": "GET_profile_username__nominal__anonymous.json",
+  "endpoint": "GET /profile/:username",
+  "scenario": "nominal",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/profile/admin",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 13376,
+      "username_in_page": true
+    },
+    "response_time_ms": 25
+  },
+  "linked_rules": [
+    "BR-007",
+    "BR-024"
+  ]
+}

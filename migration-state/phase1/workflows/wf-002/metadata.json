@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "accounts",
+    "name":  "Inscription Utilisateur (Register)",
+    "id":  "WF-002",
+    "transitions_count":  5,
+    "states_count":  5
+}

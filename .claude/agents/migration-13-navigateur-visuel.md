@@ -45,40 +45,68 @@ Pour chaque screenshot, documente :
 Marque les zones qui changent a chaque chargement (timestamps, compteurs, avatars generes) pour les masquer lors des comparaisons futures.
 
 ## Sorties dans `migration-state/phase2/visual_baseline/`
-Screenshots dans `screenshots/`, convention : `{route_slug}__{state}__{role}__{viewport}.png`
-Exemple : `dashboard__default__admin__desktop.png`
 
-Catalog : `migration-state/phase2/visual_baseline/visual_catalog.json`
+Structure modulable pour sélectionner par écran/rôle/viewport :
+```
+visual_baseline/
+  ├─ index.json                   (liste screens + refs)
+  ├─ summary.json                 (stats globales)
+  ├─ screens/
+  │  ├─ {route_slug}__{state}__{role}__{viewport}/
+  │  │  ├─ screenshot.png
+  │  │  ├─ screenshot_normalized.png   (zones dynamiques masquées)
+  │  │  └─ metadata.json               (écran, composants, regles, zones dynamiques)
+  │  └─ ...
+  └─ workflows/
+     └─ {workflow_id}/
+        ├─ metadata.json               (étapes, transitions, screenshots)
+        └─ screenshots/
+           └─ step_{n}.png
+```
+
+**`visual_baseline/index.json`** (léger) :
 ```json
 {
   "generated_at": "ISO 8601", "agent": "13-navigateur-visuel", "confidence": 85,
   "application": "legacy", "base_url": "string",
-  "summary": { "total_screens": 0, "total_screenshots": 0, "total_viewports": 0, "total_roles_tested": 0 },
+  "total_unique_screens": 25, "total_screenshots": 150,
   "screens": [
     {
-      "id": "SCR-001", "route": "/dashboard", "name": "Dashboard principal",
-      "description": "Vue d'ensemble avec statistiques",
-      "screenshots": [
-        { "file": "screenshots/dashboard__default__admin__desktop.png", "viewport": "desktop", "state": "default", "role": "admin", "captured_at": "ISO 8601" }
-      ],
-      "navigation_path": ["login as admin", "click sidebar > Dashboard"],
-      "ui_components": [
-        { "type": "chart", "description": "Graphique de ventes mensuelles", "business_rules": ["BR-045"] }
-      ],
-      "linked_routes_backend": ["GET /api/stats"],
-      "dynamic_zones": [
-        { "x": 100, "y": 50, "width": 200, "height": 30, "reason": "Timestamp last update" }
-      ]
-    }
-  ],
-  "workflows_visual": [
-    {
-      "workflow_id": "WF-001",
-      "steps": [
-        { "step": "Page de commande", "screenshot": "string", "annotations": ["Formulaire visible", "Bouton valider actif"] }
-      ]
+      "route": "/dashboard", "route_slug": "dashboard", "name": "Dashboard",
+      "states": ["default", "empty"], "roles": ["admin", "user"],
+      "viewports": ["desktop", "mobile"],
+      "screenshots": 8,
+      "metadata_file": "screens/dashboard__default__admin__desktop/metadata.json"
     }
   ]
+}
+```
+
+**`visual_baseline/summary.json`** :
+```json
+{
+  "generated_at": "ISO 8601",
+  "total_unique_screens": 25, "total_screenshot_combinations": 150,
+  "coverage_by_role": { "admin": 60, "user": 50, "anonymous": 40 },
+  "coverage_by_viewport": { "desktop": 60, "tablet": 50, "mobile": 40 },
+  "total_dynamic_zones_masked": 75
+}
+```
+
+**`visual_baseline/screens/{route_slug}__{state}__{role}__{viewport}/metadata.json`** :
+```json
+{
+  "route": "/dashboard", "route_slug": "dashboard", "state": "default", "role": "admin", "viewport": "desktop",
+  "name": "Dashboard principal", "description": "Vue d'ensemble avec statistiques",
+  "navigation_path": ["login as admin", "click sidebar > Dashboard"],
+  "ui_components": [
+    { "type": "chart", "region": "top-right", "description": "Graphique ventes", "business_rules": ["BR-045"] }
+  ],
+  "linked_routes_backend": ["GET /api/stats"],
+  "dynamic_zones": [
+    { "x": 100, "y": 50, "width": 200, "height": 30, "reason": "Timestamp mise à jour" }
+  ],
+  "business_rules_observed": ["BR-045", "BR-046"]
 }
 ```
 

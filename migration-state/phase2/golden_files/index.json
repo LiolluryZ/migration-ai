@@ -1,0 +1,1323 @@
+{
+  "generated_at": "2026-04-15T09:00:00Z",
+  "agent": "11-golden-file",
+  "confidence": 90,
+  "application": "legacy",
+  "base_url": "http://localhost:8000",
+  "fixtures_description": "Golden files captured from Django/HTMX legacy app (Conduit). Covers all 23 backend routes with nominal, error, permission, HTMX partial, and pagination scenarios. Test user: test@email.com (role: user). HTML responses stored with length/structure metadata. Timestamps, UUIDs, tokens and IDs are normalized.",
+  "normalization_rules": [
+    {
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+      "replacement": "{{UUID}}"
+    },
+    {
+      "pattern": "\\b\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?",
+      "replacement": "{{TIMESTAMP}}"
+    },
+    {
+      "pattern": "\\b\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?",
+      "replacement": "{{TIMESTAMP}}"
+    },
+    {
+      "pattern": "\"sessionid\": \"[^\"]+\"",
+      "replacement": "\"sessionid\": \"{{SESSION_ID}}\""
+    },
+    {
+      "pattern": "\"csrftoken\": \"[^\"]+\"",
+      "replacement": "\"csrftoken\": \"{{CSRF_TOKEN}}\""
+    },
+    {
+      "pattern": "csrfmiddlewaretoken\" value=\"[^\"]+\"",
+      "replacement": "csrfmiddlewaretoken\" value=\"{{CSRF_TOKEN}}\""
+    }
+  ],
+  "summary": {
+    "total_golden_files": 43,
+    "total_endpoints_covered": 22,
+    "endpoints_covered": [
+      "GET /",
+      "GET /?feed=following",
+      "GET /?page=2",
+      "GET /article/:slug",
+      "GET /editor",
+      "GET /editor/:slug",
+      "GET /login",
+      "GET /profile/:username",
+      "GET /profile/:username/favorites",
+      "GET /register",
+      "GET /settings",
+      "GET /tag/intelligence-artificielle",
+      "POST /article/:slug/comment",
+      "POST /article/:slug/comment/:id/delete",
+      "POST /article/:slug/delete",
+      "POST /article/:slug/favorite",
+      "POST /editor",
+      "POST /editor/:slug",
+      "POST /login",
+      "POST /logout",
+      "POST /profile/:username/follow",
+      "POST /register"
+    ]
+  },
+  "golden_files": [
+    {
+      "file": "GET_root__nominal__anonymous.json",
+      "endpoint": "GET /",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 15087,
+          "content_preview": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Conduit</title>\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap\">\n  <link rel=\"stylesheet\" href=\"https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css\">\n  <link rel=\"stylesheet\" href=\"/static/css/styles.css\">\n  <script src=\"https...[HTML truncated]",
+          "contains_global_feed": true
+        },
+        "response_time_ms": 24
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-003",
+        "BR-031"
+      ]
+    },
+    {
+      "file": "GET_root__nominal__user.json",
+      "endpoint": "GET /",
+      "scenario": "nominal",
+      "role": "user",
+      "request": {
+        "method": "GET",
+        "path": "/",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 16510,
+          "contains_following_feed": true,
+          "contains_global_feed": true
+        },
+        "response_time_ms": 32
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-003",
+        "BR-031"
+      ]
+    },
+    {
+      "file": "GET_root_feed_following__nominal__user.json",
+      "endpoint": "GET /?feed=following",
+      "scenario": "nominal",
+      "role": "user",
+      "request": {
+        "method": "GET",
+        "path": "/",
+        "query": {
+          "feed": "following"
+        },
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 5503,
+          "status_ok": true
+        },
+        "response_time_ms": 21
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-031"
+      ]
+    },
+    {
+      "file": "GET_root_feed_following__unauthenticated__anonymous.json",
+      "endpoint": "GET /?feed=following",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/",
+        "query": {
+          "feed": "following"
+        },
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 6
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-031"
+      ]
+    },
+    {
+      "file": "GET_tag_slug__nominal__anonymous.json",
+      "endpoint": "GET /tag/intelligence-artificielle",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/tag/intelligence-artificielle",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 6052,
+          "tag_value": "intelligence-artificielle"
+        },
+        "response_time_ms": 18
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-040"
+      ]
+    },
+    {
+      "file": "GET_tag_slug__htmx_partial__anonymous.json",
+      "endpoint": "GET /tag/intelligence-artificielle",
+      "scenario": "htmx_partial",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/tag/intelligence-artificielle",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 1480,
+          "is_partial": true
+        },
+        "response_time_ms": 15
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-040"
+      ]
+    },
+    {
+      "file": "GET_article_slug__nominal__anonymous.json",
+      "endpoint": "GET /article/:slug",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 7043,
+          "slug_tested": "teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "response_time_ms": 88
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-036"
+      ]
+    },
+    {
+      "file": "GET_article_slug__nominal__user.json",
+      "endpoint": "GET /article/:slug",
+      "scenario": "nominal",
+      "role": "user",
+      "request": {
+        "method": "GET",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 9408,
+          "slug_tested": "teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "response_time_ms": 29
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-036"
+      ]
+    },
+    {
+      "file": "GET_article_slug__not_found__anonymous.json",
+      "endpoint": "GET /article/:slug",
+      "scenario": "not_found",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/article/nonexistent-article-xyz-999",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "error": "article not found"
+        },
+        "response_time_ms": 11
+      },
+      "linked_rules": [
+        "BR-036"
+      ]
+    },
+    {
+      "file": "GET_editor__nominal__user.json",
+      "endpoint": "GET /editor",
+      "scenario": "nominal",
+      "role": "user",
+      "request": {
+        "method": "GET",
+        "path": "/editor",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 5210,
+          "has_form": true
+        },
+        "response_time_ms": 13
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-033"
+      ]
+    },
+    {
+      "file": "GET_editor__unauthenticated__anonymous.json",
+      "endpoint": "GET /editor",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/editor",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/editor"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 5
+      },
+      "linked_rules": [
+        "BR-005"
+      ]
+    },
+    {
+      "file": "GET_editor_slug__nominal__owner.json",
+      "endpoint": "GET /editor/:slug",
+      "scenario": "nominal",
+      "role": "owner",
+      "request": {
+        "method": "GET",
+        "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 9060,
+          "has_form": true,
+          "slug_tested": "teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "response_time_ms": 12
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-033",
+        "BR-034"
+      ]
+    },
+    {
+      "file": "GET_editor_slug__unauthenticated__anonymous.json",
+      "endpoint": "GET /editor/:slug",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 5
+      },
+      "linked_rules": [
+        "BR-005"
+      ]
+    },
+    {
+      "file": "GET_login__nominal__anonymous.json",
+      "endpoint": "GET /login",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/login",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 2944,
+          "has_form": true
+        },
+        "response_time_ms": 5
+      },
+      "linked_rules": [
+        "BR-007",
+        "BR-014"
+      ]
+    },
+    {
+      "file": "POST_login__valid_credentials__anonymous.json",
+      "endpoint": "POST /login",
+      "scenario": "valid_credentials",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/login",
+        "headers": {
+          "Referer": "http://localhost:8000/login"
+        },
+        "body": {
+          "email": "test@email.com",
+          "password": "{{PASSWORD}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/"
+        },
+        "body": {
+          "redirects_to": "/",
+          "session_created": true
+        },
+        "response_time_ms": 1642
+      },
+      "linked_rules": [
+        "BR-007",
+        "BR-014",
+        "BR-015"
+      ]
+    },
+    {
+      "file": "POST_login__invalid_credentials__anonymous.json",
+      "endpoint": "POST /login",
+      "scenario": "invalid_credentials",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/login",
+        "headers": {},
+        "body": {
+          "email": "wrong@email.com",
+          "password": "{{PASSWORD}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 3095,
+          "has_error_message": true,
+          "error_text": "Invalid email or password."
+        },
+        "response_time_ms": 1611
+      },
+      "linked_rules": [
+        "BR-014",
+        "BR-015"
+      ]
+    },
+    {
+      "file": "GET_register__nominal__anonymous.json",
+      "endpoint": "GET /register",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/register",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 3173,
+          "has_form": true
+        },
+        "response_time_ms": 6
+      },
+      "linked_rules": [
+        "BR-007",
+        "BR-016"
+      ]
+    },
+    {
+      "file": "POST_register__duplicate_email__anonymous.json",
+      "endpoint": "POST /register",
+      "scenario": "duplicate_email",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/register",
+        "headers": {},
+        "body": {
+          "username": "newuniqueuser99",
+          "email": "test@email.com",
+          "password": "{{PASSWORD}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 3338,
+          "has_error": true,
+          "error_expected": "email already taken or similar"
+        },
+        "response_time_ms": 1965
+      },
+      "linked_rules": [
+        "BR-002",
+        "BR-007",
+        "BR-016"
+      ]
+    },
+    {
+      "file": "GET_settings__nominal__user.json",
+      "endpoint": "GET /settings",
+      "scenario": "nominal",
+      "role": "user",
+      "request": {
+        "method": "GET",
+        "path": "/settings",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 4316,
+          "has_form": true,
+          "username_in_page": true
+        },
+        "response_time_ms": 14
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-007",
+        "BR-009",
+        "BR-021"
+      ]
+    },
+    {
+      "file": "GET_settings__unauthenticated__anonymous.json",
+      "endpoint": "GET /settings",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/settings",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/settings"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 6
+      },
+      "linked_rules": [
+        "BR-005"
+      ]
+    },
+    {
+      "file": "POST_logout__nominal__user.json",
+      "endpoint": "POST /logout",
+      "scenario": "nominal",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/logout",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/"
+        },
+        "body": {
+          "redirects_to": "/",
+          "session_cleared": true
+        },
+        "response_time_ms": 18
+      },
+      "linked_rules": [
+        "BR-022"
+      ]
+    },
+    {
+      "file": "GET_profile_username__nominal__anonymous.json",
+      "endpoint": "GET /profile/:username",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/profile/admin",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 13376,
+          "username_in_page": true
+        },
+        "response_time_ms": 25
+      },
+      "linked_rules": [
+        "BR-007",
+        "BR-024"
+      ]
+    },
+    {
+      "file": "GET_profile_username__htmx_partial__anonymous.json",
+      "endpoint": "GET /profile/:username",
+      "scenario": "htmx_partial",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/profile/admin",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 13376
+        },
+        "response_time_ms": 26
+      },
+      "linked_rules": [
+        "BR-001",
+        "BR-024"
+      ]
+    },
+    {
+      "file": "GET_profile_username__not_found__anonymous.json",
+      "endpoint": "GET /profile/:username",
+      "scenario": "not_found",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/profile/nonexistent-user-xyz-999",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "error": "user not found"
+        },
+        "response_time_ms": 10
+      },
+      "linked_rules": [
+        "BR-024"
+      ]
+    },
+    {
+      "file": "GET_profile_username_favorites__nominal__anonymous.json",
+      "endpoint": "GET /profile/:username/favorites",
+      "scenario": "nominal",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/profile/admin/favorites",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 3304
+        },
+        "response_time_ms": 13
+      },
+      "linked_rules": [
+        "BR-024",
+        "BR-048"
+      ]
+    },
+    {
+      "file": "POST_profile_username_follow__htmx_toggle__user.json",
+      "endpoint": "POST /profile/:username/follow",
+      "scenario": "htmx_toggle",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/profile/admin/follow",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 1,
+          "is_partial": true
+        },
+        "response_time_ms": 10
+      },
+      "linked_rules": [
+        "BR-010",
+        "BR-025",
+        "BR-026"
+      ]
+    },
+    {
+      "file": "POST_profile_username_follow__redirect__user.json",
+      "endpoint": "POST /profile/:username/follow",
+      "scenario": "redirect",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/profile/admin/follow",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/profile/admin"
+        },
+        "body": {
+          "redirects_to": "/profile/admin"
+        },
+        "response_time_ms": 10
+      },
+      "linked_rules": [
+        "BR-010",
+        "BR-025",
+        "BR-026"
+      ]
+    },
+    {
+      "file": "POST_profile_username_follow__unauthenticated__anonymous.json",
+      "endpoint": "POST /profile/:username/follow",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/profile/admin/follow",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/profile/admin/follow"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 5
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-025"
+      ]
+    },
+    {
+      "file": "POST_article_slug_favorite__htmx_toggle__user.json",
+      "endpoint": "POST /article/:slug/favorite",
+      "scenario": "htmx_toggle",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/favorite",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 288,
+          "is_partial": true
+        },
+        "response_time_ms": 27
+      },
+      "linked_rules": [
+        "BR-048",
+        "BR-049"
+      ]
+    },
+    {
+      "file": "POST_article_slug_favorite__redirect__user.json",
+      "endpoint": "POST /article/:slug/favorite",
+      "scenario": "redirect",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/favorite",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "body": {
+          "redirects_to": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "response_time_ms": 31
+      },
+      "linked_rules": [
+        "BR-048",
+        "BR-049"
+      ]
+    },
+    {
+      "file": "POST_article_slug_favorite__unauthenticated__anonymous.json",
+      "endpoint": "POST /article/:slug/favorite",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/favorite",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/favorite"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 5
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-048"
+      ]
+    },
+    {
+      "file": "POST_article_slug_comment__htmx_nominal__user.json",
+      "endpoint": "POST /article/:slug/comment",
+      "scenario": "htmx_nominal",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": {
+          "body": "Golden file test comment - please ignore",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 723,
+          "is_partial": true
+        },
+        "response_time_ms": 26
+      },
+      "linked_rules": [
+        "BR-050",
+        "BR-051",
+        "BR-052"
+      ]
+    },
+    {
+      "file": "POST_article_slug_comment__redirect__user.json",
+      "endpoint": "POST /article/:slug/comment",
+      "scenario": "redirect",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment",
+        "headers": {},
+        "body": {
+          "body": "Another test comment",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "body": {
+          "redirects_to": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+        },
+        "response_time_ms": 19
+      },
+      "linked_rules": [
+        "BR-050",
+        "BR-051"
+      ]
+    },
+    {
+      "file": "POST_article_slug_comment__empty_body__user.json",
+      "endpoint": "POST /article/:slug/comment",
+      "scenario": "empty_body",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": {
+          "body": "",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 1424,
+          "silently_ignored": true
+        },
+        "response_time_ms": 13
+      },
+      "linked_rules": [
+        "BR-052"
+      ]
+    },
+    {
+      "file": "POST_article_slug_comment__unauthenticated__anonymous.json",
+      "endpoint": "POST /article/:slug/comment",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment",
+        "headers": {},
+        "body": {
+          "body": "test",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment"
+        },
+        "body": {
+          "redirects_to_login": true
+        },
+        "response_time_ms": 6
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-050"
+      ]
+    },
+    {
+      "file": "POST_article_slug_comment_id_delete__unauthenticated__anonymous.json",
+      "endpoint": "POST /article/:slug/comment/:id/delete",
+      "scenario": "unauthenticated",
+      "role": "anonymous",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment/2/delete",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/login?next=/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment/2/delete"
+        },
+        "body": {
+          "redirects_to_login": true,
+          "status": 302
+        },
+        "response_time_ms": 6
+      },
+      "linked_rules": [
+        "BR-005",
+        "BR-053"
+      ]
+    },
+    {
+      "file": "POST_article_slug_comment_id_delete__htmx_authorized__user.json",
+      "endpoint": "POST /article/:slug/comment/:id/delete",
+      "scenario": "htmx_authorized",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/comment/2/delete",
+        "headers": {
+          "HX-Request": "true"
+        },
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 723,
+          "is_partial": true
+        },
+        "response_time_ms": 28
+      },
+      "linked_rules": [
+        "BR-053",
+        "BR-054"
+      ]
+    },
+    {
+      "file": "POST_editor__valid_create__user.json",
+      "endpoint": "POST /editor",
+      "scenario": "valid_create",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/editor",
+        "headers": {},
+        "body": {
+          "title": "{{ARTICLE_TITLE}}",
+          "description": "A description for golden file testing",
+          "body": "This is the body content for golden file testing.",
+          "tags": "golden,test",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/article/golden-test-article-1776149922"
+        },
+        "body": {
+          "redirects_to": "/article/golden-test-article-1776149922",
+          "article_created": true
+        },
+        "response_time_ms": 81
+      },
+      "linked_rules": [
+        "BR-033",
+        "BR-034",
+        "BR-035"
+      ]
+    },
+    {
+      "file": "POST_editor__invalid_empty_title__user.json",
+      "endpoint": "POST /editor",
+      "scenario": "invalid_empty_title",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/editor",
+        "headers": {},
+        "body": {
+          "title": "",
+          "description": "Description",
+          "body": "Body",
+          "tags": "",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 5341,
+          "shows_form_again": true,
+          "has_error": true
+        },
+        "response_time_ms": 11
+      },
+      "linked_rules": [
+        "BR-033"
+      ]
+    },
+    {
+      "file": "POST_editor_slug__valid_edit__owner.json",
+      "endpoint": "POST /editor/:slug",
+      "scenario": "valid_edit",
+      "role": "owner",
+      "request": {
+        "method": "POST",
+        "path": "/editor/golden-test-article-1776149922",
+        "headers": {},
+        "body": {
+          "title": "{{ARTICLE_TITLE}}",
+          "description": "Updated description",
+          "body": "Updated body content.",
+          "tags": "golden,test,updated",
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/article/golden-test-article-1776149922"
+        },
+        "body": {
+          "redirects_to": "/article/golden-test-article-1776149922",
+          "article_updated": true
+        },
+        "response_time_ms": 95
+      },
+      "linked_rules": [
+        "BR-034",
+        "BR-035"
+      ]
+    },
+    {
+      "file": "POST_article_slug_delete__nominal__owner.json",
+      "endpoint": "POST /article/:slug/delete",
+      "scenario": "nominal",
+      "role": "owner",
+      "request": {
+        "method": "POST",
+        "path": "/article/golden-test-article-1776149922/delete",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 302,
+        "headers": {
+          "content_type": "text/html",
+          "location": "/"
+        },
+        "body": {
+          "redirects_to": "/",
+          "article_deleted": true
+        },
+        "response_time_ms": 28
+      },
+      "linked_rules": [
+        "BR-034",
+        "BR-037"
+      ]
+    },
+    {
+      "file": "POST_article_slug_delete__not_found__user.json",
+      "endpoint": "POST /article/:slug/delete",
+      "scenario": "not_found",
+      "role": "user",
+      "request": {
+        "method": "POST",
+        "path": "/article/totally-nonexistent-article-xyz/delete",
+        "headers": {},
+        "body": {
+          "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "error": "article not found or not owner"
+        },
+        "response_time_ms": 17
+      },
+      "linked_rules": [
+        "BR-034",
+        "BR-037"
+      ]
+    },
+    {
+      "file": "GET_root_page2__pagination__anonymous.json",
+      "endpoint": "GET /?page=2",
+      "scenario": "pagination",
+      "role": "anonymous",
+      "request": {
+        "method": "GET",
+        "path": "/",
+        "query": {
+          "page": "2"
+        },
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content_type": "text/html"
+        },
+        "body": {
+          "html_length": 5690,
+          "page": 2
+        },
+        "response_time_ms": 13
+      },
+      "linked_rules": [
+        "BR-031",
+        "BR-032"
+      ]
+    }
+  ]
+}

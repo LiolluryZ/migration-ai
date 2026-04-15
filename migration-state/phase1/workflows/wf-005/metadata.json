@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "accounts",
+    "name":  "Toggle Suivi Utilisateur (Follow/Unfollow)",
+    "id":  "WF-005",
+    "transitions_count":  3,
+    "states_count":  3
+}

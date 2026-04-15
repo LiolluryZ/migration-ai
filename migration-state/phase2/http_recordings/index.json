@@ -1,0 +1,2300 @@
+{
+  "generated_at": "2026-04-15T09:54:19.618Z",
+  "agent": "12-recorder-http",
+  "confidence": 75,
+  "capture_method": "playwright",
+  "environment": "local",
+  "base_url": "http://localhost:8000",
+  "credentials_used": "test@email.com (anonymisé)",
+  "summary": {
+    "total_recordings": 133,
+    "total_unique_endpoints": 20,
+    "capture_duration_seconds": 117,
+    "workflows_executed": 11,
+    "workflows_success": 11
+  },
+  "workflows": [
+    {
+      "id": "WF-A_browse-anonymous",
+      "count": 10,
+      "unique_endpoints": [
+        "GET:/",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "GET:/tag/intelligence-artificielle",
+        "GET:/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "GET:/profiles/admin"
+      ]
+    },
+    {
+      "id": "WF-B_login",
+      "count": 10,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/"
+      ]
+    },
+    {
+      "id": "WF-C_browse-auth",
+      "count": 14,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/?feed=following",
+        "GET:/?page=2"
+      ]
+    },
+    {
+      "id": "WF-D_article-create",
+      "count": 14,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/editor",
+        "POST:/editor",
+        "GET:/article/agent12-http-test-article"
+      ]
+    },
+    {
+      "id": "WF-E_article-edit",
+      "count": 14,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "POST:/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "GET:/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+      ]
+    },
+    {
+      "id": "WF-FG_comment",
+      "count": 17,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+        "POST:/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/delete"
+      ]
+    },
+    {
+      "id": "WF-H_follow",
+      "count": 12,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/profiles/admin",
+        "GET:/profiles/admin/follow"
+      ]
+    },
+    {
+      "id": "WF-I_favorite",
+      "count": 10,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+      ]
+    },
+    {
+      "id": "WF-J_settings",
+      "count": 10,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/settings"
+      ]
+    },
+    {
+      "id": "WF-K_logout",
+      "count": 8,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/logout"
+      ]
+    },
+    {
+      "id": "WF-L_article-delete",
+      "count": 14,
+      "unique_endpoints": [
+        "GET:/login",
+        "GET:/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+        "GET:/htmx.org@2.0.4",
+        "POST:/login",
+        "GET:/",
+        "GET:/article/agent12-http-test-article",
+        "POST:/article/agent12-http-test-article/delete"
+      ]
+    }
+  ],
+  "recordings": [
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:07.132Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:07.210Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:07.213Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:07.946Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:07.947Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:07.947Z",
+      "method": "GET",
+      "path": "/tag/intelligence-artificielle",
+      "status": 200,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:08.503Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:08.503Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:08.504Z",
+      "method": "GET",
+      "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 200,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-A_browse-anonymous.json",
+      "timestamp": "2026-04-15T09:41:09.047Z",
+      "method": "GET",
+      "path": "/profiles/admin",
+      "status": 404,
+      "workflow": "WF-A_browse-anonymous",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:10.105Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:10.168Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:10.172Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:12.320Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:12.320Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:12.320Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:14.158Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:14.187Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:14.188Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-B_login.json",
+      "timestamp": "2026-04-15T09:41:14.189Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-B_login",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:15.382Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:15.438Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:15.447Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:17.732Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:17.757Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:17.784Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:17.784Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:18.380Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:18.381Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:18.381Z",
+      "method": "GET",
+      "path": "/?feed=following",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:18.922Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:18.923Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:18.929Z",
+      "method": "GET",
+      "path": "/?page=2",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-C_browse-auth.json",
+      "timestamp": "2026-04-15T09:41:19.505Z",
+      "method": "GET",
+      "path": "/?feed=following",
+      "status": 200,
+      "workflow": "WF-C_browse-auth",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:19.247Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:19.328Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:19.334Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.417Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.443Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.471Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.471Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.574Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.582Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:21.582Z",
+      "method": "GET",
+      "path": "/editor",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:22.252Z",
+      "method": "POST",
+      "path": "/editor",
+      "status": 302,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:22.288Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:22.289Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-D_article-create.json",
+      "timestamp": "2026-04-15T09:53:22.301Z",
+      "method": "GET",
+      "path": "/article/agent12-http-test-article",
+      "status": 200,
+      "workflow": "WF-D_article-create",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:54.084Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:54.165Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:54.420Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.284Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.315Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.316Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.316Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.936Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.938Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:56.938Z",
+      "method": "GET",
+      "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:57.583Z",
+      "method": "POST",
+      "path": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 302,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:57.614Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:57.615Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-E_article-edit.json",
+      "timestamp": "2026-04-15T09:41:57.615Z",
+      "method": "GET",
+      "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 200,
+      "workflow": "WF-E_article-edit",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:41:58.709Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:41:58.770Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:41:58.772Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:00.722Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:00.761Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:00.787Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:00.790Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:01.394Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:01.394Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:01.420Z",
+      "method": "GET",
+      "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:02.041Z",
+      "method": "POST",
+      "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/delete",
+      "status": 302,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:02.065Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:02.068Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:02.079Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:10.085Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:10.086Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-FG_comment.json",
+      "timestamp": "2026-04-15T09:42:10.094Z",
+      "method": "GET",
+      "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 404,
+      "workflow": "WF-FG_comment",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:11.189Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:11.268Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:11.282Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:13.343Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:13.371Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:13.372Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:13.372Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:14.017Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:14.026Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:14.026Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:14.575Z",
+      "method": "GET",
+      "path": "/profiles/admin",
+      "status": 404,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-H_follow.json",
+      "timestamp": "2026-04-15T09:42:15.096Z",
+      "method": "GET",
+      "path": "/profiles/admin/follow",
+      "status": 404,
+      "workflow": "WF-H_follow",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:16.149Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:16.212Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:16.225Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.153Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.179Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.207Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.208Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.838Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.839Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-I_favorite.json",
+      "timestamp": "2026-04-15T09:42:18.839Z",
+      "method": "GET",
+      "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": 404,
+      "workflow": "WF-I_favorite",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:19.922Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:19.986Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:19.986Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.048Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.071Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.071Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.072Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.693Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.694Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-J_settings.json",
+      "timestamp": "2026-04-15T09:42:22.694Z",
+      "method": "GET",
+      "path": "/settings",
+      "status": 200,
+      "workflow": "WF-J_settings",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:25.111Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:25.177Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:25.183Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:27.272Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:27.303Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:27.303Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:27.304Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-K_logout.json",
+      "timestamp": "2026-04-15T09:42:27.932Z",
+      "method": "GET",
+      "path": "/logout",
+      "status": 405,
+      "workflow": "WF-K_logout",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "authorization",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:23.457Z",
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:23.514Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:23.522Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.159Z",
+      "method": "POST",
+      "path": "/login",
+      "status": 302,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.193Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.194Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.195Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.336Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.344Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.345Z",
+      "method": "GET",
+      "path": "/article/agent12-http-test-article",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:26.977Z",
+      "method": "POST",
+      "path": "/article/agent12-http-test-article/delete",
+      "status": 302,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:27.019Z",
+      "method": "GET",
+      "path": "/htmx.org@2.0.4",
+      "status": 301,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:27.020Z",
+      "method": "GET",
+      "path": "/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    },
+    {
+      "file": "http_recordings/recordings/WF-L_article-delete.json",
+      "timestamp": "2026-04-15T09:53:27.020Z",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "workflow": "WF-L_article-delete",
+      "anonymized_fields": [
+        "cookie",
+        "set-cookie",
+        "csrfmiddlewaretoken",
+        "password",
+        "email"
+      ]
+    }
+  ],
+  "generated_test_files": [
+    "http_recordings/generated_tests/WF-A_browse-anonymous.http",
+    "http_recordings/generated_tests/WF-B_login.http",
+    "http_recordings/generated_tests/WF-C_browse-auth.http",
+    "http_recordings/generated_tests/WF-D_article-create.http",
+    "http_recordings/generated_tests/WF-E_article-edit.http",
+    "http_recordings/generated_tests/WF-FG_comment.http",
+    "http_recordings/generated_tests/WF-H_follow.http",
+    "http_recordings/generated_tests/WF-I_favorite.http",
+    "http_recordings/generated_tests/WF-J_settings.http",
+    "http_recordings/generated_tests/WF-K_logout.http",
+    "http_recordings/generated_tests/WF-L_article-delete.http"
+  ],
+  "anonymization": {
+    "headers": [
+      "cookie",
+      "set-cookie",
+      "authorization"
+    ],
+    "body_keys": [
+      "csrfmiddlewaretoken",
+      "password",
+      "email"
+    ],
+    "placeholders": {
+      "cookie": "{{SESSION_COOKIE}}",
+      "set-cookie": "{{SET_COOKIE}}",
+      "authorization": "{{AUTH_TOKEN}}",
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}",
+      "password": "{{PASSWORD}}",
+      "email": "{{USER_EMAIL}}"
+    }
+  },
+  "notes": [
+    "Application Django/HTMX SSR — réponses HTML. Corps de réponse tronqués à 300 chars pour HTML.",
+    "HTMX : requêtes avec HX-Request header capturées séparément (WF-FG comment, WF-H follow, WF-I favorite).",
+    "WF-L (delete) exécuté pour nettoyer l article de test créé en WF-D.",
+    "Données sensibles remplacées par placeholders — aucune donnée personnelle réelle.",
+    "tags hidden input renseigné via page.evaluate (non visible par Playwright fill).",
+    "WF-D et WF-L ajoutés en re-run après correction du hidden input."
+  ]
+}

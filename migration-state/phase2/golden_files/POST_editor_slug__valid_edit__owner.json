@@ -1,0 +1,34 @@
+{
+  "file": "POST_editor_slug__valid_edit__owner.json",
+  "endpoint": "POST /editor/:slug",
+  "scenario": "valid_edit",
+  "role": "owner",
+  "request": {
+    "method": "POST",
+    "path": "/editor/golden-test-article-1776149922",
+    "headers": {},
+    "body": {
+      "title": "{{ARTICLE_TITLE}}",
+      "description": "Updated description",
+      "body": "Updated body content.",
+      "tags": "golden,test,updated",
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/article/golden-test-article-1776149922"
+    },
+    "body": {
+      "redirects_to": "/article/golden-test-article-1776149922",
+      "article_updated": true
+    },
+    "response_time_ms": 95
+  },
+  "linked_rules": [
+    "BR-034",
+    "BR-035"
+  ]
+}

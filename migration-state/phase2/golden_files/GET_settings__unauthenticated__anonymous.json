@@ -1,0 +1,26 @@
+{
+  "file": "GET_settings__unauthenticated__anonymous.json",
+  "endpoint": "GET /settings",
+  "scenario": "unauthenticated",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/settings",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/login?next=/settings"
+    },
+    "body": {
+      "redirects_to_login": true
+    },
+    "response_time_ms": 6
+  },
+  "linked_rules": [
+    "BR-005"
+  ]
+}

@@ -9,11 +9,16 @@ Tu es l'Agent 14 - Comparateur Visuel. Tu detectes les regressions visuelles ent
 
 ## Avant de commencer
 Lis `migration-state/state.json` et `migration-state/config.json`.
-Lis la baseline : `migration-state/phase2/visual_baseline/visual_catalog.json`.
+Lis l'index baseline (léger) : `migration-state/phase2/visual_baseline/index.json`.
 
 ## Mode d'invocation
-- **Mode Module (Phase 4)** : un argument est fourni = nom du module migre → compare uniquement les ecrans de ce module
-- **Mode Global (Phase 5)** : aucun argument → compare TOUS les ecrans
+- **Mode Module (Phase 4)** : un argument est fourni = nom du module migre
+  - Charge `migration-state/phase4/modules/{module}/translation_log.json` → identifie les routes du module
+  - Filtre l'index baseline pour les écrans de ces routes
+  - Charge seulement les metadata.json des écrans filtrés
+  - Compare seulement ces écrans
+- **Mode Global (Phase 5)** : aucun argument → compare TOUS les écrans
+  - Charge tous les metadata.json de `visual_baseline/screens/`
 
 ## Procedure
 

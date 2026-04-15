@@ -1,0 +1,35 @@
+{
+  "file": "POST_editor__valid_create__user.json",
+  "endpoint": "POST /editor",
+  "scenario": "valid_create",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/editor",
+    "headers": {},
+    "body": {
+      "title": "{{ARTICLE_TITLE}}",
+      "description": "A description for golden file testing",
+      "body": "This is the body content for golden file testing.",
+      "tags": "golden,test",
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/article/golden-test-article-1776149922"
+    },
+    "body": {
+      "redirects_to": "/article/golden-test-article-1776149922",
+      "article_created": true
+    },
+    "response_time_ms": 81
+  },
+  "linked_rules": [
+    "BR-033",
+    "BR-034",
+    "BR-035"
+  ]
+}

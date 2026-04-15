@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "comments",
+    "name":  "Suppression de Commentaire",
+    "id":  "WF-011",
+    "transitions_count":  5,
+    "states_count":  5
+}

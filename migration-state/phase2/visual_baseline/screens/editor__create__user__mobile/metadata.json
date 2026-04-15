@@ -1,0 +1,44 @@
+{
+  "route": "/editor",
+  "route_slug": "editor",
+  "state": "create",
+  "role": "user",
+  "viewport": "mobile",
+  "name": "Editor - Créer un article",
+  "description": "Formulaire vide de création d'article",
+  "navigation_path": [
+    "login",
+    "click \"New Article\" in navbar"
+  ],
+  "ui_components": [
+    {
+      "type": "form",
+      "region": "main",
+      "description": "Champs: title (required), description, body (textarea Markdown), tags",
+      "business_rules": [
+        "BR-011",
+        "BR-012",
+        "BR-013",
+        "BR-014"
+      ]
+    },
+    {
+      "type": "button",
+      "region": "form",
+      "description": "Bouton \"Publish Article\"",
+      "business_rules": []
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /editor",
+    "POST /editor"
+  ],
+  "dynamic_zones": [],
+  "business_rules_observed": [
+    "BR-011",
+    "BR-012",
+    "BR-013",
+    "BR-014"
+  ],
+  "captured_at": "2026-04-15T09:04:22.765Z"
+}

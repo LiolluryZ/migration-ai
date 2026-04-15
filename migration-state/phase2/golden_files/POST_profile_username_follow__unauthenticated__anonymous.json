@@ -1,0 +1,29 @@
+{
+  "file": "POST_profile_username_follow__unauthenticated__anonymous.json",
+  "endpoint": "POST /profile/:username/follow",
+  "scenario": "unauthenticated",
+  "role": "anonymous",
+  "request": {
+    "method": "POST",
+    "path": "/profile/admin/follow",
+    "headers": {},
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/login?next=/profile/admin/follow"
+    },
+    "body": {
+      "redirects_to_login": true
+    },
+    "response_time_ms": 5
+  },
+  "linked_rules": [
+    "BR-005",
+    "BR-025"
+  ]
+}

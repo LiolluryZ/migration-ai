@@ -1,0 +1,29 @@
+{
+  "file": "POST_article_slug_favorite__redirect__user.json",
+  "endpoint": "POST /article/:slug/favorite",
+  "scenario": "redirect",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance/favorite",
+    "headers": {},
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+    },
+    "body": {
+      "redirects_to": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+    },
+    "response_time_ms": 31
+  },
+  "linked_rules": [
+    "BR-048",
+    "BR-049"
+  ]
+}

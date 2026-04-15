@@ -1,0 +1,117 @@
+﻿{
+    "module":  "helpers",
+    "agent":  "05-extracteur-regles",
+    "rules":  [
+                  {
+                      "id":  "BR-001",
+                      "domain":  "rendering",
+                      "module":  "helpers",
+                      "summary":  "La presence du header HTTP HX-Request=true determine si la reponse doit etre un fragment HTML partiel (HTMX) ou une page complete. Ce mecanisme conditionne le rendu de toutes les vues.",
+                      "formal_expression":  "is_htmx(request) := request.headers[\u0027HX-Request\u0027] == \u0027true\u0027",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "helpers/htmx.py",
+                                                   "function":  "is_htmx",
+                                                   "line_start":  4,
+                                                   "line_end":  5,
+                                                   "code_snippet":  "def is_htmx(request: HttpRequest) -\u003e bool:\n    return request.headers.get(\"HX-Request\") == \"true\""
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Header absent ou valeur differente de \u0027true\u0027",
+                                             "expected_behavior":  "Retourne False, la vue rend la page complete"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  70,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-002",
+                      "domain":  "error_handling",
+                      "module":  "helpers",
+                      "summary":  "Les violations de contrainte d\u0027unicite en base de donnees sont parsees pour extraire le nom du champ en erreur, permettant d\u0027afficher un message d\u0027erreur metier specifique (ex: \u0027email already taken\u0027). Supporte SQLite et PostgreSQL.",
+                      "formal_expression":  "clean_integrity_error(error) -\u003e field_name | null",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "helpers/exceptions.py",
+                                                   "function":  "clean_integrity_error",
+                                                   "line_start":  27,
+                                                   "line_end":  36,
+                                                   "code_snippet":  "def clean_integrity_error(error: Exception) -\u003e str | None:\n    try:\n        if UniqueViolation is not None and isinstance(error.__cause__, UniqueViolation):\n            return error.__cause__.args[0].split(\":\")[1].split(\"(\")[1].split(\")\")[0]\n        if isinstance(error.__cause__, SQLiteIntegrityError):\n            return error.__cause__.args[0].split(\": \")[1].split(\".\")[1]\n        return None\n    except Exception:\n        return None"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Format d\u0027erreur non reconnu (ni PostgreSQL ni SQLite)",
+                                             "expected_behavior":  "Retourne None silencieusement"
+                                         },
+                                         {
+                                             "description":  "Message d\u0027erreur SQLite malformed",
+                                             "expected_behavior":  "Retourne None (catch-all Exception)"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  75,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-003",
+                      "domain":  "authentication",
+                      "module":  "helpers",
+                      "summary":  "Pour tout utilisateur authentifie, le contexte expose en JSON les champs username, email, bio et image. Pour un utilisateur non authentifie, le contexte expose null. Cela alimente window.__conduit_debug__ dans le frontend.",
+                      "formal_expression":  "IF user.is_authenticated THEN expose {username, email, bio, image} ELSE expose null",
+                      "type":  "transformation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "helpers/context_processors.py",
+                                                   "function":  "conduit_context",
+                                                   "line_start":  4,
+                                                   "line_end":  20,
+                                                   "code_snippet":  "def conduit_context(request):\n    if request.user.is_authenticated:\n        user_data = {\n            \"username\": request.user.username,\n            \"email\": request.user.email,\n            \"bio\": request.user.bio or None,\n            \"image\": request.user.image or None,\n        }\n        return {\"conduit_user_json\": json.dumps(user_data), \"conduit_authenticated\": True}\n    return {\"conduit_user_json\": \"null\", \"conduit_authenticated\": False}"
+                                               }
+                                           ],
+                      "dependencies":  [
+                                           "BR-001"
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "bio ou image vide (string vide)",
+                                             "expected_behavior":  "Converti en None via \u0027or None\u0027"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  80,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  }
+              ],
+    "total_rules":  3,
+    "generated_at":  "2026-04-15T07:50:00.8203883ZZ"
+}

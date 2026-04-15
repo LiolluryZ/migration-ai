@@ -12,7 +12,7 @@ Lis `migration-state/state.json` et `migration-state/config.json`.
 Lis :
 - `migration-state/phase0/structure.json`
 - `migration-state/phase0/routes_catalog.json`
-- `migration-state/phase1/business_rules.json` (**REQUIS**)
+- `migration-state/phase1/business_rules/index.json` (**REQUIS** - léger, utilisé pour références BR-xxx)
 
 ## Procedure
 
@@ -35,19 +35,27 @@ Cherche dans le code :
 ### Diagrammes
 Genere un diagramme `stateDiagram-v2` Mermaid pour chaque workflow.
 
-## Sortie : `migration-state/phase1/workflows.json`
+## Sortie : `migration-state/phase1/workflows/`
+
+**Structure modulable** :
+```
+workflows/
+  ├─ index.json                  (liste workflows + stats)
+  ├─ summary.json                (stats globales)
+  └─ {workflow_id}/
+     ├─ workflow.json            (workflow complet)
+     └─ metadata.json            (id, name, domain, nb states/transitions)
+```
+
+**`workflows/{workflow_id}/workflow.json`** :
 ```json
 {
-  "generated_at": "ISO 8601", "agent": "06-extracteur-workflows", "confidence": 80,
-  "summary": { "total_workflows": 0, "total_states": 0, "total_transitions": 0 },
-  "workflows": [
-    {
-      "id": "WF-001", "name": "Processus de commande", "domain": "orders",
-      "trigger": "User clicks 'Place Order'",
-      "trigger_location": { "file": "string", "line": 0 },
-      "states": [
-        { "name": "pending", "description": "En attente de paiement", "is_initial": true, "is_terminal": false,
-          "entry_actions": ["Creer la commande en base"], "exit_actions": [] }
+  "id": "WF-001", "name": "Processus de commande", "domain": "orders",
+  "trigger": "User clicks 'Place Order'",
+  "trigger_location": { "file": "string", "line": 0 },
+  "states": [
+    { "name": "pending", "description": "En attente de paiement", "is_initial": true, "is_terminal": false,
+      "entry_actions": ["Creer la commande en base"], "exit_actions": [] }
       ],
       "transitions": [
         {

@@ -1,0 +1,118 @@
+﻿{
+    "module":  "config",
+    "agent":  "05-extracteur-regles",
+    "rules":  [
+                  {
+                      "id":  "BR-004",
+                      "domain":  "security",
+                      "module":  "config",
+                      "summary":  "[NON MIGRÃ‰E] AUTH_PASSWORD_VALIDATORS est configurÃ© dans settings.py mais n\u0027est PAS effectivement appliquÃ© lors de l\u0027inscription ni du changement de mot de passe. DÃ©cision humaine (2026-04-13): comportement intentionnel Ã  reproduire â€” aucune validation de complexitÃ© de mot de passe dans la cible.",
+                      "formal_expression":  null,
+                      "migration_status":  "excluded",
+                      "migration_decision":  "RÃ¨gle non effective dans le legacy. DÃ©cision: ne pas appliquer de validators de mot de passe dans la cible. ValidÃ© le 2026-04-13.",
+                      "type":  "validation",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "config/settings.py",
+                                                   "function":  "AUTH_PASSWORD_VALIDATORS",
+                                                   "line_start":  117,
+                                                   "line_end":  122,
+                                                   "code_snippet":  "AUTH_PASSWORD_VALIDATORS = [\n    {\"NAME\": \"django.contrib.auth.password_validation.UserAttributeSimilarityValidator\"},\n    {\"NAME\": \"django.contrib.auth.password_validation.MinimumLengthValidator\"},\n    {\"NAME\": \"django.contrib.auth.password_validation.CommonPasswordValidator\"},\n    {\"NAME\": \"django.contrib.auth.password_validation.NumericPasswordValidator\"},\n]"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+                                         {
+                                             "description":  "Mot de passe identique au username ou email",
+                                             "expected_behavior":  "Rejete par UserAttributeSimilarityValidator"
+                                         },
+                                         {
+                                             "description":  "Mot de passe de moins de 8 caracteres",
+                                             "expected_behavior":  "Rejete par MinimumLengthValidator"
+                                         }
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  100,
+                      "requires_human_validation":  false,
+                      "validation_question":  null,
+                      "human_decision":  {
+                                             "date":  "2026-04-13",
+                                             "decision":  "non_migrate",
+                                             "rationale":  "Regle configuree mais non effective dans le legacy. Comportement voulu : pas de restriction sur les mots de passe."
+                                         }
+                  },
+                  {
+                      "id":  "BR-005",
+                      "domain":  "authentication",
+                      "module":  "config",
+                      "summary":  "Les utilisateurs non authentifies sont rediriges vers /login lorsqu\u0027ils tentent d\u0027acceder a une page protegee par @login_required.",
+                      "formal_expression":  "IF NOT authenticated AND route.requires_auth THEN redirect(\u0027/login\u0027)",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "config/settings.py",
+                                                   "function":  "LOGIN_URL",
+                                                   "line_start":  155,
+                                                   "line_end":  155,
+                                                   "code_snippet":  "LOGIN_URL = \"/login\""
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  95,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  },
+                  {
+                      "id":  "BR-006",
+                      "domain":  "i18n",
+                      "module":  "config",
+                      "summary":  "L\u0027application utilise l\u0027anglais americain comme langue par defaut et le fuseau horaire UTC pour toutes les dates/heures.",
+                      "formal_expression":  "LANGUAGE_CODE = \u0027en-us\u0027 AND TIME_ZONE = \u0027UTC\u0027 AND USE_TZ = True",
+                      "type":  "constraint",
+                      "source_locations":  [
+                                               {
+                                                   "file":  "config/settings.py",
+                                                   "function":  "settings",
+                                                   "line_start":  134,
+                                                   "line_end":  137,
+                                                   "code_snippet":  "LANGUAGE_CODE = \"en-us\"\nTIME_ZONE = \"UTC\"\nUSE_I18N = True\nUSE_TZ = True"
+                                               }
+                                           ],
+                      "dependencies":  [
+
+                                       ],
+                      "edge_cases":  [
+
+                                     ],
+                      "duplicates":  [
+
+                                     ],
+                      "inconsistencies":  [
+
+                                          ],
+                      "confidence":  90,
+                      "requires_human_validation":  false,
+                      "validation_question":  null
+                  }
+              ],
+    "total_rules":  3,
+    "generated_at":  "2026-04-15T07:50:00.8695726ZZ"
+}

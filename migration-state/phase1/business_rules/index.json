@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "05-extracteur-regles",
+  "confidence": 94,
+  "total_rules": 54,
+  "total_modules": 6,
+  "modules": [
+    {
+      "name": "helpers",
+      "domain": "rendering, error_handling, authentication",
+      "rule_count": 12,
+      "file": "business_rules/modules/helpers/rules.json"
+    },
+    {
+      "name": "config",
+      "domain": "security, i18n",
+      "rule_count": 4,
+      "file": "business_rules/modules/config/rules.json"
+    },
+    {
+      "name": "accounts",
+      "domain": "authentication, user_management",
+      "rule_count": 8,
+      "file": "business_rules/modules/accounts/rules.json"
+    },
+    {
+      "name": "articles",
+      "domain": "articles, tags",
+      "rule_count": 12,
+      "file": "business_rules/modules/articles/rules.json"
+    },
+    {
+      "name": "comments",
+      "domain": "comments",
+      "rule_count": 5,
+      "file": "business_rules/modules/comments/rules.json"
+    },
+    {
+      "name": "templates",
+      "domain": "ui, navigation, pagination, social, favorites",
+      "rule_count": 13,
+      "file": "business_rules/modules/templates/rules.json"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+﻿{
+    "id":  "WF-003",
+    "name":  "Modification des Parametres Utilisateur (Settings)",
+    "domain":  "accounts",
+    "trigger":  "Utilisateur authentifie soumet SettingsForm (POST /settings, @login_required)",
+    "trigger_location":  {
+                             "file":  "apps/accounts/views.py",
+                             "line":  55
+                         },
+    "states":  [
+                   {
+                       "name":  "form_displayed",
+                       "description":  "Formulaire pre-rempli avec les donnees actuelles de l\u0027utilisateur (image, username, bio, email).",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "SettingsForm(instance=request.user)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "saving_settings",
+                       "description":  "Validation du formulaire, sauvegarde des donnees utilisateur.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "form.save(commit=False)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "re_authenticating",
+                       "description":  "Nouveau mot de passe defini â€” re-login obligatoire pour maintenir la session active.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "user.set_password(password)",
+                                             "user.save()",
+                                             "login(request, user)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "settings_saved",
+                       "description":  "Parametres sauvegardes sans changement de mot de passe.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "user.save()"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "redirected_to_profile",
+                       "description":  "Redirection vers la page de profil de l\u0027utilisateur.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "redirect(\u0027profile\u0027, username=user.username)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "form_displayed",
+                            "to":  "saving_settings",
+                            "condition":  "POST + SettingsForm.is_valid() (ref BR-015)",
+                            "condition_rules":  [
+                                                    "BR-015"
+                                                ],
+                            "actions":  [
+                                            "form.save(commit=False) â€” produit l\u0027objet user non sauvegarde"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "settings_view",
+                                                    "line":  57
+                                                }
+                        },
+                        {
+                            "from":  "saving_settings",
+                            "to":  "re_authenticating",
+                            "condition":  "form.cleaned_data[\u0027password\u0027] non vide (ref BR-015)",
+                            "condition_rules":  [
+                                                    "BR-015"
+                                                ],
+                            "actions":  [
+                                            "user.set_password(password)",
+                                            "user.save()",
+                                            "login(request, user) â€” re-login pour maintenir la session"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "settings_view",
+                                                    "line":  62
+                                                }
+                        },
+                        {
+                            "from":  "saving_settings",
+                            "to":  "settings_saved",
+                            "condition":  "form.cleaned_data[\u0027password\u0027] vide (ref BR-015)",
+                            "condition_rules":  [
+                                                    "BR-015"
+                                                ],
+                            "actions":  [
+                                            "user.save()"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "settings_view",
+                                                    "line":  65
+                                                }
+                        },
+                        {
+                            "from":  "re_authenticating",
+                            "to":  "redirected_to_profile",
+                            "condition":  "Re-login reussi",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027profile\u0027, username=user.username)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "settings_view",
+                                                    "line":  68
+                                                }
+                        },
+                        {
+                            "from":  "settings_saved",
+                            "to":  "redirected_to_profile",
+                            "condition":  "Sauvegarde reussie (sans changement de mot de passe)",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "redirect(\u0027profile\u0027, username=user.username)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "settings_view",
+                                                    "line":  68
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "form_displayed",
+                               "to":  "form_displayed",
+                               "condition":  "POST + formulaire invalide",
+                               "rollback_actions":  [
+                                                        "render(\u0027accounts/settings.html\u0027) avec erreurs de validation"
+                                                    ]
+                           }
+                       ],
+    "confidence":  95,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e form_displayed\n  form_displayed --\u003e saving_settings : POST + form_valid\n  saving_settings --\u003e re_authenticating : password non vide\n  saving_settings --\u003e settings_saved : password vide\n  re_authenticating --\u003e redirected_to_profile : login() + redirect\n  settings_saved --\u003e redirected_to_profile : redirect to profile\n  redirected_to_profile --\u003e [*]\n  form_displayed --\u003e form_displayed : POST + form_invalid"
+}

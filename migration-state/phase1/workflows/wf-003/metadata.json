@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "accounts",
+    "name":  "Modification des Parametres Utilisateur (Settings)",
+    "id":  "WF-003",
+    "transitions_count":  5,
+    "states_count":  5
+}

@@ -1,0 +1,69 @@
+﻿{
+    "id":  "WF-008",
+    "name":  "Suppression d\u0027Article",
+    "domain":  "articles",
+    "trigger":  "Auteur authentifie soumet le formulaire de suppression (POST /article/\u003cslug\u003e/delete, @login_required @require_POST)",
+    "trigger_location":  {
+                             "file":  "apps/articles/views.py",
+                             "line":  143
+                         },
+    "states":  [
+                   {
+                       "name":  "article_exists",
+                       "description":  "Article trouve et auteur verifie via get_object_or_404.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "get_object_or_404(Article, slug=slug, author=request.user) (ref BR-035)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "article_deleted",
+                       "description":  "Article supprime. En cascade: tous les commentaires et liens favoris de cet article sont supprimes (ref BR-043).",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "article.delete() [cascade: comments (BR-043), favorites ManyToMany]",
+                                             "redirect(\u0027home\u0027)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "article_exists",
+                            "to":  "article_deleted",
+                            "condition":  "POST + article.author == request.user (ref BR-035)",
+                            "condition_rules":  [
+                                                    "BR-035",
+                                                    "BR-043"
+                                                ],
+                            "actions":  [
+                                            "article.delete() [suppression cascade: comments, favorites]",
+                                            "redirect(\u0027home\u0027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/articles/views.py",
+                                                    "function":  "article_delete_view",
+                                                    "line":  145
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "article_exists",
+                               "to":  null,
+                               "condition":  "Utilisateur authentifie non-auteur tente la suppression",
+                               "rollback_actions":  [
+                                                        "get_object_or_404(Article, slug=slug, author=request.user) echoue â†’ 404 Not Found (pas 403, ref BR-035)"
+                                                    ]
+                           }
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e article_exists\n  article_exists --\u003e article_deleted : POST + author==user (BR-035)\n  article_deleted --\u003e [*] : redirect to home\n  note right of article_exists : 404 si non-auteur (BR-035)\n  note right of article_deleted : cascade: all comments deleted (BR-043)"
+}

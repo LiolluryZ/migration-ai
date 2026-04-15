@@ -1,0 +1,142 @@
+﻿{
+    "id":  "WF-001",
+    "name":  "Authentification (Login)",
+    "domain":  "accounts",
+    "trigger":  "Utilisateur soumet le formulaire de connexion (POST /login)",
+    "trigger_location":  {
+                             "file":  "apps/accounts/views.py",
+                             "line":  17
+                         },
+    "states":  [
+                   {
+                       "name":  "form_displayed",
+                       "description":  "Formulaire de connexion visible, en attente de soumission.",
+                       "is_initial":  true,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "credentials_validating",
+                       "description":  "Validation du formulaire et appel a authenticate(email, password).",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "Valider LoginForm",
+                                             "authenticate(email=..., password=...)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "authenticated",
+                       "description":  "Utilisateur connecte, session Django demarree, redirection vers home.",
+                       "is_initial":  false,
+                       "is_terminal":  true,
+                       "entry_actions":  [
+                                             "login(request, user)",
+                                             "redirect(\u0027home\u0027)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   },
+                   {
+                       "name":  "login_failed",
+                       "description":  "Credentials incorrects, formulaire re-affiche avec erreur generique.",
+                       "is_initial":  false,
+                       "is_terminal":  false,
+                       "entry_actions":  [
+                                             "form.add_error(None, \u0027Invalid email or password.\u0027)"
+                                         ],
+                       "exit_actions":  [
+
+                                        ]
+                   }
+               ],
+    "transitions":  [
+                        {
+                            "from":  "form_displayed",
+                            "to":  "credentials_validating",
+                            "condition":  "POST + LoginForm.is_valid()",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "Valider LoginForm (email, password)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "login_view",
+                                                    "line":  18
+                                                }
+                        },
+                        {
+                            "from":  "credentials_validating",
+                            "to":  "authenticated",
+                            "condition":  "authenticate() retourne un user non-None (ref BR-011, BR-012)",
+                            "condition_rules":  [
+                                                    "BR-011",
+                                                    "BR-012"
+                                                ],
+                            "actions":  [
+                                            "login(request, user)",
+                                            "redirect(\u0027home\u0027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "login_view",
+                                                    "line":  21
+                                                }
+                        },
+                        {
+                            "from":  "credentials_validating",
+                            "to":  "login_failed",
+                            "condition":  "authenticate() retourne None â€” email inconnu ou mot de passe incorrect (ref BR-011)",
+                            "condition_rules":  [
+                                                    "BR-011"
+                                                ],
+                            "actions":  [
+                                            "form.add_error(None, \u0027Invalid email or password.\u0027)"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "login_view",
+                                                    "line":  24
+                                                }
+                        },
+                        {
+                            "from":  "login_failed",
+                            "to":  "form_displayed",
+                            "condition":  "Re-affichage du formulaire avec erreur",
+                            "condition_rules":  [
+
+                                                ],
+                            "actions":  [
+                                            "render(\u0027accounts/login.html\u0027, {\u0027form\u0027: form})"
+                                        ],
+                            "source_location":  {
+                                                    "file":  "apps/accounts/views.py",
+                                                    "function":  "login_view",
+                                                    "line":  26
+                                                }
+                        }
+                    ],
+    "error_handling":  [
+                           {
+                               "from":  "form_displayed",
+                               "to":  "form_displayed",
+                               "condition":  "POST + formulaire invalide (champs manquants/malformes)",
+                               "rollback_actions":  [
+                                                        "render(\u0027accounts/login.html\u0027) avec erreurs de validation"
+                                                    ]
+                           }
+                       ],
+    "confidence":  98,
+    "mermaid_diagram":  "stateDiagram-v2\n  [*] --\u003e form_displayed\n  form_displayed --\u003e credentials_validating : POST + form_valid\n  credentials_validating --\u003e authenticated : authenticate() != None\n  authenticated --\u003e [*] : redirect to home\n  credentials_validating --\u003e login_failed : authenticate() == None\n  login_failed --\u003e form_displayed : re-display form\n  form_displayed --\u003e form_displayed : POST + form_invalid"
+}

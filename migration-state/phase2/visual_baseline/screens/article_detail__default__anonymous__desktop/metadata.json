@@ -1,0 +1,67 @@
+{
+  "route": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+  "route_slug": "article_detail",
+  "state": "default",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "name": "Article Detail (anonymous)",
+  "description": "Page de détail d'article: corps Markdown + commentaires",
+  "navigation_path": [
+    "click article title on home feed"
+  ],
+  "ui_components": [
+    {
+      "type": "article_header",
+      "region": "top",
+      "description": "Titre, auteur, date — boutons Follow/Favorite liens vers /login (BR-038)",
+      "business_rules": [
+        "BR-038",
+        "BR-040"
+      ]
+    },
+    {
+      "type": "article_body",
+      "region": "main",
+      "description": "Contenu Markdown rendu en HTML",
+      "business_rules": [
+        "BR-031"
+      ]
+    },
+    {
+      "type": "tag_list",
+      "region": "article",
+      "description": "Tags de l'article",
+      "business_rules": []
+    },
+    {
+      "type": "comment_section",
+      "region": "bottom",
+      "description": "Invite à se connecter pour commenter + liste commentaires publics",
+      "business_rules": [
+        "BR-036",
+        "BR-037"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Date de publication"
+    },
+    {
+      "selector": ".favorites-count",
+      "reason": "Compteur favoris"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-031",
+    "BR-036",
+    "BR-037",
+    "BR-038",
+    "BR-040"
+  ],
+  "captured_at": "2026-04-15T09:03:13.311Z"
+}

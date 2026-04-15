@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-04-15T10:00:00Z",
+  "agent": "07-extracteur-rbac",
+  "total_roles": 3,
+  "total_resources": 10,
+  "total_permissions": 34,
+  "unprotected_routes": 1,
+  "anomalies": 4,
+  "permissions_by_role": {
+    "anonymous": {
+      "count": 8,
+      "actions": ["read_home_feed", "read_article_detail", "read_profile", "read_profile_articles"]
+    },
+    "authenticated": {
+      "count": 21,
+      "actions": ["create_article", "edit_own_article", "delete_own_article", "create_comment", "delete_own_comment", "follow_user", "favorite_article"]
+    },
+    "staff": {
+      "count": 5,
+      "actions": ["admin_access", "manage_users", "manage_articles", "manage_comments", "manage_tags"]
+    }
+  },
+  "confidence": 95,
+  "notes": "Application Django 5.2 avec ABAC (ownership-based) plutôt que RBAC pur. Les contrôles d'accès sont implémentés via @login_required + get_object_or_404(author=request.user)"
+}

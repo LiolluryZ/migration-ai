@@ -1,0 +1,30 @@
+{
+  "file": "POST_profile_username_follow__redirect__user.json",
+  "endpoint": "POST /profile/:username/follow",
+  "scenario": "redirect",
+  "role": "user",
+  "request": {
+    "method": "POST",
+    "path": "/profile/admin/follow",
+    "headers": {},
+    "body": {
+      "csrfmiddlewaretoken": "{{CSRF_TOKEN}}"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/profile/admin"
+    },
+    "body": {
+      "redirects_to": "/profile/admin"
+    },
+    "response_time_ms": 10
+  },
+  "linked_rules": [
+    "BR-010",
+    "BR-025",
+    "BR-026"
+  ]
+}

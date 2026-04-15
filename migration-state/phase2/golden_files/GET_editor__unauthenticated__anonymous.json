@@ -1,0 +1,26 @@
+{
+  "file": "GET_editor__unauthenticated__anonymous.json",
+  "endpoint": "GET /editor",
+  "scenario": "unauthenticated",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/editor",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/login?next=/editor"
+    },
+    "body": {
+      "redirects_to_login": true
+    },
+    "response_time_ms": 5
+  },
+  "linked_rules": [
+    "BR-005"
+  ]
+}

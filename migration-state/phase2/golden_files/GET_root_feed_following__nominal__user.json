@@ -1,0 +1,30 @@
+{
+  "file": "GET_root_feed_following__nominal__user.json",
+  "endpoint": "GET /?feed=following",
+  "scenario": "nominal",
+  "role": "user",
+  "request": {
+    "method": "GET",
+    "path": "/",
+    "query": {
+      "feed": "following"
+    },
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 5503,
+      "status_ok": true
+    },
+    "response_time_ms": 21
+  },
+  "linked_rules": [
+    "BR-001",
+    "BR-031"
+  ]
+}

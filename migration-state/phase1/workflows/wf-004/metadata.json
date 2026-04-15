@@ -1,0 +1,7 @@
+﻿{
+    "domain":  "accounts",
+    "name":  "Deconnexion (Logout)",
+    "id":  "WF-004",
+    "transitions_count":  1,
+    "states_count":  2
+}

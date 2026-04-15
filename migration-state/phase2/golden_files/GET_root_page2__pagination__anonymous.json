@@ -1,0 +1,30 @@
+{
+  "file": "GET_root_page2__pagination__anonymous.json",
+  "endpoint": "GET /?page=2",
+  "scenario": "pagination",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/",
+    "query": {
+      "page": "2"
+    },
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content_type": "text/html"
+    },
+    "body": {
+      "html_length": 5690,
+      "page": 2
+    },
+    "response_time_ms": 13
+  },
+  "linked_rules": [
+    "BR-031",
+    "BR-032"
+  ]
+}

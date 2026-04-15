@@ -1,0 +1,53 @@
+{
+  "route": "/profile/admin",
+  "route_slug": "profile",
+  "state": "default",
+  "role": "user",
+  "viewport": "mobile",
+  "name": "Profile - admin (self)",
+  "description": "Vue de son propre profil: sans bouton Follow (BR-049), avec lien Edit Profile Settings",
+  "navigation_path": [
+    "login",
+    "click username in navbar"
+  ],
+  "ui_components": [
+    {
+      "type": "profile_header",
+      "region": "top",
+      "description": "Avatar, username, bio — pas de Follow (soi-même BR-049) — lien Edit Settings",
+      "business_rules": [
+        "BR-049"
+      ]
+    },
+    {
+      "type": "tab_list",
+      "region": "main",
+      "description": "Onglets: My Articles (actif) / Favorited Articles",
+      "business_rules": []
+    },
+    {
+      "type": "article_list",
+      "region": "main",
+      "description": "Articles avec boutons Favorite actifs",
+      "business_rules": [
+        "BR-038"
+      ]
+    }
+  ],
+  "linked_routes_backend": [
+    "GET /profile/admin"
+  ],
+  "dynamic_zones": [
+    {
+      "selector": "time",
+      "reason": "Dates de publication"
+    }
+  ],
+  "business_rules_observed": [
+    "BR-038",
+    "BR-047",
+    "BR-048",
+    "BR-049"
+  ],
+  "captured_at": "2026-04-15T09:04:25.416Z"
+}

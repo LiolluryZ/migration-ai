@@ -1,0 +1,30 @@
+{
+  "file": "GET_root_feed_following__unauthenticated__anonymous.json",
+  "endpoint": "GET /?feed=following",
+  "scenario": "unauthenticated",
+  "role": "anonymous",
+  "request": {
+    "method": "GET",
+    "path": "/",
+    "query": {
+      "feed": "following"
+    },
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content_type": "text/html",
+      "location": "/login"
+    },
+    "body": {
+      "redirects_to_login": true
+    },
+    "response_time_ms": 6
+  },
+  "linked_rules": [
+    "BR-005",
+    "BR-031"
+  ]
+}
