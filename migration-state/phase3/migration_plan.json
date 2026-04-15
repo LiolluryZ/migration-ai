@@ -1,0 +1,390 @@
+{
+  "generated_at": "2026-04-15T14:00:00Z",
+  "agent": "17-planificateur",
+  "confidence": 88,
+  "summary": {
+    "total_modules": 6,
+    "total_migration_phases": 5,
+    "critical_path_length": 5,
+    "critical_path": ["helpers", "articles", "accounts", "comments", "templates"],
+    "total_estimated_sprints": 6,
+    "strangler_fig_strategy": "Architecture découplée : Fastify API JSON + Angular SPA déployés en parallèle du legacy Django/HTMX. Proxy HTTP progressif (nginx/gateway) redirige les endpoints migrés vers la cible. Le legacy reste actif jusqu'à validation finale de chaque module."
+  },
+
+  "dependency_analysis": {
+    "graph": {
+      "helpers":   { "depends_on": [],                              "dependents": ["accounts", "articles", "comments"] },
+      "config":    { "depends_on": ["accounts", "articles", "comments"], "dependents": [] },
+      "articles":  { "depends_on": ["helpers"],                     "dependents": ["config", "accounts", "comments", "templates"] },
+      "accounts":  { "depends_on": ["helpers", "articles"],         "dependents": ["config", "comments", "templates"] },
+      "comments":  { "depends_on": ["articles", "accounts"],        "dependents": ["config", "templates"] },
+      "templates": { "depends_on": ["accounts", "articles", "comments"], "dependents": [] }
+    },
+    "notes": "accounts dépend de articles dans la source (profile_view pagine les articles de l'auteur). En cible REST cette dépendance devient un appel API interne, mais reste une dépendance de déploiement (articles API doit exister avant accounts profile). config Django n'a pas d'équivalent direct en cible : son successeur est le scaffolding Fastify + Angular bootstrappé en Phase 1 avant toute logique métier."
+  },
+
+  "migration_phases": [
+    {
+      "phase": 1,
+      "label": "Infrastructure & Utilitaires",
+      "sprint": "Sprint 1",
+      "parallel": true,
+      "modules": [
+        {
+          "name": "helpers",
+          "path": "helpers/",
+          "target_path": "target/backend/src/shared/",
+          "estimated_effort": "low",
+          "risk": "low",
+          "loc_source": 100,
+          "instability": 0.0,
+          "complexity_avg": 1.56,
+          "dependencies_migrated": true,
+          "requires_coexistence_adapter": false,
+          "business_rules_count": 12,
+          "business_rules_domain": "rendering, error_handling, authentication_context",
+          "key_translations": [
+            "is_htmx(request) → supprimé (HTMX disparaît en SPA) — garder comme utilitaire de détection header générique si besoin",
+            "clean_integrity_error(psycopg2/sqlite3) → parseSequelizeError(UniqueConstraintError) en Node.js/Sequelize",
+            "conduit_context (context processor Django) → Angular AuthStore (service injectable global)"
+          ],
+          "critical_rules": [
+            "Erreur d'unicité email → message 'email already in use' (BR-helpers : mapping psycopg2 → Sequelize UniqueConstraintError)",
+            "Erreur d'unicité username → message 'username already in use'",
+            "Context user injecté dans chaque vue → Angular AuthService.currentUser$ disponible globalement"
+          ],
+          "risks": [
+            { "level": "medium", "description": "get_or_404 et ResourceNotFound marqués dead code (agent-01) — décider migrer ou ignorer. VALIDATION HUMAINE REQUISE avant migration de ces symboles." },
+            { "level": "low", "description": "psycopg2.errors.UniqueViolation → SequelizeUniqueConstraintError : message format différent, adapter les assertions des tests golden files." }
+          ],
+          "validation_checkpoint": "1. npm run test:unit helpers.spec.ts → 0 failing. 2. parseSequelizeError retourne les mêmes clés d'erreur que clean_integrity_error. 3. AuthStore expose bien user/token après login.",
+          "strangler_fig_notes": "Pas d'injection proxy nécessaire — ce module est pur utilitaire, ne génère pas d'endpoint HTTP."
+        },
+        {
+          "name": "config",
+          "path": "config/",
+          "target_path": "target/ (Fastify app + Angular app shell)",
+          "estimated_effort": "medium",
+          "risk": "low",
+          "loc_source": 215,
+          "instability": 1.0,
+          "complexity_avg": 2.6,
+          "dependencies_migrated": true,
+          "requires_coexistence_adapter": false,
+          "business_rules_count": 4,
+          "business_rules_domain": "security (CSRF, helmet), i18n (timezone UTC, langue)",
+          "key_translations": [
+            "Django settings.py (INSTALLED_APPS, MIDDLEWARE) → Fastify plugins (@fastify/helmet, @fastify/cors, @fastify/jwt) + sequelize.config.ts",
+            "config/urls.py ROOT router → Fastify route registration (prefix /api) + Angular RouterModule (routes SPA)",
+            "LOGIN_URL + @login_required → AuthGuard Angular + fastify.authenticate preHandler",
+            "DATABASE_URL multi-provider (SQLite/PostgreSQL) → Sequelize datasource avec .env (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)",
+            "USE_FAST_HASHER (tests) → bcrypt rounds configurable via env (BCRYPT_ROUNDS=1 en test)"
+          ],
+          "critical_rules": [
+            "CSRF protection → @fastify/csrf-protection ou SameSite=Strict cookies + Origin header check",
+            "SECRET_KEY Django → JWT_SECRET en variable d'environnement (obligatoire, pas de défaut hardcodé)",
+            "ALLOWED_HOSTS → @fastify/cors ORIGIN whitelist",
+            "Timezone UTC → Sequelize timestamps en UTC (dialectOptions: { useUTC: true })"
+          ],
+          "risks": [
+            { "level": "medium", "description": "Architecture coupée Django monolithe → API découplée : le scaffolding Fastify + Angular doit être bootstrappé AVANT tout module métier. Risque d'écarts de configuration (CORS, CSRF) entre phases." }
+          ],
+          "validation_checkpoint": "1. Fastify démarre sur :3001 sans erreur. 2. Angular build sans erreur (ng build). 3. GET /api/health → 200 OK. 4. CORS configuré : Angular :4200 → Fastify :3001 sans erreur. 5. .env.example documenté avec toutes les variables requises.",
+          "strangler_fig_notes": "Ce module bootstrap le squelette cible sans logique métier. Il est le prérequis absolu de tous les autres modules cibles. Peut être développé en parallèle de helpers."
+        }
+      ],
+      "rationale": "Modules fondateurs : helpers (aucune dépendance interne, Ca=3) et config (scaffolding cible, I=1.0). Peuvent être traités en parallèle dans le même sprint. helpers fournit les utilitaires partagés qu'articles/accounts/comments importeront. config bootstrappe le projet Fastify + Angular qui hébergera tous les modules migrés.",
+      "validation_checkpoint": "Projet cible démarrable (Fastify :3001 + Angular :4200). GET /api/health → 200. Utilitaires shared (parseSequelizeError, AuthStore) couverts par tests unitaires."
+    },
+
+    {
+      "phase": 2,
+      "label": "Module Articles (domaine central)",
+      "sprint": "Sprint 2-3",
+      "parallel": false,
+      "modules": [
+        {
+          "name": "articles",
+          "path": "apps/articles/",
+          "target_path": "target/backend/src/modules/articles/ + target/frontend/src/app/articles/",
+          "estimated_effort": "high",
+          "risk": "high",
+          "loc_source": 332,
+          "instability": 0.25,
+          "complexity_avg": 2.5,
+          "dependencies_migrated": true,
+          "requires_coexistence_adapter": true,
+          "business_rules_count": 12,
+          "business_rules_domain": "articles, tags, slug, favorites, pagination, markdown, cache",
+          "key_translations": [
+            "ArticleQuerySet.with_favorites() (Count/Exists/OuterRef annotations ORM) → Sequelize findAll avec include + subquery + literal COUNT",
+            "django-taggit TaggableManager → table Tag + table ArticleTag (many-to-many explicite) + seeding Sequelize",
+            "cache.get_or_set (5 min tags list) → Node.js + node-cache ou Redis TTL 300s",
+            "render_markdown filter (markdown + nh3 sanitization côté serveur) → marked + DOMPurify côté client Angular (pipe MarkdownPipe)",
+            "slugify auto-generation à la création (BR-023 immutabilité) → Fastify onSave hook avec slugify(), refus de modification en PATCH",
+            "Pagination manuelle (page × ARTICLES_PER_PAGE=20) → limit/offset Sequelize + total count dans réponse JSON",
+            "article_favorite_view (toggle POST) → Fastify POST /api/articles/:slug/favorite + Angular FavoriteButtonComponent réactif"
+          ],
+          "critical_rules": [
+            "BR-023 : slug immuable après création — CRITIQUE. Fastify PATCH /api/articles/:slug doit ignorer/rejeter toute tentative de modification du slug.",
+            "BR-024 : slug généré depuis title à la création uniquement.",
+            "BR-025 : ARTICLES_PER_PAGE=20 — pagination homogène entre legacy et cible.",
+            "BR-026 : tags normalisés en minuscules (taggit behavior).",
+            "BR-027 : compteur favoris = annotation temps réel (pas de cache sur le compteur).",
+            "BR-028 : rendu Markdown sécurisé — XSS interdit (DOMPurify obligatoire côté client). Gap critique BR-037 identifié en Phase 2."
+          ],
+          "risks": [
+            { "level": "high", "description": "ArticleQuerySet annotations (Count/Exists/OuterRef) : pas d'équivalent direct Sequelize → requêtes manuelles + Sequelize literal(). Risque de régression sur le compteur is_favorited / favorites_count." },
+            { "level": "high", "description": "Rendu Markdown : déplacement côté serveur → côté client Angular. Les golden files capturés en Phase 2 ont du HTML rendu. La cible retournera du Markdown brut, et Angular le rendra. Adapter l'agent-20 pour cette différence." },
+            { "level": "medium", "description": "Cache tags (5 min) : comportement subtil. Si un tag est ajouté, il n'apparaît pas dans la liste pendant 5 min. Reproduire ce comportement ou documenter le delta." },
+            { "level": "medium", "description": "django-taggit → tables Tag+ArticleTag explicites : dépendance de schéma DB, migration Sequelize requise avant déploiement." }
+          ],
+          "validation_checkpoint": "1. Tests API Phase 2 (articles-crud.http, articles-feed.http, articles-favorite.http) passent contre cible :3001. 2. GET /api/articles retourne structure JSON iso-fonctionnelle. 3. Slug immutabilité : PATCH avec nouveau titre ne change pas le slug (test E2E wf007). 4. Pagination offset/limit correcte. 5. Favoris count identique source vs cible sur golden files. 6. XSS Markdown : DOMPurify en place (BR-037).",
+          "strangler_fig_notes": "Activer le proxy pour /api/articles/* → cible :3001 après validation. Legacy Django continue de servir /login, /register, / (templates), /article/:slug (HTML) pendant que la cible gère uniquement l'API JSON. Coexistence adapter : nginx upstream conditionnel sur Accept: application/json."
+        }
+      ],
+      "rationale": "Articles est le module central (instabilité 0.25 = beaucoup de modules en dépendent). Migrer en Phase 2 débloque accounts et comments. C'est le module le plus volumineux côté backend (332 LOC, 12 patterns framework). Deux sprints alloués pour couvrir les QuerySet annotations complexes et le redesign taggit → tables explicites.",
+      "validation_checkpoint": "GET /api/articles/:slug retourne les mêmes données que le legacy (golden file normalisé). Tests API articles 100% passing. Strangler Fig : proxy /api/articles actif, trafic JSON routé vers cible."
+    },
+
+    {
+      "phase": 3,
+      "label": "Module Accounts (authentification & profils)",
+      "sprint": "Sprint 4",
+      "parallel": false,
+      "modules": [
+        {
+          "name": "accounts",
+          "path": "apps/accounts/",
+          "target_path": "target/backend/src/modules/auth/ + target/frontend/src/app/auth/",
+          "estimated_effort": "high",
+          "risk": "high",
+          "loc_source": 294,
+          "instability": 0.5,
+          "complexity_avg": 2.47,
+          "dependencies_migrated": true,
+          "requires_coexistence_adapter": true,
+          "business_rules_count": 8,
+          "business_rules_domain": "authentication, user_management, follow/unfollow",
+          "key_translations": [
+            "AbstractUser (EMAIL= USERNAME_FIELD, email unique) → Sequelize User model + @fastify/jwt (token stateless) + bcrypt hash",
+            "authenticate/login/logout Django session → POST /api/auth/login renvoie JWT + Refresh Token ; logout invalide côté client uniquement",
+            "@login_required → fastify.authenticate preHandler (vérification JWT Authorization Bearer header)",
+            "ManyToManyField(self, 'following') → table UserFollow (follower_id, followed_id) Sequelize",
+            "follow_view (toggle POST HTMX) → POST /api/profiles/:username/follow + DELETE /api/profiles/:username/follow + Angular FollowButtonComponent",
+            "RegisterForm validation (email unique + username unique + min password) → Fastify JSON Schema validation + Sequelize UniqueConstraintError → parseSequelizeError (helpers)",
+            "SettingsForm (bio, image, email, username, password optionnel) → PATCH /api/user avec champs partiels"
+          ],
+          "critical_rules": [
+            "BR-001 : email unique en base — UniqueConstraintError → message métier 'email already in use'. Dépend de helpers.parseSequelizeError.",
+            "BR-002 : username unique — même mécanique.",
+            "BR-003 : authentification par email (pas username) — JWT sub = user.id, email dans payload.",
+            "BR-004 : password hashé PBKDF2 en legacy → bcrypt en cible. INCOMPATIBILITÉ : les utilisateurs existants ne pourront pas se connecter sans re-hash. VALIDATION HUMAINE REQUISE pour la stratégie de migration des mots de passe (re-hash à la première connexion ou reset forcé).",
+            "BR-005 : follow/unfollow toggle idempotent — POST /follow sur un utilisateur déjà suivi → 200 (pas d'erreur).",
+            "BR-006 : profil 404 si username inconnu — GET /api/profiles/:username → 404 (comportement différent de 403)."
+          ],
+          "risks": [
+            { "level": "high", "description": "PBKDF2 (Django) → bcrypt (Node.js) : incompatibilité de hash. Les mots de passe legacy ne sont pas vérifiables par bcrypt. BLOCKER si migration live des utilisateurs. Stratégie : lazy re-hash à la première connexion (vérifier avec PBKDF2 puis re-hasher en bcrypt) ou reset forcé. DÉCISION HUMAINE REQUISE avant déploiement." },
+            { "level": "high", "description": "Session Django (cookie httpOnly) → JWT Bearer token : changement de paradigme d'authentification. L'Angular doit stocker le JWT (localStorage ou cookie httpOnly — choisir avant Sprint 4). Impacts sécurité OWASP A02." },
+            { "level": "medium", "description": "Dépendance legacy : accounts/views.py importe articles.models pour profile_view. En cible, profile_view appelle /api/articles?author=:username via service Angular. S'assurer que la route Fastify articles supporte le filtre ?author=." }
+          ],
+          "validation_checkpoint": "1. POST /api/auth/login → JWT valide. 2. Register avec email dupliqué → 409 + message 'email already in use'. 3. Tests E2E wf001-login, wf002-register, wf003-settings, wf004-logout passent. 4. GET /api/profiles/:username → structure JSON correcte. 5. Follow/unfollow toggle idempotent (wf005). 6. Stratégie PBKDF2→bcrypt documentée et validée humainement.",
+          "strangler_fig_notes": "Activer proxy /api/auth/* et /api/profiles/* → cible après validation. BLOCKER sur PBKDF2: ne pas activer le proxy auth tant que la stratégie de migration des mots de passe n'est pas validée. Adapter durée de coexistence : prévoir re-hash lazy pendant 30 jours minimum."
+        }
+      ],
+      "rationale": "Accounts dépend de articles (profile_view) et helpers (parseSequelizeError). Migré après articles en Phase 3. Effort high dû au redesign auth session→JWT et à l'incompatibilité PBKDF2→bcrypt. Sprint 4 entier alloué, avec point de validation humaine impératif sur la stratégie des mots de passe.",
+      "validation_checkpoint": "JWT fonctionnel. Tous les tests auth E2E (wf001-wf005) passent contre cible. Proxy /api/auth actif. PBKDF2→bcrypt validé humainement."
+    },
+
+    {
+      "phase": 4,
+      "label": "Module Comments (commentaires avec autorisation double)",
+      "sprint": "Sprint 5",
+      "parallel": false,
+      "modules": [
+        {
+          "name": "comments",
+          "path": "apps/comments/",
+          "target_path": "target/backend/src/modules/comments/ + target/frontend/src/app/comments/",
+          "estimated_effort": "low",
+          "risk": "medium",
+          "loc_source": 64,
+          "instability": 0.67,
+          "complexity_avg": 2.67,
+          "dependencies_migrated": true,
+          "requires_coexistence_adapter": false,
+          "business_rules_count": 5,
+          "business_rules_domain": "comments, double_authorization",
+          "key_translations": [
+            "comment_create_view (POST HTMX → rechargement partiel comment_list.html) → POST /api/articles/:slug/comments → Angular CommentListComponent se rafraîchit réactivement",
+            "comment_delete_view (auteur commentaire OU auteur article → 403 sinon) → DELETE /api/articles/:slug/comments/:id avec double-check middleware",
+            "HttpResponseForbidden (403) → reply.code(403).send() Fastify",
+            "ForeignKey Comment→Article CASCADE → Sequelize onDelete: 'CASCADE' (BR-043 : suppression article cascade comments)",
+            "HTMX hx-swap=outerHTML sur le commentaire supprimé → Angular @for avec tracking + removeComment() réactif"
+          ],
+          "critical_rules": [
+            "BR-041 : suppression commentaire autorisée si auteur du commentaire OU auteur de l'article. CRITIQUE (2 CRITICAL identifiés en Phase 1 agent-08). Le middleware doit faire deux checks : comment.authorId === userId OR article.authorId === userId.",
+            "BR-042 : commentaire vide refusé (body requis non vide) → Fastify JSON Schema minLength:1.",
+            "BR-043 : suppression article → cascade delete de tous ses commentaires. Vérifier onDelete: 'CASCADE' dans la migration Sequelize Comment.",
+            "BR-044 : seuls les authentifiés peuvent commenter → preHandler: [fastify.authenticate]."
+          ],
+          "risks": [
+            { "level": "high", "description": "BR-041 double autorisation commentaire : logique critique. Un bug ici = suppression autorisée à tort (security issue OWASP A01). Test impératif : s'assurer qu'un utilisateur ni auteur du commentaire ni auteur de l'article reçoit bien 403. Le golden file POST_article_slug_comment_id_delete__unauthenticated__anonymous.json couvre l'anonyme mais pas le cas 403 authentifié (noté manquant en Phase 2 agent-11)." },
+            { "level": "medium", "description": "Partial HTMX comment_list.html → Angular CommentListComponent : le rechargement partiel HTMX post-suppression devient un update réactif Angular. Vérifier que la liste se met à jour sans full-page reload." }
+          ],
+          "validation_checkpoint": "1. Tests API comments.http (Phase 2) passent contre cible. 2. Tests E2E wf010-comment-create, wf011-comment-delete passent. 3. Cas 403 : utilisateur authentifié non-auteur reçoit 403 sur DELETE /api/articles/:slug/comments/:id. 4. Cascade : DELETE article supprime tous ses commentaires (vérifier en base). 5. Commentaire vide → 422.",
+          "strangler_fig_notes": "articles et accounts sont déjà migrés quand on arrive en Phase 4. Pas de coexistence adapter supplémentaire nécessaire. Activer proxy /api/articles/:slug/comments/* → cible après validation."
+        }
+      ],
+      "rationale": "Comments est le module le plus simple (64 LOC, instabilité 0.67, effort low) mais contient la logique d'autorisation double (BR-041) qui est un point de risque critique. Migré après accounts et articles pour que les deux dépendances soient disponibles. Un sprint suffit.",
+      "validation_checkpoint": "Tests comments complets. BR-041 double autorisation validée. Proxy /api/comments actif."
+    },
+
+    {
+      "phase": 5,
+      "label": "Module Templates (Angular SPA — frontend complet)",
+      "sprint": "Sprint 6",
+      "parallel": false,
+      "modules": [
+        {
+          "name": "templates",
+          "path": "templates/",
+          "target_path": "target/frontend/src/app/",
+          "estimated_effort": "very_high",
+          "risk": "high",
+          "loc_source": 600,
+          "instability": 1.0,
+          "complexity_avg": 2.94,
+          "dependencies_migrated": true,
+          "requires_coexistence_adapter": true,
+          "business_rules_count": 13,
+          "business_rules_domain": "ui, navigation, pagination, social, favorites, visual_rendering",
+          "key_translations": [
+            "base.html (layout global + header/footer) → AppComponent + HeaderComponent + FooterComponent Angular standalone",
+            "templates/articles/home.html (3 onglets : global/following/tag) → HomeComponent avec onglets réactifs (QueryParams) + ArticleListComponent",
+            "templates/articles/detail.html (article + commentaires + actions conditionnelles) → ArticleDetailComponent + CommentListComponent + ArticleMetaComponent",
+            "templates/articles/editor.html (create/edit unifié) → EditorComponent Angular reactive form",
+            "templates/accounts/login.html + register.html → LoginComponent + RegisterComponent Angular reactive forms",
+            "templates/accounts/settings.html → SettingsComponent reactive form avec pre-fill",
+            "templates/accounts/profile.html + favorites → ProfileComponent avec onglets articles/favoris",
+            "Partials HTMX → Angular Components : article_list.html→ArticleListComponent, article_meta.html→ArticleMetaComponent, comment_list.html→CommentListComponent, favorite_button.html→FavoriteButtonComponent, follow_button.html→FollowButtonComponent, feed_content.html→FeedContentComponent",
+            "{% url 'name' %} → [routerLink]=['/path'] Angular",
+            "{% csrf_token %} → supprimé (JWT Bearer token remplace CSRF protection)",
+            "{{ article.body|render_markdown }} → MarkdownPipe Angular + DOMPurify sanitize",
+            "hx-post / hx-target / hx-swap → (click) handler Angular + HttpClient + signal/observable update",
+            "HTMX loading indicator → Angular loading state (isLoading flag ou loadingService)"
+          ],
+          "critical_rules": [
+            "BR-templates : navigation correcte vers toutes les routes (home, article, editor, login, register, settings, profile).",
+            "BR-048 : format date 'F j, Y' (ex: April 15, 2026) → Angular DatePipe 'MMMM d, y' ou pipe personnalisé. Gap identifié en Phase 2.",
+            "BR-037 : XSS Markdown → MarkdownPipe avec DOMPurify.sanitize() avant innerHTML. Blocker si omis.",
+            "BR-pagination : flèches page précédente/suivante + compteur articles. Comportement identique au legacy.",
+            "BR-favoris toggle : bouton réactif sans reload complet de la page.",
+            "BR-follows toggle : idem.",
+            "BR profile 404 : afficher templates/accounts/profile_404.html equivalent (ProfileNotFoundComponent).",
+            "BR-article 404 : afficher templates/articles/detail_404.html equivalent (ArticleNotFoundComponent)."
+          ],
+          "risks": [
+            { "level": "high", "description": "8 partials HTMX → composants Angular standalone : redesign complet du rendu conditionnel. Risque de régression visuelle sur les mises à jour partielles (favoris, follow, commentaires sans reload). Baseline visuelle Phase 2 (51 screenshots) est la référence." },
+            { "level": "high", "description": "Angular SPA : état initial invisible aux crawlers (SSR Angular Universal recommandé si SEO requis, mais hors scope). À documenter si conduit est exposé publiquement." },
+            { "level": "medium", "description": "Format date FR vs EN : le legacy affiche en anglais (F j, Y = 'April 15, 2026'). Vérifier la locale Angular configurée." },
+            { "level": "medium", "description": "DOMPurify côté client : charger la lib dans main.ts, ne pas accéder à document en SSR si Angular Universal activé ultérieurement." }
+          ],
+          "validation_checkpoint": "1. Agent 14 (comparateur visuel) : diff < 2% sur les 51 screenshots de baseline Phase 2. 2. Tests E2E Playwright 43/43 passent contre cible Angular :4200. 3. MarkdownPipe + DOMPurify : XSS payload '<script>alert(1)</script>' dans body article → échappé correctement. 4. Format date correct (F j, Y). 5. Navigation Angular Router : toutes les routes fonctionnelles (y compris 404 profile / article).",
+          "strangler_fig_notes": "Phase finale du Strangler Fig. Déployer Angular SPA sur l'URL de production. Redirections nginx : toutes les routes HTML (* sauf /api/*) → Angular index.html. Legacy Django coupé après validation agent-22 (CERTIFIED). Coexistence adapter : nginx servant legacy Django ET Angular SPA pendant la phase de validation visuelle — basculer le trafic HTML progressivement (10% → 50% → 100%)."
+        }
+      ],
+      "rationale": "Templates est le module le plus volumineux (600 LOC, 18 composants, 8 partials HTMX, effort very_high) et dépend de tous les modules backend migrés. Migré en dernier pour que tous les backends Fastify soient disponibles. C'est le module de convergence : sa validation clôture la Phase 4 et déclenche la Phase 5 (audit final).",
+      "validation_checkpoint": "43/43 tests E2E passing. Diff visuel < 2% (agent-14). XSS Markdown validé. Legacy Django peut être éteint après audit final agent-22."
+    }
+  ],
+
+  "critical_path": ["helpers", "articles", "accounts", "comments", "templates"],
+
+  "coexistence_adapters_needed": [
+    {
+      "module_source": "articles",
+      "module_target": "accounts",
+      "reason": "accounts (non migré) utlilise articles.models pour profile_view pendant Phase 3. En Phase 2, Fastify /api/articles est actif mais accounts Django accède encore aux modèles Python directement.",
+      "adapter_type": "interface",
+      "description": "Aucun adaptateur HTTP requis : legacy accounts appelle les modèles Django articles directement (même process Python). L'adaptateur est implicite — il suffit de ne pas supprimer les modèles Django articles tant que accounts n'est pas migré.",
+      "estimated_lifetime": "Sprint 2-3 à Sprint 4 (durée : ~1 sprint)"
+    },
+    {
+      "module_source": "accounts",
+      "module_target": "templates",
+      "reason": "Angular SPA (templates) a besoin que Fastify /api/auth soit stable avant déploiement frontend. Pendant Phase 4 (comments), les templates sont encore en Django HTMX.",
+      "adapter_type": "proxy",
+      "description": "nginx upstream : requêtes Accept: application/json → Fastify :3001. Requêtes Accept: text/html → Django :8000. Ce proxy est le cœur du Strangler Fig pattern — actif de Phase 2 à Phase 5.",
+      "proxy_config": "# nginx strangler fig\nlocation /api/ { proxy_pass http://fastify:3001; }\nlocation / { proxy_pass http://django:8000; }",
+      "estimated_lifetime": "Sprint 2 à Sprint 6 (durée : ~4 sprints) — supprimé après Phase 5 complète"
+    },
+    {
+      "module_source": "accounts",
+      "module_target": "accounts",
+      "reason": "Incompatibilité PBKDF2 (legacy passwords) → bcrypt (cible). Les utilisateurs existants ont des mots de passe hashés PBKDF2. Fastify bcrypt ne peut pas les vérifier directement.",
+      "adapter_type": "interface",
+      "description": "Lazy re-hash adapter : lors du premier login post-migration, vérifier le mot de passe avec PBKDF2 (via micro-service Django ou librairie Python-in-Node improbable) puis stocker un hash bcrypt. Alternative : reset forcé de tous les mots de passe avant bascule. DÉCISION HUMAINE REQUISE.",
+      "estimated_lifetime": "Sprint 4 + 30 jours post-bascule auth (durée : ~6 semaines)"
+    }
+  ],
+
+  "strangler_fig_sequencing": {
+    "description": "Séquencement du proxy pour le remplacement progressif des routes Django par les routes Fastify+Angular",
+    "steps": [
+      {
+        "step": 1,
+        "sprint": "Sprint 1",
+        "action": "Déployer Fastify :3001 + Angular :4200 en parallèle du legacy Django :8000. nginx proxy actif en mode pass-through (tout → Django).",
+        "traffic_split": { "django": "100%", "fastify": "0%", "angular": "0%" }
+      },
+      {
+        "step": 2,
+        "sprint": "Sprint 2-3",
+        "action": "Articles API validée. Activer proxy /api/articles/* → Fastify :3001 pour clients Accept: application/json.",
+        "traffic_split": { "django": "100% HTML", "fastify": "articles API JSON", "angular": "0%" }
+      },
+      {
+        "step": 3,
+        "sprint": "Sprint 4",
+        "action": "Auth + Profiles API validée. Activer proxy /api/auth/* et /api/profiles/* → Fastify :3001.",
+        "traffic_split": { "django": "100% HTML", "fastify": "articles + auth + profiles API", "angular": "0%" }
+      },
+      {
+        "step": 4,
+        "sprint": "Sprint 5",
+        "action": "Comments API validée. Activer proxy /api/articles/:slug/comments/* → Fastify.",
+        "traffic_split": { "django": "100% HTML", "fastify": "toutes les routes /api/*", "angular": "0%" }
+      },
+      {
+        "step": 5,
+        "sprint": "Sprint 6",
+        "action": "Angular SPA validée. Basculer trafic HTML progressivement : 10% → Angular :4200, 90% → Django :8000. Rollback possible.",
+        "traffic_split": { "django": "90% HTML", "fastify": "100% /api/*", "angular": "10% HTML" }
+      },
+      {
+        "step": 6,
+        "sprint": "Post Sprint 6",
+        "action": "Audit final (agent-22 CERTIFIED). Basculer 100% HTML → Angular. Django éteint.",
+        "traffic_split": { "django": "0%", "fastify": "100% /api/*", "angular": "100% HTML" }
+      }
+    ]
+  },
+
+  "human_validations_required": [
+    {
+      "id": "HV-001",
+      "module": "helpers",
+      "description": "Confirmer si helpers.get_or_404 et helpers.ResourceNotFound (marqués dead code par agent-01) doivent être migrés dans la cible ou ignorés.",
+      "blocking": false,
+      "sprint": "Sprint 1"
+    },
+    {
+      "id": "HV-002",
+      "module": "accounts",
+      "description": "CRITIQUE — Stratégie de migration des mots de passe PBKDF2 (legacy) → bcrypt (cible). Options : (A) lazy re-hash à la première connexion, (B) reset forcé de tous les mots de passe, (C) micro-service PBKDF2 temporaire. Sans décision, le proxy /api/auth ne peut pas être activé.",
+      "blocking": true,
+      "sprint": "Sprint 4 (décision requise avant début Sprint 4)"
+    }
+  ]
+}

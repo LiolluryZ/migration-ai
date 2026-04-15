@@ -1,0 +1,601 @@
+{
+  "generated_at": "2026-04-15T12:00:00Z",
+  "agent": "16-mappeur-techno",
+  "confidence": 87,
+  "source_stack": {
+    "language": "Python 3.12",
+    "framework": "Django 5.2",
+    "extras": ["HTMX 2.x", "django-taggit 6.x", "markdown + nh3", "pytest-django", "django-extensions"]
+  },
+  "target_stack": {
+    "language": "TypeScript 5.x",
+    "framework": "Angular 17+ (frontend) + Fastify 4.x (backend)",
+    "extras": ["Sequelize 6.x + sequelize-typescript (ORM)", "Jest (tests)", "@fastify/jwt", "@fastify/helmet", "@fastify/cors", "marked + DOMPurify (Markdown)", "bcrypt", "slugify"]
+  },
+  "summary": {
+    "total_patterns": 32,
+    "direct": 5,
+    "adapt": 18,
+    "redesign": 9,
+    "unmappable": 1
+  },
+  "mappings": [
+    {
+      "id": "TM-001",
+      "category": "routing",
+      "source_pattern": "Django urlpatterns avec path() et include() — monolithe SSR",
+      "target_pattern": "Fastify route registration (REST API /api/*) + Angular RouterModule (SPA navigation)",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "Django SSR: une URL = rendu HTML complet côté serveur. Cible: architecture découplée. Fastify gère les routes API JSON REST (/api/*). Angular Router gère la navigation SPA côté client. Chaque route Django devient : 1 route Fastify (données) + 1 route Angular (rendu).",
+      "example": {
+        "source": "# config/urls.py\nurlpatterns = [\n    path('', include('articles.urls')),\n    path('', include('accounts.urls')),\n    path('', include('comments.urls')),\n]\n# articles/urls.py\nurlpatterns = [\n    path('', home_view, name='home'),\n    path('article/<slug:slug>', article_detail_view, name='article_detail'),\n    path('editor', article_create_view, name='article_create'),\n]",
+        "target": "// Fastify (backend) — src/routes/articles.ts\nfastify.get('/api/articles', articlesListHandler);\nfastify.get('/api/articles/:slug', articleDetailHandler);\nfastify.post('/api/articles', { preHandler: [authenticate] }, articleCreateHandler);\n\n// Angular (frontend) — src/app/app.routes.ts\nexport const routes: Routes = [\n  { path: '', component: HomeComponent },\n  { path: 'article/:slug', component: ArticleDetailComponent },\n  { path: 'editor', component: EditorComponent, canActivate: [AuthGuard] },\n];"
+      },
+      "gotchas": [
+        "Django name='home' sert à {% url 'home' %} dans les templates — Angular utilise [routerLink]=\"['/']\" syntaxe statique, pas de lookup par nom de route",
+        "Le pattern include() Django (découpage par app) devient des fichiers de routes Fastify séparés (routes/articles.ts, routes/auth.ts, routes/comments.ts)",
+        "Les 17 URL patterns Django donnent naissance à ~17 endpoints Fastify + ~11 routes Angular (les routes POST-only Django n'ont pas de page Angular correspondante)"
+      ]
+    },
+    {
+      "id": "TM-002",
+      "category": "routing",
+      "source_pattern": "Django @require_POST pour contraindre la méthode HTTP sur une vue fonction",
+      "target_pattern": "Fastify route avec méthode HTTP explicite (fastify.post, fastify.delete, fastify.put)",
+      "strategy": "direct",
+      "complexity": "low",
+      "notes": "Dans Django, @require_POST ajoute une contrainte de méthode sur une vue générique définie avec path(). Dans Fastify, la méthode HTTP est inhérente à la déclaration de la route — pas de décorateur séparé.",
+      "example": {
+        "source": "@login_required\n@require_POST\ndef article_delete_view(request, slug):\n    article = get_object_or_404(Article, slug=slug, author=request.user)\n    article.delete()\n    return redirect('home')",
+        "target": "fastify.delete('/api/articles/:slug', {\n  preHandler: [fastify.authenticate]\n}, async (request, reply) => {\n  const article = await Article.findOne({\n    where: { slug: request.params.slug, authorId: request.user.id }\n  });\n  if (!article) return reply.code(404).send({ error: 'Not found' });\n  await article.destroy();\n  return reply.code(204).send();\n});"
+      },
+      "gotchas": [
+        "Django utilise POST pour toutes les actions destructives (pas de DELETE HTTP, formulaires HTML). En cible REST, utiliser DELETE, PUT, PATCH selon la convention REST. Les tests E2E Playwright devront être adaptés en conséquence",
+        "Les golden files de phase2 capturés en Django POST → adapter les méthodes HTTP dans les tests API de la cible"
+      ]
+    },
+    {
+      "id": "TM-003",
+      "category": "routing",
+      "source_pattern": "Django view avec détection HX-Request header — double réponse HTML (full page / partial)",
+      "target_pattern": "Fastify handler retourne uniquement JSON — Angular gère le rendu conditionnel des parties",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "Pattern central de l'application HTMX : une même URL Django répond HTML complet OU partiel selon le header HX-Request. Ce pattern disparaît totalement en SPA Angular : Fastify retourne toujours du JSON, Angular décide quels composants re-rendre. 8 endpoints Django ont ce comportement.",
+      "example": {
+        "source": "def home_view(request):\n    context = _build_feed(request)\n    if is_htmx(request):\n        return render(request, 'partials/feed_content.html', context)  # partiel\n    return render(request, 'articles/home.html', context)            # full page\n\n# helpers/htmx.py\ndef is_htmx(request):\n    return request.headers.get('HX-Request') == 'true'",
+        "target": "// Fastify: retourne toujours JSON — plus de double comportement\nfastify.get('/api/articles', async (request, reply) => {\n  const { feed, page, tag } = request.query as ArticleQueryParams;\n  const articles = await articleService.getFeed({ feed, page, tag, userId: request.user?.id });\n  return reply.send({ articles: articles.rows, total: articles.count, page });\n});\n\n// Angular HomeComponent — met à jour uniquement la liste réactive\n@Component({ template: `\n  <app-article-list [articles]=\"articles$ | async\"></app-article-list>\n` })\nexport class HomeComponent {\n  articles$ = this.route.queryParams.pipe(\n    switchMap(params => this.articleService.getFeed(params))\n  );\n}"
+      },
+      "gotchas": [
+        "8 endpoints Django ont ce double comportement (home, tag, follow, favorite, comment_create, comment_delete, profile, article_detail partials) — chacun doit être revu individuellement",
+        "Les partiels HTMX (partials/feed_content.html, partials/follow_button.html, partials/favorite_button.html, partials/comment_list.html, partials/article_list.html) deviennent des sous-composants Angular standalone autonomes",
+        "hx-swap=innerHTML + hx-target=#feed → Angular data binding réactif avec @for — pas de manipulation DOM manuelle",
+        "La suppression du concept HX-Request implique de repenser tous les états de chargement (HTMX indicator) en Angular loading state explicite"
+      ]
+    },
+    {
+      "id": "TM-004",
+      "category": "routing",
+      "source_pattern": "Django redirect() vers url_name — post-action redirect (PRG pattern)",
+      "target_pattern": "Fastify reply.send(201/200 JSON) + Angular Router.navigate() post-action",
+      "strategy": "adapt",
+      "complexity": "low",
+      "notes": "Django SSR utilise le pattern PRG (Post/Redirect/Get) pour éviter les doubles soumissions. En SPA, l'API Fastify retourne simplement 200/201 JSON, c'est Angular qui navigue après succès.",
+      "example": {
+        "source": "# Post-login → redirect home\nlogin(request, user)\nreturn redirect('home')  # 302 /\n\n# Post-create article → redirect detail\n_save_article_form(form, article)\nreturn redirect('article_detail', slug=article.slug)  # 302 /article/<slug>",
+        "target": "// Fastify: retourne données (pas de redirect)\nreturn reply.code(201).send({ article: { slug: article.slug, ...toArticleDto(article) } });\n\n// Angular: navigue après succès\nthis.articleService.create(formValue).subscribe(res => {\n  this.router.navigate(['/article', res.article.slug]);\n});\n\n// Après login:\nthis.authService.login(credentials).subscribe(res => {\n  this.tokenService.set(res.token);\n  const returnUrl = this.route.snapshot.queryParams['next'] || '/';\n  this.router.navigateByUrl(returnUrl);\n});"
+      },
+      "gotchas": [
+        "redirect('login') après @login_required (avec ?next=/editor) → Angular AuthGuard stocke la route tentée dans un service et y revient après login réussi",
+        "Le PRG pattern Django évitait les double-submit. En Angular, désactiver le bouton de soumission pendant la requête en cours (loading state)"
+      ]
+    },
+    {
+      "id": "TM-005",
+      "category": "routing",
+      "source_pattern": "Django path params typés (<slug:slug>, <str:tag>, <int:comment_id>)",
+      "target_pattern": "Fastify :param + Angular ActivatedRoute.params",
+      "strategy": "direct",
+      "complexity": "low",
+      "notes": "Les path params Django sont directement équivalents aux :params Fastify et Angular. La validation de type est implicite dans Django (slug = letters+digits+hyphens), doit être explicite en Fastify via JSON Schema.",
+      "example": {
+        "source": "# Django urls\npath('article/<slug:slug>', article_detail_view)\npath('article/<slug:slug>/comment/<int:comment_id>/delete', comment_delete_view)",
+        "target": "// Fastify\nfastify.get('/api/articles/:slug', { schema: { params: { type: 'object', properties: { slug: { type: 'string', pattern: '^[a-z0-9-]+$' } } } } }, handler);\nfastify.delete('/api/articles/:slug/comments/:commentId', handler);\n// request.params.slug, request.params.commentId\n\n// Angular template\n<a [routerLink]=\"['/article', article.slug]\">{{ article.title }}</a>\n// Component\nthis.route.params.subscribe(p => this.loadArticle(p['slug']));"
+      },
+      "gotchas": [
+        "Django <slug:slug> valide le format (lettres minuscules + chiffres + tirets) — ajouter un pattern regex dans le JSON Schema Fastify pour reproduire cette validation",
+        "Django <int:comment_id> → Fastify :commentId est une string — parser en integer dans le handler : const commentId = parseInt(request.params.commentId)"
+      ]
+    },
+    {
+      "id": "TM-006",
+      "category": "orm",
+      "source_pattern": "Django models.Model avec CharField, TextField, DateTimeField auto_now_add/auto_now, ForeignKey CASCADE, ManyToManyField",
+      "target_pattern": "Sequelize Model avec @Table, @Column, DataType, @BelongsTo, @HasMany, @BelongsToMany (sequelize-typescript)",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Correspondance directe des types de colonnes mais syntaxe très différente. Django ORM est déclaratif via métaclasses Python. Sequelize utilise des classes TypeScript avec décorateurs. Les timestamps (created/updated) sont gérés automatiquement par Sequelize si timestamps: true.",
+      "example": {
+        "source": "class Article(models.Model):\n    title   = models.CharField(max_length=150, unique=True, blank=False)\n    summary = models.TextField(blank=True)\n    content = models.TextField(blank=True)\n    created = models.DateTimeField(auto_now_add=True, db_index=True)\n    updated = models.DateTimeField(auto_now=True)\n    slug    = models.SlugField(unique=True, max_length=255)\n    author  = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)",
+        "target": "@Table({ tableName: 'articles', timestamps: true, indexes: [{ fields: ['createdAt'] }] })\nexport class Article extends Model<Article> {\n  @Column({ type: DataType.STRING(150), unique: true, allowNull: false })\n  title!: string;\n\n  @Column({ type: DataType.TEXT, defaultValue: '' })\n  summary!: string;\n\n  @Column({ type: DataType.TEXT, defaultValue: '' })\n  content!: string;\n\n  @Column({ type: DataType.STRING(255), unique: true, allowNull: false })\n  slug!: string;\n\n  // createdAt, updatedAt gérés automatiquement par Sequelize (timestamps: true)\n\n  @ForeignKey(() => User)\n  @Column({ type: DataType.BIGINT, allowNull: false })\n  authorId!: number;\n\n  @BelongsTo(() => User)\n  author!: User;\n}"
+      },
+      "gotchas": [
+        "Django auto_now_add → Sequelize createdAt (géré si timestamps: true — immutable à la création)",
+        "Django auto_now → Sequelize updatedAt (mis à jour automatiquement à chaque save()). ATTENTION: Sequelize ne met updatedAt à jour que via save()/update(), pas via Article.update({}, {where:...}) sans 'returning: true'",
+        "Django blank=True ≠ null=True: blank=True signifie que le champ peut être vide en validation (pas en DB). En Sequelize, defaultValue: '' et allowNull: false reproduisent ce comportement",
+        "django db_index=True → définir l'index dans @Table({ indexes: [{ fields: ['createdAt'] }] })"
+      ]
+    },
+    {
+      "id": "TM-007",
+      "category": "orm",
+      "source_pattern": "Custom QuerySet avec annotations dynamiques (ArticleQuerySet.with_favorites avec Exists + Count)",
+      "target_pattern": "Méthode statique sur Model Sequelize avec Sequelize.literal() pour sous-requêtes agrégées",
+      "strategy": "adapt",
+      "complexity": "high",
+      "notes": "Django QuerySet permet d'annoter des champs calculés (num_favorites, is_favorite) via expressions SQL (Count, Exists). Sequelize utilise Sequelize.literal() avec des sous-requêtes SQL directes pour le même résultat. La logique conditionnelle (user authentifié vs anonyme) doit être gérée explicitement.",
+      "example": {
+        "source": "class ArticleQuerySet(models.QuerySet):\n    def with_favorites(self, user):\n        return self.annotate(\n            num_favorites=models.Count('favorites'),\n            is_favorite=(\n                models.Exists(\n                    get_user_model().objects.filter(\n                        pk=user.id, favorites=models.OuterRef('pk')\n                    )\n                ) if user.is_authenticated\n                else models.Value(False, output_field=models.BooleanField())\n            ),\n        )\n\n# Usage\nArticle.objects.with_favorites(request.user).select_related('author')",
+        "target": "// Dans ArticleRepository ou service\nstatic async findWithFavorites(\n  userId: number | null,\n  options: FindOptions = {}\n): Promise<Article[]> {\n  return Article.findAll({\n    ...options,\n    attributes: {\n      include: [\n        [\n          Sequelize.literal(\n            '(SELECT COUNT(*) FROM article_favorites WHERE article_id = \"Article\".\"id\")'\n          ),\n          'numFavorites'\n        ],\n        [\n          Sequelize.literal(\n            userId != null\n              ? `CASE WHEN EXISTS(SELECT 1 FROM article_favorites WHERE article_id = \"Article\".\"id\" AND user_id = ${userId}) THEN TRUE ELSE FALSE END`\n              : 'FALSE'\n          ),\n          'isFavorite'\n        ],\n      ]\n    }\n  });\n}"
+      },
+      "gotchas": [
+        "SECURITE: userId dans Sequelize.literal() doit être un integer validé (number | null) — ne jamais interpoler une string utilisateur directement",
+        "Les annotations Django sont lazy (évaluées au moment de l'itération) — Sequelize.literal() est évalué immédiatement à la construction de la requête",
+        "Le nom de table SQL ('Article') dans les double-guillemets SQLite peut différer en PostgreSQL — tester les deux DB",
+        "is_favorite retourne 'TRUE'/'FALSE' string en SQLite vs boolean en PostgreSQL avec certains dialects — normaliser la valeur de retour dans le DTO"
+      ]
+    },
+    {
+      "id": "TM-008",
+      "category": "orm",
+      "source_pattern": "ManyToManyField self-référentiel asymétrique (User.followers = ManyToManyField('self', symmetrical=False))",
+      "target_pattern": "Sequelize BelongsToMany bidirectionnel vers User via table de jonction explicite",
+      "strategy": "adapt",
+      "complexity": "high",
+      "notes": "Relation self-référentielle asymétrique : A suit B ne signifie pas que B suit A. Django gère cela avec symmetrical=False. Sequelize nécessite deux associations BelongsToMany avec foreignKey/otherKey inversées.",
+      "example": {
+        "source": "class User(AbstractUser):\n    followers = ManyToManyField('self', blank=True, symmetrical=False)\n\n# usage\nprofile_user.followers.add(current_user)   # current_user suit profile_user\nis_f = profile_user.followers.filter(pk=current_user.id).exists()\nprofile_user.followers.remove(current_user)",
+        "target": "// Associations (à définir après les deux models)\nUser.belongsToMany(User, {\n  as: 'following',       // les users que JE suis\n  through: 'user_followers',\n  foreignKey: 'from_user_id',\n  otherKey: 'to_user_id',\n});\nUser.belongsToMany(User, {\n  as: 'followers',       // les users qui ME suivent\n  through: 'user_followers',\n  foreignKey: 'to_user_id',\n  otherKey: 'from_user_id',\n});\n\n// Usage\nawait profileUser.$add('follower', currentUser);   // currentUser suit profileUser\nawait profileUser.$has('follower', currentUser.id); // check\nawait profileUser.$remove('follower', currentUser); // unfollow"
+      },
+      "gotchas": [
+        "Confusion possible : Django 'followers.add(user)' = 'user vient rejoindre les abonnés de profile_user'. Sequelize $add('follower', user) idem. Documenter clairement les alias 'following' vs 'followers'",
+        "Créer une contrainte unique (from_user_id, to_user_id) sur la table 'user_followers' pour éviter les doublons — reproduit l'index Django accounts_user_followers_from_to_uniq",
+        "is_following() dans Django (méthode User) doit devenir une méthode de service ou helper dans la cible : async isFollowing(currentUserId, targetUserId): Promise<boolean>"
+      ]
+    },
+    {
+      "id": "TM-009",
+      "category": "orm",
+      "source_pattern": "django-taggit TaggableManager avec ContentType polymorphique (tags = TaggableManager())",
+      "target_pattern": "Table Tag + table de jonction ArticleTag explicites (BelongsToMany Sequelize)",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "django-taggit utilise une GenericForeignKey via ContentType pour relier n'importe quel modèle à des tags. La cible n'a pas d'équivalent générique — créer des tables Tag et ArticleTag dédiées. Les tables taggit_tag et taggit_taggeditem disparaissent.",
+      "example": {
+        "source": "# Modèle\ntags = TaggableManager(blank=True)\n\n# Usage\narticle.tags.add('ai')               # crée le Tag si absent\narticle.tags.clear()                 # supprime tous les tags\narticle.tags.all()                   # liste des tags\nTag.objects.all()                    # cloud de tags global\nArticle.objects.filter(tags__name=tag)  # filtrer par tag\ncache.delete('all_tags')             # invalider cache après ajout",
+        "target": "@Table({ tableName: 'tags' })\nexport class Tag extends Model<Tag> {\n  @Column({ type: DataType.STRING(100), unique: true, allowNull: false })\n  name!: string;\n  // Sequelize auto-gère la table de jonction\n  @BelongsToMany(() => Article, { through: 'article_tags', as: 'articles' })\n  articles!: Article[];\n}\n\nArticle.belongsToMany(Tag, { through: 'article_tags', as: 'tags' });\n\n// Usage\nconst tagNames = ['ai', 'tech'];\nconst tags = await Promise.all(\n  tagNames.map(name => Tag.findOrCreate({ where: { name: name.toLowerCase().trim() } }).then(([t]) => t))\n);\nawait article.$set('tags', tags);         // remplace .tags.add() + .tags.clear() en une opération\nawait Tag.findAll({ order: [['name', 'ASC']] }); // cloud de tags\nawait Article.findAll({ include: [{ model: Tag, where: { name: tagParam }, through: { attributes: [] } }] });"
+      },
+      "gotchas": [
+        "django-taggit gère automatiquement le slug du tag — en cible, normaliser le nom : name.toLowerCase().trim() avant findOrCreate()",
+        "article.tags.clear() suivi de .add() = opération deux passes. Sequelize $set('tags', []) remplace tout en une transaction — préférer $set pour l'atomicité",
+        "La requête Tag.objects.all() est cachée 300s dans Django via cache.get_or_set — reproduire l'invalidation du cache à chaque modification de tags (voir TM-029)",
+        "Les tables taggit_tag et taggit_taggeditem de la DB source ne migrent PAS directement — il faut un script de migration de données vers tag + article_tags"
+      ]
+    },
+    {
+      "id": "TM-010",
+      "category": "orm",
+      "source_pattern": "Django Article.save() avec hook slug = slugify(title) conditionnel (if not self.pk)",
+      "target_pattern": "Sequelize @BeforeCreate hook pour générer le slug à la création uniquement",
+      "strategy": "direct",
+      "complexity": "low",
+      "notes": "Le slug est généré une seule fois à la création et ne change jamais lors d'une édition (BR-023). Django le gère dans save() avec 'if not self.pk'. Sequelize utilise un hook @BeforeCreate — et explicitement AUCUN @BeforeUpdate.",
+      "example": {
+        "source": "def save(self, *args, **kwargs):\n    if not self.pk:  # seulement à la création\n        self.slug = slugify(self.title)\n    super().save(*args, **kwargs)",
+        "target": "import slugify from 'slugify';  // npm install slugify\n\n@BeforeCreate  // PAS de @BeforeUpdate — intentionnel (BR-023)\nstatic generateSlug(instance: Article): void {\n  instance.slug = slugify(instance.title, {\n    lower: true,\n    strict: true,    // supprime les caractères spéciaux\n    trim: true\n  });\n}"
+      },
+      "gotchas": [
+        "NE PAS ajouter @BeforeUpdate — c'est une règle métier critique (BR-023) : l'édition d'un article ne modifie jamais son slug/URL",
+        "Le package npm 'slugify' avec { lower: true, strict: true } se comporte comme django.utils.text.slugify pour les caractères ASCII. Valider les cas avec accents (é→e, ê→e) qui peuvent différer",
+        "Si le titre d'un article est modifié pour être identique à un autre (slug collision) → UniqueConstraintError sur article.slug. Gérer côté Fastify avec 409"
+      ]
+    },
+    {
+      "id": "TM-011",
+      "category": "orm",
+      "source_pattern": "Django get_object_or_404(Model, **kwargs) — retourne 404 si absent ou si filtre auteur ne correspond pas",
+      "target_pattern": "Sequelize findOne() + vérification manuelle + reply.code(404)",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "get_object_or_404 est un raccourci Django. Avec filtre author=request.user, renvoie 404 même si l'article existe mais n'est pas de l'utilisateur (comportement intentionnel CRITIQUE — décrit dans attention_points).",
+      "example": {
+        "source": "# Ownership article: 404 si pas l'auteur (intentionnel)\narticle = get_object_or_404(Article, slug=slug, author=request.user)\n\n# Commentaire dans article: 404 si absent\narticle = get_object_or_404(Article, slug=slug)\ncomment = get_object_or_404(Comment, id=comment_id, article=article)",
+        "target": "// Ownership article — 404 intentionnel (pas 403)\nconst article = await Article.findOne({\n  where: { slug: request.params.slug, authorId: request.user.id }\n});\nif (!article) {\n  return reply.code(404).send({ error: 'Article not found' });\n}\n\n// Commentaire\nconst article = await Article.findOne({ where: { slug: request.params.slug } });\nif (!article) return reply.code(404).send({ error: 'Article not found' });\nconst comment = await Comment.findOne({\n  where: { id: request.params.commentId, articleId: article.id }\n});\nif (!comment) return reply.code(404).send({ error: 'Comment not found' });"
+      },
+      "gotchas": [
+        "CRITIQUE (attention_points): Django renvoie 404 (et non 403) quand l'article existe mais n'appartient pas à l'utilisateur. Reproduire EXACTEMENT ce comportement — ne pas changer en 403 Forbidden",
+        "La suppression d'un commentaire utilise une logique différente: double autorisation (auteur commentaire OU auteur article) → 403 si aucun des deux. Voir TM-022 pour ce cas"
+      ]
+    },
+    {
+      "id": "TM-012",
+      "category": "orm",
+      "source_pattern": "Django transaction.atomic() + IntegrityError avec helpers/exceptions.py clean_integrity_error()",
+      "target_pattern": "Sequelize sequelize.transaction() + UniqueConstraintError avec lecture de err.errors[0].path",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Django lève IntegrityError sur violation de contrainte unique. Le helper clean_integrity_error() parse le message d'erreur SQLite/PostgreSQL pour identifier le champ fautif. Sequelize lève UniqueConstraintError avec un tableau structuré err.errors[0].path contenant directement le nom du champ.",
+      "example": {
+        "source": "try:\n    with transaction.atomic():\n        user = User.objects.create_user(\n            email=form.cleaned_data['email'],\n            username=form.cleaned_data['username'],\n            password=form.cleaned_data['password'],\n        )\nexcept IntegrityError as err:\n    field = clean_integrity_error(err)  # parse message SQLite\n    if field == 'email':\n        form.add_error('email', 'This email has already been taken.')\n    elif field == 'username':\n        form.add_error('username', 'This username has already been taken.')",
+        "target": "const t = await sequelize.transaction();\ntry {\n  const passwordHash = await bcrypt.hash(body.password, 10);\n  const user = await User.create(\n    { email: body.email, username: body.username, passwordHash },\n    { transaction: t }\n  );\n  await t.commit();\n  const token = fastify.jwt.sign({ id: user.id }, { expiresIn: '7d' });\n  return reply.code(201).send({ token, user: toUserDto(user) });\n} catch (err) {\n  await t.rollback();\n  if (err instanceof UniqueConstraintError) {\n    const field = err.errors[0]?.path; // 'email' ou 'username'\n    return reply.code(409).send({ errors: { [field]: ['already taken'] } });\n  }\n  throw err;\n}"
+      },
+      "gotchas": [
+        "helpers/exceptions.py clean_integrity_error() parse le message d'erreur brut SQLite ('UNIQUE constraint failed: accounts_user.email') — en Sequelize, ce parsing est inutile car err.errors[0].path donne directement le nom du champ",
+        "PostgreSQL en production : UniqueConstraintError.errors[0].path contient le nom de la colonne SQL (ex: 'email') — identique à SQLite pour ce projet",
+        "Valider que les messages d'erreur renvoyés à Angular sont cohérents avec les golden files de phase2"
+      ]
+    },
+    {
+      "id": "TM-013",
+      "category": "orm",
+      "source_pattern": "Django select_related() (JOIN pour FK) + prefetch_related() (requête séparée pour M2M/reverse FK)",
+      "target_pattern": "Sequelize include avec eager loading — modèle unifié pour JOIN et sous-requêtes",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Django distingue select_related (JOIN SQL) et prefetch_related (requête séparée). Sequelize unifie les deux avec include. La performance peut différer — surveiller les N+1 queries.",
+      "example": {
+        "source": "Article.objects\n    .with_favorites(request.user)\n    .select_related('author')\n    .prefetch_related('tags')\n    .order_by('-created')",
+        "target": "await Article.findAll({\n  include: [\n    {\n      model: User,\n      as: 'author',\n      attributes: ['id', 'username', 'image', 'bio']\n    },\n    {\n      model: Tag,\n      as: 'tags',\n      through: { attributes: [] }  // exclure colonnes de la table de jonction\n    },\n  ],\n  order: [['createdAt', 'DESC']],\n  ...withFavoritesAttributes(userId),  // voir TM-007\n});"
+      },
+      "gotchas": [
+        "Sequelize génère des LEFT JOIN — pour des grandes tables, vérifier les performances avec EXPLAIN ANALYZE",
+        "through: { attributes: [] } est essentiel pour ne pas exposer les champs internes de article_tags dans les résultats JSON",
+        "Django order_by('-created') sur le champ 'created' → Sequelize order: [['createdAt', 'DESC']] (Sequelize renomme les timestamps en camelCase)"
+      ]
+    },
+    {
+      "id": "TM-014",
+      "category": "orm",
+      "source_pattern": "Django pagination manuelle avec slice de QuerySet (queryset[offset:offset+N]) + count()",
+      "target_pattern": "Sequelize findAndCountAll() avec limit et offset",
+      "strategy": "adapt",
+      "complexity": "low",
+      "notes": "Django utilise le slicing Python sur un queryset (traduit en LIMIT/OFFSET SQL). Sequelize a findAndCountAll() qui retourne rows + count en une seule passe. ARTICLES_PER_PAGE = 10 (défini en double dans accounts/views.py et articles/views.py — centraliser en cible).",
+      "example": {
+        "source": "ARTICLES_PER_PAGE = 10  # dupliqué dans accounts/views.py et articles/views.py\ntry:\n    page = int(request.GET.get('page', 1))\nexcept (ValueError, TypeError):\n    page = 1\noffset = (page - 1) * ARTICLES_PER_PAGE\narticles = list(queryset[offset: offset + ARTICLES_PER_PAGE])\ntotal = queryset.count()\ntotal_pages = (total + ARTICLES_PER_PAGE - 1) // ARTICLES_PER_PAGE",
+        "target": "// config/constants.ts (centraliser)\nexport const ARTICLES_PER_PAGE = 10;\n\n// Dans le handler\nconst page = Math.max(1, parseInt((req.query as any).page) || 1);\nconst offset = (page - 1) * ARTICLES_PER_PAGE;\nconst { rows: articles, count: total } = await Article.findAndCountAll({\n  limit: ARTICLES_PER_PAGE,\n  offset,\n  distinct: true,  // nécessaire avec include pour count correct\n  include: [...],\n});\nconst totalPages = Math.ceil(total / ARTICLES_PER_PAGE);"
+      },
+      "gotchas": [
+        "ARTICLES_PER_PAGE est dupliqué dans accounts/views.py et articles/views.py (BR inconsistance détectée en phase1) — centraliser en constante partagée en cible",
+        "distinct: true est nécessaire avec findAndCountAll() quand include est utilisé, sinon le count est multiplié par le nombre de JOINs",
+        "Valider que page=0, page=-1, page='abc' sont tous traités comme page=1 (reproduit le try/except ValueError Django)"
+      ]
+    },
+    {
+      "id": "TM-015",
+      "category": "validation",
+      "source_pattern": "Django forms.Form et forms.ModelForm (LoginForm, RegisterForm, ArticleForm, SettingsForm) avec is_valid()/cleaned_data",
+      "target_pattern": "Fastify JSON Schema validation (AJV) côté serveur + Angular Reactive Forms côté client",
+      "strategy": "redesign",
+      "complexity": "medium",
+      "notes": "Les formulaires Django servent à la fois pour le rendu HTML (widgets, placeholders, classes CSS) et la validation côté serveur. En cible, ces deux responsabilités sont séparées : Angular Reactive Forms pour le rendu/UX, Fastify JSON Schema pour la validation API.",
+      "example": {
+        "source": "class RegisterForm(forms.Form):\n    username = forms.CharField(max_length=60)\n    email    = forms.EmailField()\n    password = forms.CharField()\n\nform = RegisterForm(request.POST)\nif form.is_valid():\n    data = form.cleaned_data  # dict validé",
+        "target": "// Fastify: JSON Schema (validé par AJV intégré)\nconst registerSchema = {\n  body: {\n    type: 'object',\n    required: ['username', 'email', 'password'],\n    properties: {\n      username: { type: 'string', minLength: 1, maxLength: 60 },\n      email:    { type: 'string', format: 'email' },\n      password: { type: 'string', minLength: 1 },\n    },\n    additionalProperties: false\n  }\n};\nfastify.post('/api/auth/register', { schema: registerSchema }, registerHandler);\n\n// Angular: Reactive Form (validation UX)\nthis.form = this.fb.group({\n  username: ['', [Validators.required, Validators.maxLength(60)]],\n  email:    ['', [Validators.required, Validators.email]],\n  password: ['', Validators.required],\n});\n// Affichage erreur\n<mat-error *ngIf=\"form.get('email')?.hasError('email')\">Email invalide</mat-error>"
+      },
+      "gotchas": [
+        "form.add_error(field, message) Django pour erreurs post-validation (ex: email déjà pris) → en cible, l'API retourne { errors: { email: ['already taken'] } } et Angular affiche ces erreurs via setErrors({ serverError: msg })",
+        "SettingsForm est un ModelForm lié au modèle User — créer un UpdateUserDto explicite côté Fastify (image, username, bio, email, password optionnel)",
+        "Les attributs widget Django (placeholder='Email', class='form-control') sont de la configuration de template pure — reproduire dans les templates Angular, pas dans l'API"
+      ]
+    },
+    {
+      "id": "TM-016",
+      "category": "validation",
+      "source_pattern": "Django forms.ModelForm.save(commit=False) + set_password() conditionnel + re-login",
+      "target_pattern": "Fastify PUT /api/user avec hash bcrypt conditionnel + renouvellement JWT",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "SettingsForm.save(commit=False) permet de modifier l'instance User avant sauvegarde (notamment set_password qui hash le mot de passe). En cible, le handler Fastify applique le hash bcrypt manuellement si un mot de passe est fourni. Le re-login Django (pour invalider l'ancienne session) devient un renouvellement de JWT.",
+      "example": {
+        "source": "form = SettingsForm(request.POST, instance=request.user)\nif form.is_valid():\n    user = form.save(commit=False)\n    if password := form.cleaned_data.get('password'):\n        user.set_password(password)  # PBKDF2 hash\n    user.save()\n    if password:\n        login(request, user)  # re-login = nouvelle session\n    return redirect('profile', username=user.username)",
+        "target": "fastify.put('/api/user', { preHandler: [authenticate] }, async (req, reply) => {\n  const { username, email, bio, image, password } = req.body;\n  const updates: Partial<UserAttributes> = { username, email, bio, image };\n  if (password) {\n    updates.passwordHash = await bcrypt.hash(password, 10);\n  }\n  await User.update(updates, { where: { id: req.user.id } });\n  const user = await User.findByPk(req.user.id);\n  if (password) {\n    // Renouveler le JWT après changement de mot de passe\n    const newToken = fastify.jwt.sign({ id: user.id }, { expiresIn: '7d' });\n    return reply.send({ token: newToken, user: toUserDto(user) });\n  }\n  return reply.send({ user: toUserDto(user) });\n});"
+      },
+      "gotchas": [
+        "Django login() après changement de mot de passe invalide l'ancienne session Django. JWT n'a pas ce mécanisme intégré — l'ancien token reste valide jusqu'à expiration. Pour invalider l'ancien token: soit liste noire Redis, soit émettre un nouveau token et demander au frontend de remplacer",
+        "Django PBKDF2 → bcrypt: les mots de passe existants en DB ne seront plus valides. Si migration de données d'une DB Django existante, prévoir un fallback ou une migration progressive des hash"
+      ]
+    },
+    {
+      "id": "TM-017",
+      "category": "validation",
+      "source_pattern": "ArticleForm avec renommage de champs (description→summary, body→content) dans _save_article_form()",
+      "target_pattern": "DTO de transformation explicite dans le handler Fastify",
+      "strategy": "direct",
+      "complexity": "low",
+      "notes": "L'ArticleForm utilise description et body comme noms de champs API (convention Conduit RealWorld spec), mais les stocke dans summary et content dans le modèle. Ce mapping est intentionnel et documenté.",
+      "example": {
+        "source": "def _save_article_form(form, article):\n    article.title   = form.cleaned_data['title']\n    article.summary = form.cleaned_data.get('description', '')  # description→summary\n    article.content = form.cleaned_data.get('body', '')         # body→content\n    article.save()",
+        "target": "// Dans le handler Fastify\nconst { title, description, body, tagList } = req.body.article;  // noms API Conduit\nawait Article.create({\n  title,\n  summary:  description ?? '',  // mapping description → summary (DB)\n  content:  body ?? '',          // mapping body → content (DB)\n  authorId: req.user.id,\n  // slug généré via @BeforeCreate hook (TM-010)\n});"
+      },
+      "gotchas": [
+        "Maintenir les noms description et body dans l'API REST — c'est la convention Conduit RealWorld utilisée par les tests API de phase2 et les golden files",
+        "Le DTO de réponse doit également mapper summary→description et content→body dans l'objet retourné"
+      ]
+    },
+    {
+      "id": "TM-018",
+      "category": "validation",
+      "source_pattern": "Commentaire vide ignoré silencieusement (if body: Comment.create())",
+      "target_pattern": "Validation JSON Schema Fastify avec minLength + trim dans le handler",
+      "strategy": "direct",
+      "complexity": "low",
+      "notes": "Django ignore silencieusement un commentaire avec body vide (if body: après .strip()). En API REST, il est préférable de rejeter explicitement avec 422 Unprocessable Entity. Documenter ce changement de comportement.",
+      "example": {
+        "source": "body = request.POST.get('body', '').strip()\nif body:\n    Comment.objects.create(article=article, author=request.user, content=body)\n# Sinon: silencieux, no-op — aucune erreur retournée",
+        "target": "const commentSchema = {\n  body: {\n    type: 'object',\n    required: ['comment'],\n    properties: {\n      comment: {\n        type: 'object',\n        required: ['body'],\n        properties: { body: { type: 'string', minLength: 1 } }\n      }\n    }\n  }\n};\n\n// Dans le handler: trim avant stockage\nconst content = req.body.comment.body.trim();\nif (!content) return reply.code(422).send({ errors: { body: [\"can't be blank\"] } });\nawait Comment.create({ content, articleId: article.id, authorId: req.user.id });"
+      },
+      "gotchas": [
+        "Changement de comportement intentionnel (Django: silencieux → API REST: 422). Documenter dans la couverture métier BR-039",
+        "Le golden file POST_article_slug_comment__empty_body__user.json capture la réponse Django actuelle (probable redirect) — mettre à jour les assertions en cible"
+      ]
+    },
+    {
+      "id": "TM-019",
+      "category": "auth",
+      "source_pattern": "Django session-based auth (SessionMiddleware + AuthenticationMiddleware) avec authenticate()/login()/logout()",
+      "target_pattern": "JWT stateless (@fastify/jwt) + Angular HttpInterceptor pour injection automatique du token",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "Architecture d'authentification fondamentalement différente. Django maintient l'état de session côté serveur (table django_session). La cible SPA utilise JWT stateless — le token est stocké côté client et envoyé dans chaque requête. Toutes les routes et le flux login/logout sont impactés.",
+      "example": {
+        "source": "# Login\nuser = authenticate(email=email, password=password)  # vérifie credentials + retourne User\nif user:\n    login(request, user)   # crée réponse avec session cookie (stocké côté serveur)\n    return redirect('home')\n\n# Logout\nlogout(request)  # invalide la session côté serveur\nreturn redirect('home')\n\n# Dans les views: request.user est automatiquement disponible",
+        "target": "// Fastify login — retourne JWT\nfastify.post('/api/auth/login', async (req, reply) => {\n  const user = await User.findOne({ where: { email: req.body.email } });\n  if (!user || !(await bcrypt.compare(req.body.password, user.passwordHash))) {\n    return reply.code(401).send({ errors: { body: ['Invalid credentials'] } });\n  }\n  const token = fastify.jwt.sign({ id: user.id }, { expiresIn: '7d' });\n  return reply.send({ user: { ...toUserDto(user), token } });\n});\n// Pas de route /logout côté serveur — le frontend supprime simplement le token\n\n// Angular: Intercepteur HTTP\n@Injectable()\nexport class JwtInterceptor implements HttpInterceptor {\n  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {\n    const token = this.tokenService.get();\n    if (token) {\n      req = req.clone({ headers: req.headers.set('Authorization', `Bearer ${token}`) });\n    }\n    return next.handle(req);\n  }\n}"
+      },
+      "gotchas": [
+        "Pas de logout côté serveur natif avec JWT pur — l'ancien token reste valide jusqu'à expiration (7j). Options: liste noire Redis pour tokens révoqués OU courte durée de vie + refresh token",
+        "CsrfViewMiddleware Django non nécessaire avec JWT (pas de cookie de session) — remplacer par CORS strict (@fastify/cors) + Origin header checking",
+        "Django request.user injecté automatiquement dans toutes les views → en Fastify, request.user est disponible uniquement après le preHandler authenticate. Routes publiques: request.user peut être null"
+      ]
+    },
+    {
+      "id": "TM-020",
+      "category": "auth",
+      "source_pattern": "Django @login_required decorator — redirige vers /login?next=<url> si non authentifié",
+      "target_pattern": "Fastify preHandler authenticate hook (API) + Angular CanActivate AuthGuard (navigation SPA)",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "@login_required protège la route côté serveur Django SSR. En cible, la protection est double et découplée : Angular AuthGuard empêche la navigation vers des routes protégées côté client, Fastify preHandler vérifie le JWT pour les endpoints API côté serveur.",
+      "example": {
+        "source": "@login_required  # redirige vers /login?next=/editor si non authentifié\ndef article_create_view(request):\n    ...\n\n@login_required\n@require_POST\ndef follow_view(request, username):\n    ...",
+        "target": "// Fastify: preHandler hook d'authentification\nfastify.decorate('authenticate', async (req: FastifyRequest, reply: FastifyReply) => {\n  try {\n    await req.jwtVerify();\n  } catch (err) {\n    return reply.code(401).send({ errors: { body: ['Unauthorized'] } });\n  }\n});\nfastify.post('/api/articles', { preHandler: [fastify.authenticate] }, createHandler);\n\n// Angular: AuthGuard\n@Injectable({ providedIn: 'root' })\nexport class AuthGuard implements CanActivate {\n  constructor(private auth: AuthService, private router: Router) {}\n  canActivate(route: ActivatedRouteSnapshot): boolean {\n    if (this.auth.isLoggedIn()) return true;\n    this.router.navigate(['/login'], { queryParams: { next: route.url.join('/') } });\n    return false;\n  }\n}"
+      },
+      "gotchas": [
+        "10 routes sont protégées par @login_required — s'assurer que chacune a son preHandler: [authenticate] côté Fastify ET son canActivate: [AuthGuard] côté Angular",
+        "Django @login_required redirige vers /login?next=/editor — l'AuthGuard Angular peut préserver cette UX en stockant l'URL tentée et y revenant post-login",
+        "logout_view Django n'a PAS @login_required (détecté en phase1 comme anomalie). En cible, la 'déconnexion' est côté client uniquement — pas de route Fastify requise"
+      ]
+    },
+    {
+      "id": "TM-021",
+      "category": "auth",
+      "source_pattern": "User custom héritant de AbstractUser avec EMAIL_FIELD, USERNAME_FIELD='email', password PBKDF2",
+      "target_pattern": "Sequelize User model explicite avec email comme identifiant primaire, bcrypt pour le hash",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Django AbstractUser fournit is_active, is_staff, is_superuser, date_joined, last_login par défaut. En cible, seuls les champs applicatifs Conduit sont nécessaires. Le hashing PBKDF2 Django → bcrypt en cible.",
+      "example": {
+        "source": "class User(AbstractUser):\n    first_name = None   # supprimé\n    last_name  = None   # supprimé\n    email      = models.EmailField(unique=True)\n    username   = models.CharField(max_length=60, unique=True)\n    bio        = models.TextField(blank=True)\n    image      = models.URLField(null=True, blank=True)\n    followers  = ManyToManyField('self', symmetrical=False, blank=True)\n    USERNAME_FIELD = 'email'  # login par email, pas par username",
+        "target": "@Table({ tableName: 'users', timestamps: true })\nexport class User extends Model<User> {\n  @Column({ type: DataType.STRING(254), unique: true, allowNull: false, validate: { isEmail: true } })\n  email!: string;\n\n  @Column({ type: DataType.STRING(60), unique: true, allowNull: false })\n  username!: string;\n\n  @Column({ type: DataType.TEXT, defaultValue: '' })\n  bio!: string;\n\n  @Column({ type: DataType.STRING(500), allowNull: true, validate: { isUrl: true } })\n  image?: string;\n\n  @Column({ allowNull: false })  // Ne jamais exposer dans les DTOs\n  passwordHash!: string;\n\n  async verifyPassword(plain: string): Promise<boolean> {\n    return bcrypt.compare(plain, this.passwordHash);\n  }\n}"
+      },
+      "gotchas": [
+        "Django stocke le hash PBKDF2 dans le champ 'password' ('pbkdf2_sha256$600000$salt$hash'). En cible, stocker uniquement le hash bcrypt ($2b$10$...) dans 'passwordHash'. Si migration de données: les anciens hash Django ne seront pas comparables",
+        "Django authentifie par email (USERNAME_FIELD = 'email'), pas par username — reproduire ce comportement dans la route /api/auth/login (lookup par email, pas par username)",
+        "is_staff, is_superuser, is_active, date_joined de AbstractUser ne sont pas requis pour Conduit — ne pas les inclure dans le model cible"
+      ]
+    },
+    {
+      "id": "TM-022",
+      "category": "auth",
+      "source_pattern": "Double autorisation suppression commentaire (comment.author != user AND article.author != user → 403)",
+      "target_pattern": "Check d'appartenance explicite dans le handler Fastify avec reply.code(403)",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Règle métier CRITIQUE BR-041 : un commentaire peut être supprimé par son auteur OU par l'auteur de l'article (qui fait office de modérateur). Cette logique est encodée dans la vue Django comme une double condition.",
+      "example": {
+        "source": "@login_required\n@require_POST\ndef comment_delete_view(request, slug, comment_id):\n    article = get_object_or_404(Article, slug=slug)\n    comment = get_object_or_404(Comment, id=comment_id, article=article)\n    if comment.author != request.user and article.author != request.user:\n        return HttpResponseForbidden()  # 403\n    comment.delete()\n    ...",
+        "target": "fastify.delete('/api/articles/:slug/comments/:commentId', {\n  preHandler: [fastify.authenticate]\n}, async (req, reply) => {\n  const article = await Article.findOne({ where: { slug: req.params.slug } });\n  if (!article) return reply.code(404).send({ error: 'Article not found' });\n\n  const comment = await Comment.findOne({\n    where: { id: req.params.commentId, articleId: article.id }\n  });\n  if (!comment) return reply.code(404).send({ error: 'Comment not found' });\n\n  // Double autorisation: auteur commentaire OU auteur article\n  const canDelete = comment.authorId === req.user.id || article.authorId === req.user.id;\n  if (!canDelete) return reply.code(403).send({ errors: { body: ['Forbidden'] } });\n\n  await comment.destroy();\n  return reply.code(200).send({ message: 'Comment deleted' });\n});"
+      },
+      "gotchas": [
+        "CRITIQUE BR-041: la double condition (auteur commentaire OU auteur article) est intentionnelle et doit être reproduite exactement",
+        "Contrairement à l'ownership d'article (TM-011 qui retourne 404), la suppression de commentaire par un non-autorisé retourne 403 — comportement différent, voir attention_points CRITICAL"
+      ]
+    },
+    {
+      "id": "TM-023",
+      "category": "view",
+      "source_pattern": "Django function-based views SSR avec render(request, template, context) → HTML complet",
+      "target_pattern": "Fastify JSON handler + Angular Component consommant le service HTTP",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "Une vue Django SSR devient deux entités en cible : 1) un handler Fastify renvoyant des données JSON, 2) un composant Angular qui consomme ces données et les rend. Toute la logique métier reste côté Fastify (service layer). Les composants Angular sont stateless sauf pour l'état d'UI.",
+      "example": {
+        "source": "def article_detail_view(request, slug):\n    try:\n        article = (Article.objects.with_favorites(request.user)\n                   .select_related('author').prefetch_related('tags').get(slug=slug))\n    except Article.DoesNotExist:\n        return render(request, 'articles/detail_404.html', {'slug': slug}, status=404)\n    comments = article.comment_set.select_related('author').order_by('-created')\n    is_following = request.user.is_authenticated and request.user.is_following(article.author)\n    return render(request, 'articles/detail.html', { 'article': article, 'comments': comments, 'is_following': is_following })",
+        "target": "// Fastify handler\nfastify.get('/api/articles/:slug', async (req, reply) => {\n  const article = await articleService.getBySlugWithFavorites(req.params.slug, req.user?.id);\n  if (!article) return reply.code(404).send({ errors: { body: ['Article not found'] } });\n  return reply.send({ article: toArticleDto(article) });\n});\n\n// Angular Component\n@Component({\n  template: `\n    @if (article$ | async; as article) {\n      <h1>{{ article.title }}</h1>\n      <div [innerHTML]=\"article.body | markdown\"></div>\n      <app-comment-list [slug]=\"article.slug\"></app-comment-list>\n    }\n  `\n})\nexport class ArticleDetailComponent implements OnInit {\n  article$ = this.route.params.pipe(\n    switchMap(p => this.articleService.getBySlug(p['slug']))\n  );\n}"
+      },
+      "gotchas": [
+        "Le contexte Django (request.user, is_following, is_favorite, num_favorites) est injecté automatiquement dans le template. En Angular, ces données doivent être incluses dans le DTO de réponse Fastify OU récupérées via des appels séparés",
+        "La page 404 custom Django (articles/detail_404.html) → Angular intercepte le 404 API et affiche un composant NotFoundComponent",
+        "Les annotations Sequelize (numFavorites, isFavorite) doivent être mappées dans le DTO article pour que Angular puisse les afficher sans appel supplémentaire"
+      ]
+    },
+    {
+      "id": "TM-024",
+      "category": "view",
+      "source_pattern": "Django templates avec {% extends %}, {% block %}, {% include %}, {% if %}, {% for %} + filtres (render_markdown, date)",
+      "target_pattern": "Angular templates avec @if/@for (Angular 17+), hiérarchie de composants + Pipes Angular",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "La logique de template Django (extends/blocks = hiérarchie de pages, includes = sous-templates réutilisables) se transpose en hiérarchie de composants Angular. Les filtres Django deviennent des Pipes Angular.",
+      "example": {
+        "source": "{% extends 'base.html' %}\n{% block content %}\n  {% for article in articles %}\n    <h2>{{ article.title }}</h2>\n    <div>{{ article.content|render_markdown }}</div>  {# filtre markdown #}\n    <time>{{ article.created|date:'F j, Y' }}</time>    {# filtre date #}\n  {% endfor %}\n{% endblock %}\n{% include 'partials/article_list.html' %}\n{% if request.user.is_authenticated %} ... {% endif %}",
+        "target": "<!-- Angular layout (router-outlet remplace extends/block) -->\n<!-- app.component.html -->\n<app-header></app-header>\n<router-outlet></router-outlet>\n<app-footer></app-footer>\n\n<!-- Article list component -->\n@for (article of articles; track article.id) {\n  <h2>{{ article.title }}</h2>\n  <div [innerHTML]=\"article.body | markdown\"></div>\n  <time>{{ article.createdAt | date:'MMMM d, y' }}</time>\n}\n<!-- include → sous-composant standalone -->\n<app-article-list [articles]=\"articles\"></app-article-list>\n<!-- is_authenticated -->\n@if (authService.isLoggedIn()) { ... }"
+      },
+      "gotchas": [
+        "SECURITE: render_markdown Django utilise nh3 (Rust, très sécurisé) pour sanitiser le HTML généré. En Angular, utiliser DOMPurify.sanitize(marked(content)) dans le MarkdownPipe. NE PAS utiliser [innerHTML] sans DomSanitizer.bypassSecurityTrustHtml() + DOMPurify — risque XSS (BR-037 identifié en phase2)",
+        "date:'F j, Y' Django = 'April 15, 2026'. Angular date:'MMMM d, y' = identique. Attention à la locale (import registerLocaleData ou utiliser en-US par défaut)",
+        "Les partiels Django (7 dans templates/partials/) → 7 standalone components Angular (FeedContentComponent, FollowButtonComponent, FavoriteButtonComponent, CommentListComponent, ArticleListComponent, ArticleMetaComponent, HeaderComponent)"
+      ]
+    },
+    {
+      "id": "TM-025",
+      "category": "view",
+      "source_pattern": "Django {% url 'name' arg %} dans les templates + {% csrf_token %} dans les formulaires",
+      "target_pattern": "Angular [routerLink] + suppression CSRF (JWT stateless)",
+      "strategy": "adapt",
+      "complexity": "low",
+      "notes": "{% url tag %} résout dynamiquement les URLs par nom de route. Angular utilise [routerLink] avec des tableaux de segments. CSRF token n'est plus nécessaire avec JWT.",
+      "example": {
+        "source": "<!-- Django template -->\n<a href=\"{% url 'article_detail' slug=article.slug %}\">Lire</a>\n<a href=\"{% url 'profile' username=article.author.username %}\">Profil</a>\n<form method=\"post\">{% csrf_token %}<button type=\"submit\">Envoyer</button></form>",
+        "target": "<!-- Angular template -->\n<a [routerLink]=\"['/article', article.slug]\">Lire</a>\n<a [routerLink]=\"['/profile', article.author.username]\">Profil</a>\n<!-- Pas de csrf_token avec JWT -->\n<form (ngSubmit)=\"onSubmit()\"><button type=\"submit\">Envoyer</button></form>"
+      },
+      "gotchas": [
+        "Mapper manuellement chaque {% url 'name' %} vers son [routerLink] équivalent — il n'existe pas de résolution dynamique par nom en Angular (sauf utiliser un service de navigation centralisé)",
+        "CsrfViewMiddleware Django protège contre les attaques CSRF sur les formulaires POST. Avec JWT dans Authorization header (pas cookie), les attaques CSRF ne s'appliquent plus — CORS strict est le mécanisme de remplacement"
+      ]
+    },
+    {
+      "id": "TM-026",
+      "category": "view",
+      "source_pattern": "Attributs HTMX sur les boutons interactifs (hx-post, hx-get, hx-target, hx-swap) — 8 endpoints",
+      "target_pattern": "Angular event bindings (click) + appels de service HttpClient + mise à jour réactive du state",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "Les actions HTMX déclenchent une requête serveur qui retourne du HTML partiel injecté dans le DOM via hx-swap. En Angular, les mêmes actions appellent des endpoints JSON Fastify et mettent à jour le state du composant via RxJS — Angular re-rend automatiquement le template. Le concept de 'partial HTML response' disparaît totalement.",
+      "example": {
+        "source": "<!-- HTMX: follow button avec swap HTML partiel -->\n<div id=\"follow-btn-container\">\n  <button hx-post=\"{% url 'follow' username=profile_user.username %}\"\n          hx-target=\"#follow-btn-container\"\n          hx-swap=\"outerHTML\"\n          hx-headers='{\"X-CSRFToken\": \"{{ csrf_token }}\"}'\n          class=\"btn btn-sm btn-outline-secondary\">\n    {% if is_following %}Unfollow{% else %}Follow{% endif %}\n  </button>\n</div>\n\n<!-- HTMX: favorite button -->\n<button hx-post=\"{% url 'article_favorite' slug=article.slug %}\"\n        hx-target=\"#favorite-btn-{{ article.slug }}\"\n        hx-swap=\"outerHTML\">",
+        "target": "// Angular FollowButtonComponent\n@Component({\n  selector: 'app-follow-button',\n  standalone: true,\n  template: `\n    <button (click)=\"toggleFollow()\" [disabled]=\"loading\"\n            class=\"btn btn-sm btn-outline-secondary\">\n      {{ isFollowing ? 'Unfollow' : 'Follow' }}\n    </button>\n  `\n})\nexport class FollowButtonComponent {\n  @Input() username!: string;\n  @Input() isFollowing = false;\n  loading = false;\n\n  constructor(private profileService: ProfileService) {}\n\n  toggleFollow() {\n    this.loading = true;\n    const action$ = this.isFollowing\n      ? this.profileService.unfollow(this.username)\n      : this.profileService.follow(this.username);\n    action$.subscribe(res => {\n      this.isFollowing = res.profile.following;\n      this.loading = false;\n    });\n  }\n}"
+      },
+      "gotchas": [
+        "8 interactions HTMX dans l'application — chacune devient un composant Angular avec state local et gestion des états de chargement: FeedPaginationComponent, FollowButtonComponent, FavoriteButtonComponent, CommentFormComponent, CommentListComponent, TagFilterComponent",
+        "hx-indicator (spinner HTMX) → Angular loading state explicite sur le bouton ou le composant",
+        "hx-headers avec X-CSRFToken → non nécessaire en SPA JWT, mais l'intercepteur Angular injecte le token JWT dans tous les appels",
+        "HTMX retourne des partials HTML → Fastify retourne du JSON. Les réponses des endpoints de toggle (follow, favorite) doivent retourner l'état mis à jour : { profile: { following: true } } ou { article: { favorited: true, favoritesCount: 5 } }"
+      ]
+    },
+    {
+      "id": "TM-027",
+      "category": "test",
+      "source_pattern": "pytest-django avec TestCase, client.get/post, force_login, assert status/content",
+      "target_pattern": "Jest avec Fastify inject() pour tests d'intégration API + Angular TestBed pour composants",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Les tests Django utilisent le client de test intégré avec sessions. En cible, les tests Fastify utilisent fastify.inject() (requêtes HTTP simulées sans démarrer un vrai serveur). L'auth est remplacée par un token JWT de test.",
+      "example": {
+        "source": "class ArticleTests(TestCase):\n    def setUp(self):\n        self.user = User.objects.create_user(email='test@test.com', password='pass')\n        self.client.force_login(self.user)  # bypass auth\n\n    def test_create_article(self):\n        resp = self.client.post('/editor', {\n            'title': 'Test', 'description': '', 'body': '', 'tags': ''\n        })\n        self.assertEqual(resp.status_code, 302)  # redirect après create",
+        "target": "// Jest + Fastify inject\ndescribe('POST /api/articles', () => {\n  let app: FastifyInstance;\n  let token: string;\n\n  beforeAll(async () => {\n    app = await buildTestApp();\n    await setupTestDb();  // seed user de test\n    // Login pour obtenir JWT\n    const loginRes = await app.inject({\n      method: 'POST', url: '/api/auth/login',\n      payload: { email: 'test@email.com', password: 'test' }\n    });\n    token = JSON.parse(loginRes.body).user.token;\n  });\n\n  it('creates an article and returns 201', async () => {\n    const res = await app.inject({\n      method: 'POST', url: '/api/articles',\n      headers: { authorization: `Bearer ${token}` },\n      payload: { article: { title: 'Test Article', description: '', body: '', tagList: [] } }\n    });\n    expect(res.statusCode).toBe(201);\n    expect(JSON.parse(res.body).article.slug).toBe('test-article');\n  });\n});"
+      },
+      "gotchas": [
+        "force_login Django n'a pas d'équivalent JWT — utiliser un token de test généré via fastify.jwt.sign() directement ou via un appel /api/auth/login en beforeAll",
+        "Les tests E2E Playwright de phase2 (wf001-wf011.spec.ts) testent l'interface utilisateur — ils nécessiteront une mise à jour des sélecteurs si Angular change le HTML généré",
+        "Les golden files et tests API .http de phase2 testent les réponses Django HTML — créer de nouveaux golden files JSON pour la cible Fastify"
+      ]
+    },
+    {
+      "id": "TM-028",
+      "category": "test",
+      "source_pattern": "Django management commands (python manage.py createUser, seed_data) pour bootstrap la DB",
+      "target_pattern": "Scripts Node.js/TypeScript de seed + fixtures Jest (beforeAll)",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Django fournit des management commands pour créer des utilisateurs et des données de test. En cible, créer des scripts npm équivalents exécutables via ts-node.",
+      "example": {
+        "source": "# python manage.py createUser\n# python manage.py seed_data  (crée articles, tags, users de démo)\n# Credentials test: test@email.com / test (username=admin)",
+        "target": "// scripts/seed.ts\nimport { sequelize, User, Article, Tag } from '../src/models';\nimport bcrypt from 'bcrypt';\n\nasync function seed() {\n  await sequelize.sync({ force: true });\n  const user = await User.create({\n    email: 'test@email.com',\n    username: 'admin',        // IMPORTANT: tests E2E attendent username=admin\n    passwordHash: await bcrypt.hash('test', 10),\n  });\n  const [tag] = await Tag.findOrCreate({ where: { name: 'intelligence-artificielle' } });\n  const article = await Article.create({\n    title: 'Teletravail bilan et nouvelles frontieres',\n    summary: '',\n    content: '...',\n    authorId: user.id,\n    // slug généré via hook @BeforeCreate\n  });\n  await article.$set('tags', [tag]);\n  console.log('Seed OK - user: test@email.com / test, username: admin');\n}\nseed().catch(console.error);\n// package.json: \"seed\": \"ts-node scripts/seed.ts\""
+      },
+      "gotchas": [
+        "Les tests E2E phase2 attendent username='admin' pour l'utilisateur test@email.com — reproduire EXACTEMENT ce username dans le seed",
+        "L'article seed de phase2 (teletravail-bilan-et-nouvelles-frontieres...) et le tag (intelligence-artificielle) sont référencés dans les tests E2E et golden files — reproduire ou adapter les tests"
+      ]
+    },
+    {
+      "id": "TM-029",
+      "category": "utility",
+      "source_pattern": "Django cache.get_or_set('all_tags', Tag.objects.all, timeout=300) pour le cloud de tags",
+      "target_pattern": "Cache en mémoire Node.js (node-cache) avec TTL 300s + invalidation après modification de tags",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Django fournit un cache in-process configurable. En Node.js, utiliser node-cache pour une instance unique ou Redis pour multi-instances. L'invalidation après modification d'articles doit être répliquée.",
+      "example": {
+        "source": "# Lecture avec cache 300s\ntags = cache.get_or_set('all_tags', Tag.objects.all, timeout=300)\n\n# Invalidation dans _save_article_form() après modification des tags:\ncache.delete('all_tags')",
+        "target": "// src/utils/cache.ts\nimport NodeCache from 'node-cache';\nexport const cache = new NodeCache({ stdTTL: 300 });\n\n// src/services/tag.service.ts\nexport async function getAllTags(): Promise<Tag[]> {\n  const cached = cache.get<Tag[]>('all_tags');\n  if (cached) return cached;\n  const tags = await Tag.findAll({ order: [['name', 'ASC']] });\n  cache.set('all_tags', tags);\n  return tags;\n}\n\nexport function invalidateTagCache(): void {\n  cache.del('all_tags');\n}\n\n// Dans le handler de création/édition article:\nawait article.$set('tags', tags);\ninvalidateTagCache();  // Reproduit cache.delete('all_tags')"
+      },
+      "gotchas": [
+        "node-cache est en mémoire isolée par processus Node.js — si Fastify tourne en cluster (plusieurs workers), les caches peuvent diverger. Utiliser Redis en production",
+        "Reproduire l'invalidation cache après TOUTE modification de tags (create article, edit article) — reproduit cache.delete('all_tags') dans _save_article_form()"
+      ]
+    },
+    {
+      "id": "TM-030",
+      "category": "utility",
+      "source_pattern": "helpers/htmx.py is_htmx() + helpers/context_processors.py conduit_context (user JSON global)",
+      "target_pattern": "Ces helpers disparaissent — AuthService Angular remplace conduit_context, HTMX n'existe plus",
+      "strategy": "redesign",
+      "complexity": "low",
+      "notes": "is_htmx() est un helper SSR uniquement — le concept HX-Request disparaît en SPA. conduit_context injectait les données user dans window.__conduit_debug__ — en Angular, AuthService expose un Observable<User|null> accessible globalement.",
+      "example": {
+        "source": "# helpers/htmx.py\ndef is_htmx(request):\n    return request.headers.get('HX-Request') == 'true'\n\n# helpers/context_processors.py\ndef conduit_context(request):\n    if request.user.is_authenticated:\n        return {\n            'conduit_user_json': json.dumps(user_data),\n            'conduit_authenticated': True\n        }\n    return { 'conduit_user_json': 'null', 'conduit_authenticated': False }",
+        "target": "// Angular AuthService (remplace conduit_context)\n@Injectable({ providedIn: 'root' })\nexport class AuthService {\n  private currentUserSubject = new BehaviorSubject<User | null>(\n    this.loadUserFromToken()  // chargé depuis le JWT au démarrage\n  );\n  readonly currentUser$ = this.currentUserSubject.asObservable();\n  readonly isLoggedIn$ = this.currentUser$.pipe(map(u => u !== null));\n\n  isLoggedIn(): boolean { return !!this.currentUserSubject.value; }\n  get currentUser(): User | null { return this.currentUserSubject.value; }\n}"
+      },
+      "gotchas": [
+        "window.__conduit_debug__ était injecté par le context processor et peutêtre utilisé dans des scripts de test (ex: agent13 Playwright). Supprimer les références dans les tests E2E si présentes",
+        "conduit_context injectait is_following et is_favorite qui sont maintenant dans les DTOs de réponse Fastify — pas besoin d'un contexte global"
+      ]
+    },
+    {
+      "id": "TM-031",
+      "category": "utility",
+      "source_pattern": "Django SecurityMiddleware + CsrfViewMiddleware + XFrameOptionsMiddleware + SessionMiddleware",
+      "target_pattern": "@fastify/helmet (sécurité headers) + @fastify/cors (requêtes cross-origin SPA)",
+      "strategy": "adapt",
+      "complexity": "medium",
+      "notes": "Chaque middleware Django de sécurité a un équivalent Fastify. CSRF n'est plus nécessaire avec JWT. CORS doit être configuré pour permettre à Angular (port 4200) d'appeler Fastify (port 3000).",
+      "example": {
+        "source": "MIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',   # HSTS, secure headers\n    'django.contrib.sessions.middleware.SessionMiddleware',  # session cookie\n    'django.middleware.csrf.CsrfViewMiddleware',       # CSRF protection\n    'django.contrib.auth.middleware.AuthenticationMiddleware',  # request.user\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # X-Frame-Options\n]",
+        "target": "// Fastify main.ts\nimport fastifyHelmet from '@fastify/helmet';\nimport fastifyCors  from '@fastify/cors';\nimport fastifyJwt   from '@fastify/jwt';\n\nawait fastify.register(fastifyJwt, {\n  secret: process.env.JWT_SECRET!  // remplace Django SECRET_KEY\n});\nawait fastify.register(fastifyHelmet, {\n  contentSecurityPolicy: { directives: { defaultSrc: [\"'self'\"], scriptSrc: [\"'self'\"] } },\n  frameguard: { action: 'deny' }   // X-Frame-Options: DENY\n});\nawait fastify.register(fastifyCors, {\n  origin: process.env.FRONTEND_URL || 'http://localhost:4200',\n  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],\n  credentials: false  // pas de cookies avec JWT\n});\n// AuthenticationMiddleware remplacé par preHandler authenticate sur chaque route protégée"
+      },
+      "gotchas": [
+        "CORS doit être configuré AVANT les routes Fastify pour intercepter les pré-requêtes OPTIONS",
+        "Django SessionMiddleware n'a pas d'équivalent — les sessions serveur disparaissent avec JWT. Les données de session Django (django_session table) ne migrent pas",
+        "En production, restreindre CORS origin à l'URL Angular réelle (pas '*') et configurer HSTS via fastifyHelmet"
+      ]
+    },
+    {
+      "id": "TM-032",
+      "category": "architecture",
+      "source_pattern": "Monolithe Django SSR avec apps/ modulaires (accounts, articles, comments, config, helpers)",
+      "target_pattern": "Architecture découplée: Fastify REST API (backend/) + Angular SPA (frontend/) avec couches service",
+      "strategy": "redesign",
+      "complexity": "high",
+      "notes": "Migration d'un monolithe Django SSR vers une architecture distribuée client-serveur. Les apps Django deviennent des modules fonctionnels dupliqués dans les deux projets (Fastify pour la logique, Angular pour le rendu). Communication via API REST JSON.",
+      "example": {
+        "source": "legacy/\n  apps/\n    accounts/  # User model + views + forms + urls (294 LOC)\n    articles/  # Article model + views + forms + urls + templatetags (332 LOC)\n    comments/  # Comment model + views + urls\n  config/      # settings + urls + wsgi\n  helpers/     # htmx + context_processors + exceptions\n  templates/   # 18 templates HTML (base + partials + pages)",
+        "target": "target/\n  backend/               # Fastify REST API\n    src/\n      models/            # User, Article, Comment, Tag (Sequelize)\n      routes/            # auth.ts, users.ts, articles.ts, comments.ts, tags.ts\n      services/          # articleService, userService, tagService (logique métier)\n      middleware/        # authenticate.ts\n      utils/             # slugify, cache, dtos.ts\n      app.ts             # Fastify instance + plugins\n  frontend/              # Angular SPA\n    src/app/\n      features/\n        auth/            # LoginComponent, RegisterComponent, SettingsComponent\n        articles/        # HomeComponent, ArticleDetailComponent, EditorComponent\n        profiles/        # ProfileComponent\n      shared/\n        components/      # ArticleListComponent, CommentListComponent, FollowButtonComponent...\n        pipes/           # MarkdownPipe, DatePipe\n        services/        # ArticleService, AuthService, ProfileService, TagService\n        guards/          # AuthGuard\n        interceptors/    # JwtInterceptor"
+      },
+      "gotchas": [
+        "ARTICLES_PER_PAGE est dupliqué dans accounts/views.py et articles/views.py en source (anomalie détectée phase1) — centraliser dans une constante partagée en cible (/backend/src/utils/constants.ts)",
+        "L'admin Django (/admin/) n'a pas d'équivalent prévu dans la logique Conduit — ne pas migrer (voir unmappable)",
+        "Le déploiement devient plus complexe : 2 processus (Node.js + Angular static build) au lieu d'un seul (Django + WSGI)"
+      ]
+    }
+  ],
+  "unmappable": [
+    {
+      "source_pattern": "Django Admin automatique (/admin/) avec enregistrement de modèles (admin.py dans chaque app)",
+      "reason": "L'admin Django génère automatiquement une interface CRUD complète basée sur les métadonnées des modèles. Fastify + Angular ne fournit pas d'équivalent out-of-the-box. L'admin n'est pas utilisé dans la logique métier Conduit (aucune route ni règle métier y faisant référence).",
+      "recommendation": "Ne pas migrer l'admin Django — il n'est pas requis par la spéc Conduit RealWorld. Si une interface d'administration est nécessaire plus tard, utiliser AdminJS (Node.js) ou une solution SaaS.",
+      "impact_on_migration": "low"
+    }
+  ]
+}

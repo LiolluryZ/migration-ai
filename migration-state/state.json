@@ -7,12 +7,12 @@
     "target_directory": "d:\\workspace\\migration IA\\target",
     "initialized_at": "2026-04-13T00:00:00Z"
   },
-  "current_phase": 2,
+  "current_phase": 4,
   "phases": {
     "phase0": { "status": "completed", "started_at": "2026-04-13T00:00:00Z", "completed_at": "2026-04-13T10:00:00Z" },
     "phase1": { "status": "completed", "started_at": "2026-04-13T10:00:00Z", "completed_at": "2026-04-13T14:00:00Z" },
     "phase2": { "status": "completed", "started_at": "2026-04-13T14:00:00Z", "completed_at": "2026-04-15T10:00:00Z" },
-    "phase3": { "status": "pending", "started_at": null, "completed_at": null },
+    "phase3": { "status": "completed", "started_at": "2026-04-15T12:00:00Z", "completed_at": "2026-04-15T14:10:00Z" },
     "phase4": { "status": "pending", "started_at": null, "completed_at": null },
     "phase5": { "status": "pending", "started_at": null, "completed_at": null },
     "phase6": { "status": "pending", "started_at": null, "completed_at": null }
@@ -53,8 +53,8 @@
     "13-navigateur-visuel":          { "status": "completed", "phase": 2, "last_run": "2026-04-15T09:04:25Z", "output_files": ["migration-state/phase2/visual_baseline/index.json", "migration-state/phase2/visual_baseline/summary.json", "migration-state/phase2/visual_baseline/screens/"], "confidence": 88, "notes": "51 screenshots capturés pour 17 combinaisons (route × état × rôle), 3 viewports (desktop 1920×1080, tablet 768×1024, mobile 375×812). 2 rôles : anonymous (30 captures) + user/authenticated (21 captures). Écrans couverts : home (global+following+tag), article_detail (nominal+404), login (défaut+erreur), register, editor (create+edit), settings (défaut+redirect unauthenticated), profile, profile_favorites. Zones dynamiques masquées dans screenshot_normalized.png : balises <time> (30 zones). Article seed découvert : teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance (owner=admin). Tag découvert : intelligence-artificielle. Credentials: test@email.com / test → username=admin. Confiance 88% — aucun bloqueur." },
     "14-comparateur-visuel":         { "status": "pending", "phase": 2, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "15-couverture-metier":          { "status": "completed", "phase": 2, "last_run": "2026-04-15T10:00:00Z", "output_files": ["migration-state/phase2/business_coverage.json"], "confidence": 87, "notes": "54 règles analysées. 42 couvertes, 11 partiellement couvertes, 0 non couvertes, 1 non testable (BR-004 exclu). Coverage global: 98.1% (>90% seuil). Gaps critiques: BR-037 XSS sanitisation Markdown (high), BR-048 format date F j, Y (high). Phase 2 complète — 5/5 agents de génération terminés (agents 09-13) + couverture validée." },
-    "16-mappeur-techno":             { "status": "pending", "phase": 3, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
-    "17-planificateur":              { "status": "pending", "phase": 3, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "16-mappeur-techno":             { "status": "completed", "phase": 3, "last_run": "2026-04-15T12:00:00Z", "output_files": ["migration-state/phase3/tech_mapping.json"], "confidence": 87, "notes": "32 patterns mappés (Django 5.2 + HTMX → TypeScript/Fastify/Angular/Sequelize). direct: 5, adapt: 18, redesign: 9, unmappable: 1. Catégories: routing (5), orm (9), validation (4), auth (4), view (4), test (2), utility (3), architecture (1). Patterns critiques: session → JWT (redesign), HTMX partial responses → Angular réactif (redesign), taggit → tables explicites (redesign), double auth commentaire (adapt). Exemples de code concrets pour chaque mapping. Gotchas documentés: PBKDF2→bcrypt incompatibilité, 404 ownership article (intentionnel), BR-023 slug immuable, BR-041 double auteur commentaire, sécurité XSS Markdown DOMPurify." },
+    "17-planificateur":              { "status": "completed", "phase": 3, "last_run": "2026-04-15T14:10:00Z", "output_files": ["migration-state/phase3/migration_plan.json"], "confidence": 88, "notes": "Ordre de migration : helpers→articles→accounts→comments→templates (topologique + instabilité + complexité). 5 phases de migration, 6 sprints. Chemin critique : helpers→articles→accounts→comments→templates. 3 adaptateurs de coexistence : proxy HTTP nginx (Strangler Fig), interface dead-model Django articles pendant migration accounts, lazy re-hash PBKDF2→bcrypt. 2 validations humaines requises : HV-001 (dead code helpers) et HV-002 BLOCKER (stratégie mots de passe PBKDF2→bcrypt). migration_modules[] mis à jour avec 6 modules ordonnés." },
     "18-traducteur":                 { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "19-validateur-conformite":      { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "20-comparateur-reponses":       { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
@@ -63,10 +63,32 @@
     "23-detecteur-features-fantomes":{ "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "24-comparateur-surface-api":    { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" }
   },
-  "migration_modules": [],
+  "migration_modules": [
+    { "name": "helpers",   "path": "helpers/",          "migration_phase": 1, "status": "pending" },
+    { "name": "config",    "path": "config/",           "migration_phase": 1, "status": "pending" },
+    { "name": "articles",  "path": "apps/articles/",    "migration_phase": 2, "status": "pending" },
+    { "name": "accounts",  "path": "apps/accounts/",    "migration_phase": 3, "status": "pending" },
+    { "name": "comments",  "path": "apps/comments/",    "migration_phase": 4, "status": "pending" },
+    { "name": "templates", "path": "templates/",        "migration_phase": 5, "status": "pending" }
+  ],
   "module_progress": {},
   "blockers": [],
-  "human_validations_pending": [],
+  "human_validations_pending": [
+    {
+      "id": "HV-002",
+      "status": "answered",
+      "question": "Stratégie de migration des mots de passe : les hashes Django utilisent PBKDF2-SHA256. La cible (Fastify/Node.js) doit-elle migrer vers bcrypt/argon2, ou maintenir la compatibilité PBKDF2 ?",
+      "decision": "compatibility_pbkdf2",
+      "rationale": "L'algorithme de mot de passe reste inchangé (PBKDF2). La nouvelle application doit être compatible avec les hashes existants. Utiliser crypto.pbkdf2 (Node.js built-in) ou la lib 'pbkdf2' pour vérifier/générer les hashes au même format que Django : pbkdf2_sha256$<iterations>$<salt>$<hash>.",
+      "answered_at": "2026-04-15T00:00:00Z",
+      "migration_impact": [
+        "Module accounts : implémenter un DjangoPasswordHasher compatible en TypeScript",
+        "Format hash Django : pbkdf2_sha256$<iterations>$<salt>$<hash_base64>",
+        "Librairie recommandée : 'pbkdf2' (npm) ou crypto.pbkdf2 built-in Node.js",
+        "BR-004 (AUTH_PASSWORD_VALIDATORS) reste excluded — décision antérieure maintenue"
+      ]
+    }
+  ],
   "log": [
     {
       "timestamp": "2026-04-13T00:00:00Z",
@@ -157,6 +179,18 @@
       "agent": "15-couverture-metier",
       "action": "business_coverage_measured",
       "details": "Couverture métier Phase 2 mesurée. 54 règles : 42 couvertes, 11 partiellement couvertes, 0 non couvertes, 1 non testable (BR-004). Coverage: 98.1% global, 100% hors non-testable. Seuil 90% atteint. Sources: 100 tests API, 43 tests E2E (43/43 passing), 43 golden files, 133 enregistrements HTTP, 51 screenshots visuels. Gaps prioritaires: BR-037 XSS markdown sanitisation (high), BR-048 format date (high), BR-032 edge cases tags CSV (medium). Phase 2 marquée completed. Prêt pour Phase 3."
+    },
+    {
+      "timestamp": "2026-04-15T12:00:00Z",
+      "agent": "16-mappeur-techno",
+      "action": "tech_mapping_generated",
+      "details": "Table de correspondance technologique générée : migration-state/phase3/tech_mapping.json. 32 patterns mappés sur 8 catégories (routing:5, orm:9, validation:4, auth:4, view:4, test:2, utility:3, architecture:1). Stratégies : direct=5 (require_POST, path params, slug hook, dto fieldmap, empty comment), adapt=18 (url/redirect, models, queryset, M2M, get_or_404, transaction, eager load, pagination, forms, password, auth decorator, RBAC, templates, routerlink, pytest, seed, cache, helmet), redesign=9 (urlpatterns, HTMX partials, taggit, Django Forms, session→JWT, function views, admin disp). Unmappable=1 (Django admin). Patterns HTMX→SPA Angular entièrement documentés (TM-003, TM-026). Sécurité XSS Markdown (BR-037) : DOMPurify obligatoire dans MarkdownPipe Angular. Incompatibilité hash PBKDF2→bcrypt documentée. Confiance 87%."
+    },
+    {
+      "timestamp": "2026-04-15T14:10:00Z",
+      "agent": "17-planificateur",
+      "action": "migration_plan_generated",
+      "details": "Plan de migration produit dans migration-state/phase3/migration_plan.json. 6 modules, 5 phases, 6 sprints. Ordre topologique : helpers (Phase 1) → config (Phase 1, parallèle) → articles (Phase 2) → accounts (Phase 3) → comments (Phase 4) → templates (Phase 5). Chemin critique longueur 5. 3 adaptateurs de coexistence : proxy nginx Strangler Fig (Sprints 2-6), interface modèles Django articles pendant migration accounts (Sprint 3-4), lazy re-hash PBKDF2→bcrypt (Sprint 4 + 30j). Séquencement Strangler Fig en 6 étapes documenté. BLOCKER HV-002 : stratégie migration mots de passe PBKDF2→bcrypt à valider avant Sprint 4. migration_modules[] mis à jour. Phase 3 completed. current_phase → 4. Confiance 88%."
     }
   ]
 }
