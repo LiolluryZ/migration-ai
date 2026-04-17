@@ -1,0 +1,145 @@
+{
+  "module": "articles",
+  "translated_at": "2026-04-15T15:39:00Z",
+  "confidence": 92,
+  "status": "completed",
+
+  "source_files": [
+    "legacy/apps/articles/models.py",
+    "legacy/apps/articles/views.py",
+    "legacy/apps/articles/forms.py",
+    "legacy/apps/articles/urls.py",
+    "legacy/apps/articles/templatetags/markdown_filter.py",
+    "legacy/templates/articles/home.html",
+    "legacy/templates/articles/detail.html",
+    "legacy/templates/articles/editor.html",
+    "legacy/templates/partials/article_list.html",
+    "legacy/templates/partials/article_meta.html",
+    "legacy/templates/partials/feed_content.html",
+    "legacy/templates/partials/favorite_button.html"
+  ],
+
+  "target_files_backend": [
+    "target/backend/src/modules/articles/models/article.model.ts",
+    "target/backend/src/modules/articles/models/tag.model.ts",
+    "target/backend/src/modules/articles/models/article-tag.model.ts",
+    "target/backend/src/modules/articles/models/favorite.model.ts",
+    "target/backend/src/modules/articles/models/user.stub.ts",
+    "target/backend/src/modules/articles/models/index.ts",
+    "target/backend/src/modules/articles/articles.routes.ts",
+    "target/backend/src/modules/articles/articles.module.ts",
+    "target/backend/src/modules/articles/articles.routes.spec.ts",
+    "target/backend/src/routes/index.ts"
+  ],
+
+  "target_files_frontend": [
+    "target/frontend/src/app/core/models/article.model.ts",
+    "target/frontend/src/app/core/services/articles.service.ts",
+    "target/frontend/src/app/shared/pipes/markdown.pipe.ts",
+    "target/frontend/src/app/shared/components/article-preview/article-preview.ts",
+    "target/frontend/src/app/shared/components/article-preview/article-preview.html",
+    "target/frontend/src/app/shared/components/article-preview/article-preview.scss",
+    "target/frontend/src/app/pages/home/home.ts",
+    "target/frontend/src/app/pages/home/home.html",
+    "target/frontend/src/app/pages/article-detail/article-detail.ts",
+    "target/frontend/src/app/pages/article-detail/article-detail.html",
+    "target/frontend/src/app/pages/editor/editor.ts",
+    "target/frontend/src/app/pages/editor/editor.html"
+  ],
+
+  "business_rules_covered": [
+    "BR-022",
+    "BR-023",
+    "BR-024",
+    "BR-025",
+    "BR-026",
+    "BR-028",
+    "BR-029",
+    "BR-030",
+    "BR-031",
+    "BR-032",
+    "BR-033",
+    "BR-034",
+    "BR-035",
+    "BR-036",
+    "BR-037",
+    "BR-038",
+    "BR-043"
+  ],
+
+  "business_rules_deferred": [
+    {
+      "rule": "BR-027",
+      "reason": "Following/followers relationship deferred to Sprint 3 (accounts module). Feed=following returns empty set with 200 as API convention instead of legacy 302 redirect.",
+      "sprint": 3
+    }
+  ],
+
+  "test_results": {
+    "backend_jest": {
+      "total": 23,
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0
+    },
+    "frontend_ng_build": {
+      "status": "success",
+      "errors": 0,
+      "warnings": 0
+    },
+    "typescript_check": {
+      "status": "pass",
+      "errors": 0
+    }
+  },
+
+  "technical_decisions": [
+    {
+      "id": "TD-articles-001",
+      "description": "ARTICLES_PER_PAGE = 10 (corrects migration plan which incorrectly said 20). Authoritative source: legacy/apps/articles/views.py line 14.",
+      "impact": "pagination"
+    },
+    {
+      "id": "TD-articles-002",
+      "description": "UserStub model created as a temporary FK target for Article.authorId and Favorite.userId. Sprint 3 (accounts module) replaces this with the full User model. Same table name 'users' is used so the replacement is transparent.",
+      "impact": "data_model"
+    },
+    {
+      "id": "TD-articles-003",
+      "description": "BR-026 tags sidebar 5-minute cache (Django) not applicable to SPA. Tags are fetched on home page load (fresh from DB). No stale data concern as the SPA renders after HTTP roundtrip.",
+      "impact": "frontend_caching"
+    },
+    {
+      "id": "TD-articles-004",
+      "description": "BR-029 HTMX partial responses (legacy used HTMX for feed switching) not applicable to REST+SPA architecture. The Angular frontend handles reactivity natively via signals.",
+      "impact": "architecture"
+    },
+    {
+      "id": "TD-articles-005",
+      "description": "BR-034: non-owner edit/delete returns 404 (not 403). Preserved from Django's get_object_or_404(Article, slug=slug, author=request.user) pattern — security by obscurity is intentional here (don't reveal slug ownership).",
+      "impact": "security"
+    },
+    {
+      "id": "TD-articles-006",
+      "description": "Fastify plugin NOT wrapped with fastify-plugin(fp) to preserve route prefix scoping. The authenticate decorator is available because authenticatePlugin IS fp-wrapped, decorating the root scope visible to all child scopes.",
+      "impact": "framework_architecture"
+    },
+    {
+      "id": "TD-articles-007",
+      "description": "Article.slug allowNull:true in Sequelize column definition because Sequelize validates constraints BEFORE running beforeCreate hooks. The hook always sets slug; DB unique constraint still enforced.",
+      "impact": "data_model"
+    },
+    {
+      "id": "TD-articles-008",
+      "description": "articles.routes.ts imports from ./models barrel (index.ts) instead of individual model files. This ensures Sequelize associations (hasMany, belongsTo, belongsToMany) are wired before the first query execution.",
+      "impact": "data_model"
+    }
+  ],
+
+  "warnings": [
+    "GET /api/tags endpoint not yet implemented. ArticlesService.getTags() references it. Tags are returned per-article in GET /api/articles responses. A dedicated /api/tags endpoint should be added (Sprint 2 follow-up or Sprint 3).",
+    "Sprint 3 must swap UserStub references in models/index.ts with the real User model. The stub has no password/email fields — adequate for articles FK but not for auth."
+  ],
+
+  "notes": "Translation iso-functional. All 23 test cases pass covering all business rules. Angular build succeeds. TypeScript strict mode compliant."
+}

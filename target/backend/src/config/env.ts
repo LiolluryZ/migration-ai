@@ -40,7 +40,7 @@ if (pbkdf2Iterations < 1000 && !isTest && process.env.NODE_ENV === 'production')
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
-  port: parseInt(process.env.PORT ?? '3001', 10),
+  port: parseInt(process.env.PORT ?? '3000', 10),
   jwtSecret: jwtSecret ?? '',   // empty string only reached in test (JEST_WORKER_ID set)
   databaseUrl,
   allowedOrigins,

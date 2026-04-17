@@ -27,6 +27,12 @@ function buildSequelizeConfig(): { uri?: string; options: Options } {
   // In-memory or file: SQLite shorthand.
   // Source: config/settings.py :: if DATABASE_URL.startswith((":memory:", "file:"))
   if (url === ':memory:' || url.startsWith('file:')) {
+    if (env.nodeEnv === 'production') {
+      throw new Error(
+        'SQLite :memory: and file: databases are not allowed in production. ' +
+        'Set DATABASE_URL to a PostgreSQL connection string.',
+      );
+    }
     const storage = url === ':memory:' ? ':memory:' : url.replace(/^file:/, '');
     return {
       options: {

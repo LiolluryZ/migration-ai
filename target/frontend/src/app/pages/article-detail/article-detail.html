@@ -1,2 +1,89 @@
-<!-- Stub — full implementation in future sprint -->
-<p>Article detail — coming Sprint 2</p>
+<!--
+  Article detail — translated from templates/articles/detail.html +
+  templates/partials/article_meta.html
+  BR-037 CRITICAL: body rendered via MarkdownPipe (DOMPurify sanitisation inside)
+-->
+@if (loading()) {
+  <div class="container page"><p>Loading...</p></div>
+} @else if (notFound()) {
+  <!-- BR-030: non-existent article → 404 message with slug -->
+  <div class="container page">
+    <h2>Article not found</h2>
+    <p><a routerLink="/">Go back to home</a></p>
+  </div>
+} @else if (article(); as a) {
+  <div class="article-page">
+    <div class="banner">
+      <div class="container">
+        <h1>{{ a.title }}</h1>
+
+        <!-- Article meta -->
+        <div class="article-meta">
+          <a [routerLink]="['/profile', a.author.username]">
+            <img [src]="a.author.image ?? 'assets/images/default-avatar.svg'" [alt]="a.author.username" />
+          </a>
+          <div class="info">
+            <a [routerLink]="['/profile', a.author.username]" class="author">{{ a.author.username }}</a>
+            <span class="date">{{ a.createdAt | date:'MMMM d, y' }}</span>
+          </div>
+
+          @if (isOwner) {
+            <a [routerLink]="['/editor', a.slug]" class="btn btn-sm btn-outline-secondary">
+              <i class="ion-edit"></i> Edit Article
+            </a>
+            &nbsp;
+            <button
+              class="btn btn-sm btn-outline-danger"
+              [disabled]="deleteLoading()"
+              (click)="deleteArticle()"
+            >
+              <i class="ion-trash-a"></i> Delete Article
+            </button>
+          } @else {
+            <button
+              class="btn btn-sm"
+              [class.btn-secondary]="!a.favorited"
+              [class.btn-primary]="a.favorited"
+              [disabled]="favoriteLoading() || !auth.isAuthenticated()"
+              (click)="toggleFavorite()"
+            >
+              <i class="ion-heart"></i> {{ a.favorited ? 'Unfavorite' : 'Favorite' }} Article
+              <span class="counter">({{ a.favoritesCount }})</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="container page">
+      <!-- BR-037 CRITICAL: Markdown rendered via MarkdownPipe (DOMPurify inside) -->
+      <div class="row article-content">
+        <div class="col-md-12" [innerHTML]="a.body | markdown"></div>
+      </div>
+
+      @if (a.tagList.length > 0) {
+        <ul class="tag-list">
+          @for (tag of a.tagList; track tag) {
+            <li class="tag-default tag-pill tag-outline">{{ tag }}</li>
+          }
+        </ul>
+      }
+
+      <hr />
+
+      <!-- Comments section — stub until Sprint 4 (comments module) -->
+      <div class="row">
+        <div class="col-xs-12 col-md-8 offset-md-2">
+          @if (auth.isAuthenticated()) {
+            <p><em>Comments coming in Sprint 4.</em></p>
+          } @else {
+            <p class="comment-auth-prompt">
+              <a routerLink="/register">Sign in or sign up</a> to add comments on this article.
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+

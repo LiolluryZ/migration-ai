@@ -1,2 +1,109 @@
-<!-- Stub — full implementation in future sprint -->
-<p>Home — coming Sprint 2</p>
+<!--
+  Home page — translated from templates/articles/home.html +
+  templates/partials/feed_content.html + templates/partials/article_list.html
+-->
+<div class="home-page">
+  @if (!auth.isAuthenticated()) {
+    <div class="banner">
+      <div class="container">
+        <h1 class="logo-font">conduit</h1>
+        <p>A place to share your knowledge.</p>
+      </div>
+    </div>
+  }
+
+  <div class="container page">
+    <div class="row">
+      <!-- Feed column -->
+      <div class="col-md-9">
+        <!-- Tab navigation — BR-026: global / following / tag -->
+        <div class="feed-toggle">
+          <ul class="nav nav-pills outline-active">
+            @if (auth.isAuthenticated()) {
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  [class.active]="activeTab === 'following'"
+                  (click)="setTab('following')"
+                >
+                  Your Feed
+                </button>
+              </li>
+            }
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                [class.active]="activeTab === 'global'"
+                (click)="setTab('global')"
+              >
+                Global Feed
+              </button>
+            </li>
+            @if (activeTab === 'tag' && activeTag) {
+              <li class="nav-item">
+                <button class="nav-link active">
+                  <i class="ion-pound"></i> {{ activeTag }}
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Article list — BR-028: 10 per page, date DESC -->
+        @if (loading()) {
+          <div class="article-preview"><p>Loading articles...</p></div>
+        } @else if (articles().length === 0) {
+          <div class="article-preview">
+            @if (activeTab === 'following') {
+              <p class="empty-feed-message">
+                Your feed is empty. Check out the
+                <button class="btn btn-link p-0" (click)="setTab('global')">Global Feed</button>!
+              </p>
+            } @else {
+              <p class="empty-feed-message">No articles are here... yet.</p>
+            }
+          </div>
+        } @else {
+          @for (article of articles(); track article.slug) {
+            <app-article-preview
+              [article]="article"
+              (favoriteChanged)="onFavoriteChanged($event)"
+            />
+          }
+        }
+
+        <!-- Pagination — BR-028 -->
+        @if (totalPages.length > 1) {
+          <nav>
+            <ul class="pagination">
+              @for (p of totalPages; track p) {
+                <li class="page-item" [class.active]="p === page">
+                  <button class="page-link" (click)="setPage(p)">{{ p }}</button>
+                </li>
+              }
+            </ul>
+          </nav>
+        }
+      </div>
+
+      <!-- Tags sidebar -->
+      <div class="col-md-3">
+        <div class="sidebar">
+          <p>Popular Tags</p>
+          <div class="tag-list">
+            @for (tag of tags(); track tag) {
+              <button
+                class="tag-default tag-pill"
+                [class.active]="tag === activeTag"
+                (click)="setTagFilter(tag)"
+              >
+                {{ tag }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

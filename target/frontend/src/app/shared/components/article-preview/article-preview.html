@@ -1,0 +1,43 @@
+<!--
+  Article preview card — translated from templates/partials/article_list.html
+  Source: templates/partials/article_list.html + templates/partials/favorite_button.html
+-->
+<div class="article-preview">
+  <div class="article-meta">
+    <a [routerLink]="['/profile', article.author.username]">
+      <img
+        [src]="article.author.image ?? 'assets/images/default-avatar.svg'"
+        [alt]="article.author.username"
+      />
+    </a>
+    <div class="info">
+      <a [routerLink]="['/profile', article.author.username]" class="author">
+        {{ article.author.username }}
+      </a>
+      <span class="date">{{ article.createdAt | date:'MMMM d, y' }}</span>
+    </div>
+
+    <!-- Favorite button — BR-036: toggle add/remove -->
+    <button
+      class="btn btn-outline-primary btn-sm pull-xs-right"
+      [class.active]="article.favorited"
+      [disabled]="favoriteLoading || !auth.isAuthenticated()"
+      (click)="toggleFavorite($event)"
+    >
+      <i class="ion-heart"></i> {{ article.favoritesCount }}
+    </button>
+  </div>
+
+  <a [routerLink]="['/article', article.slug]" class="preview-link">
+    <h1>{{ article.title }}</h1>
+    <p>{{ article.description }}</p>
+    <span>Read more...</span>
+    @if (article.tagList.length > 0) {
+      <ul class="tag-list">
+        @for (tag of article.tagList; track tag) {
+          <li class="tag-default tag-pill tag-outline">{{ tag }}</li>
+        }
+      </ul>
+    }
+  </a>
+</div>

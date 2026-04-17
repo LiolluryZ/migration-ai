@@ -1,2 +1,95 @@
-<!-- Stub — full implementation in future sprint -->
-<p>Editor — coming Sprint 2</p>
+<!--
+  Article editor — translated from templates/articles/editor.html
+  BR-031: form field names match RealWorld spec (description / body)
+  BR-023: this form NEVER sends a slug field in PATCH (enforced in editor.ts)
+-->
+<div class="editor-page">
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-10 offset-md-1 col-xs-12">
+
+        <!-- Validation errors -->
+        @if (hasErrors()) {
+          <ul class="error-messages">
+            @for (key of errorKeys(); track key) {
+              @for (msg of errors()[key]; track msg) {
+                <li>{{ key }} {{ msg }}</li>
+              }
+            }
+          </ul>
+        }
+
+        <form (ngSubmit)="submit()" novalidate>
+          <fieldset [disabled]="loading()">
+
+            <!-- Title — BR-022: required, max 150, unique -->
+            <fieldset class="form-group">
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                placeholder="Article Title"
+                [(ngModel)]="title"
+                name="title"
+                maxlength="150"
+                required
+              />
+              @if (errors()['title']) {
+                @for (msg of errors()['title']; track msg) {
+                  <p class="error-messages">{{ msg }}</p>
+                }
+              }
+            </fieldset>
+
+            <!-- Description — BR-031: form.description → model.summary -->
+            <fieldset class="form-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="What's this article about?"
+                [(ngModel)]="description"
+                name="description"
+              />
+            </fieldset>
+
+            <!-- Body (Markdown) — BR-031: form.body → model.content -->
+            <fieldset class="form-group">
+              <textarea
+                class="form-control"
+                placeholder="Write your article (in markdown)"
+                rows="8"
+                [(ngModel)]="body"
+                name="body"
+              ></textarea>
+            </fieldset>
+
+            <!-- Tags — BR-026: normalised to lowercase on add; BR-032: clear+re-add on save -->
+            <fieldset class="form-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter tags (press Enter or ,)"
+                [(ngModel)]="tagInput"
+                name="tagInput"
+                (keydown)="addTag($event)"
+              />
+              <div class="tag-list">
+                @for (tag of tags; track tag) {
+                  <span class="tag-default tag-pill">
+                    <i class="ion-close-round" (click)="removeTag(tag)"></i>
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            </fieldset>
+
+            <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
+              {{ loading() ? 'Saving...' : 'Publish Article' }}
+            </button>
+
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

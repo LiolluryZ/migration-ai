@@ -41,3 +41,13 @@ Agent	Confiance	Sortie principale
 04-metriques	82%	1651 LOC, CC moyen 2.48, ordre migration établi
 Prochaine étape : Phase 1
 L'agent 05-extracteur-regles doit passer en premier (pré-requis pour 06 et 07). C'est l'agent le plus critique — il utilise claude-opus-4-6.
+
+## Phase 3
+
+L'agent va decouper les module et les organiser pour les migrer en sequentiel.
+Il decoupe en "sprint"
+
+## Phase 4
+
+Pour chaque "sprint", il execute les agents de migration de code 18, de review 21 et de validation de conformité 19.
+Il faut passer par l'orchestrateur a chaque fois pour valider les pre-requis et la progression.

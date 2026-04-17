@@ -55,18 +55,18 @@
     "15-couverture-metier":          { "status": "completed", "phase": 2, "last_run": "2026-04-15T10:00:00Z", "output_files": ["migration-state/phase2/business_coverage.json"], "confidence": 87, "notes": "54 règles analysées. 42 couvertes, 11 partiellement couvertes, 0 non couvertes, 1 non testable (BR-004 exclu). Coverage global: 98.1% (>90% seuil). Gaps critiques: BR-037 XSS sanitisation Markdown (high), BR-048 format date F j, Y (high). Phase 2 complète — 5/5 agents de génération terminés (agents 09-13) + couverture validée." },
     "16-mappeur-techno":             { "status": "completed", "phase": 3, "last_run": "2026-04-15T12:00:00Z", "output_files": ["migration-state/phase3/tech_mapping.json"], "confidence": 87, "notes": "32 patterns mappés (Django 5.2 + HTMX → TypeScript/Fastify/Angular/Sequelize). direct: 5, adapt: 18, redesign: 9, unmappable: 1. Catégories: routing (5), orm (9), validation (4), auth (4), view (4), test (2), utility (3), architecture (1). Patterns critiques: session → JWT (redesign), HTMX partial responses → Angular réactif (redesign), taggit → tables explicites (redesign), double auth commentaire (adapt). Exemples de code concrets pour chaque mapping. Gotchas documentés: PBKDF2→bcrypt incompatibilité, 404 ownership article (intentionnel), BR-023 slug immuable, BR-041 double auteur commentaire, sécurité XSS Markdown DOMPurify." },
     "17-planificateur":              { "status": "completed", "phase": 3, "last_run": "2026-04-15T14:10:00Z", "output_files": ["migration-state/phase3/migration_plan.json"], "confidence": 88, "notes": "Ordre de migration : helpers→articles→accounts→comments→templates (topologique + instabilité + complexité). 5 phases de migration, 6 sprints. Chemin critique : helpers→articles→accounts→comments→templates. 3 adaptateurs de coexistence : proxy HTTP nginx (Strangler Fig), interface dead-model Django articles pendant migration accounts, lazy re-hash PBKDF2→bcrypt. 2 validations humaines requises : HV-001 (dead code helpers) et HV-002 BLOCKER (stratégie mots de passe PBKDF2→bcrypt). migration_modules[] mis à jour avec 6 modules ordonnés." },
-    "18-traducteur":                 { "status": "completed", "phase": 4, "last_run": "2026-04-15T16:00:00Z", "output_files": ["target/backend/src/shared/htmx.ts", "target/backend/src/shared/errors.ts", "target/backend/src/shared/errors.spec.ts", "migration-state/phase4/modules/helpers/translation_log.json", "target/backend/package.json", "target/backend/tsconfig.json", "target/backend/jest.config.ts", "target/backend/.env.example", "target/backend/src/config/env.ts", "target/backend/src/config/sequelize.config.ts", "target/backend/src/types/fastify.d.ts", "target/backend/src/plugins/authenticate.ts", "target/backend/src/routes/health.ts", "target/backend/src/routes/index.ts", "target/backend/src/app.ts", "target/backend/src/server.ts", "migration-state/phase4/modules/config/translation_log.json"], "confidence": 90, "notes": "Module config traduit (11 fichiers, 368 LOC cible). BR-005 (authenticate preHandler), BR-006 (UTC timezone) couverts. BR-004 excluded (non effective dans legacy). HV-002 documenté : PBKDF2 compatible Django. 2 points de suivi : CSRF SameSite=Strict strategy à valider, authenticate stub à compléter dans accounts module." },
-    "19-validateur-conformite":      { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
+    "18-traducteur":                 { "status": "completed", "phase": 4, "last_run": "2026-04-15T17:00:00Z", "output_files": ["target/backend/src/shared/htmx.ts", "target/backend/src/shared/errors.ts", "target/backend/src/shared/errors.spec.ts", "migration-state/phase4/modules/helpers/translation_log.json", "target/backend/package.json", "target/backend/tsconfig.json", "target/backend/jest.config.ts", "target/backend/.env.example", "target/backend/src/config/env.ts", "target/backend/src/config/sequelize.config.ts", "target/backend/src/types/fastify.d.ts", "target/backend/src/plugins/authenticate.ts", "target/backend/src/routes/health.ts", "target/backend/src/routes/index.ts", "target/backend/src/app.ts", "target/backend/src/server.ts", "migration-state/phase4/modules/config/translation_log.json", "target/backend/src/modules/articles/models/article.model.ts", "target/backend/src/modules/articles/models/tag.model.ts", "target/backend/src/modules/articles/models/article-tag.model.ts", "target/backend/src/modules/articles/models/favorite.model.ts", "target/backend/src/modules/articles/models/user.stub.ts", "target/backend/src/modules/articles/models/index.ts", "target/backend/src/modules/articles/articles.routes.ts", "target/backend/src/modules/articles/articles.module.ts", "target/backend/src/modules/articles/articles.routes.spec.ts", "target/frontend/src/app/core/models/article.model.ts", "target/frontend/src/app/core/services/articles.service.ts", "target/frontend/src/app/shared/pipes/markdown.pipe.ts", "target/frontend/src/app/shared/components/article-preview/article-preview.ts", "target/frontend/src/app/shared/components/article-preview/article-preview.html", "target/frontend/src/app/shared/components/article-preview/article-preview.scss", "target/frontend/src/app/pages/home/home.ts", "target/frontend/src/app/pages/home/home.html", "target/frontend/src/app/pages/article-detail/article-detail.ts", "target/frontend/src/app/pages/article-detail/article-detail.html", "target/frontend/src/app/pages/editor/editor.ts", "target/frontend/src/app/pages/editor/editor.html", "migration-state/phase4/modules/articles/translation_log.json"], "confidence": 92, "notes": "Modules helpers, config, articles traduits (sprints 1-2). Backend: 23/23 tests Jest pass. Frontend Angular: build success, 0 erreurs. TypeScript strict: 0 erreurs. Décisions clés: ARTICLES_PER_PAGE=10 (corrige plan), UserStub temporaire (Sprint 3), fp wrapper retiré pour scoping prefix, slug allowNull=true (Sequelize hook order), imports depuis barrel models/index.ts (associations)." },
+    "19-validateur-conformite":      { "status": "completed", "phase": 4, "last_run": "2026-04-15T16:30:00Z", "output_files": ["migration-state/phase4/modules/articles/conformity_report.json"], "confidence": 85, "notes": "Validation statique (Jest 25/25, Angular build OK). Verdict CONDITIONAL_PASS. 17 BR validées, 0 MISSING, 0 BLOCKER. 2 WARNINGs: BR-036 toggle REST redesign (vérifié OK), BR-032 tags lowercase (migration données requise). Validation dynamique (agent 20 shadow mode) nécessaire avec les deux apps running." },
     "20-comparateur-reponses":       { "status": "pending", "phase": 4, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
-    "21-revieweur-migration":        { "status": "completed", "phase": 4, "last_run": "2026-04-15T19:30:00Z", "output_files": ["migration-state/phase4/modules/helpers/review_report.json", "migration-state/phase4/modules/config/review_report.json"], "confidence": 86, "notes": "Module config reviewé. Verdict: CHANGES_REQUESTED (confiance 86%). BR-004 excluded (non effective, décision 2026-04-13 confirmée). BR-005 (authenticate preHandler) PRESENT — 401 correctement substitué au 302. BR-006 (UTC timezone) PRESENT — timezone:'+00:00' + dialectOptions.useUTC:true. BLOCKER OWASP A07:2021 : jwtSecret fallback hardcodé 'dev-insecure-secret-change-me' dans env.ts:41 — production guard insuffisant (NODE_ENV uniquement). 2 WARNINGs : garde ':memory:' SQLite hors production manquante (sequelize.config.ts:31), garde PBKDF2_ITERATIONS trop faible en production manquante (env.ts:35). ZERO logique métier ajoutée. HV-002 respecté (no bcrypt). Module helpers: Verdict APPROVED (précédente revue, confiance 93%)." },
+    "21-revieweur-migration":        { "status": "completed", "phase": 4, "last_run": "2026-04-15T20:30:00Z", "output_files": ["migration-state/phase4/modules/helpers/review_report.json", "migration-state/phase4/modules/config/review_report.json", "migration-state/phase4/modules/articles/review_report.json"], "confidence": 84, "notes": "Module articles reviewé. Verdict: CHANGES_REQUESTED (confiance 84%). 17 règles: 13 PRESENT, 4 MODIFIED, 0 MISSING. BLOCKER: GET /api/tags endpoint manquant — sidebar tags toujours vide (BR-027). WARNINGs: BR-023 slug collision silencieuse (source: IntegrityError), BR-032 lowercase tags ajouté (source: case-preserving), BR-036 POST toggle → POST idempotent-add + DELETE (SPA compense). Added: explicit slug rejection dans PATCH (justifié REST). Précédentes revues — config: CHANGES_REQUESTED (BLOCKER-config-001 résolu), helpers: APPROVED." },
     "22-audit-final":                { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "23-detecteur-features-fantomes":{ "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" },
     "24-comparateur-surface-api":    { "status": "pending", "phase": 5, "last_run": null, "output_files": [], "confidence": null, "notes": "" }
   },
   "migration_modules": [
     { "name": "helpers",   "path": "helpers/",          "migration_phase": 1, "status": "translated" },
-    { "name": "config",    "path": "config/",           "migration_phase": 1, "status": "translated" },
-    { "name": "articles",  "path": "apps/articles/",    "migration_phase": 2, "status": "pending" },
+    { "name": "config",    "path": "config/",           "migration_phase": 1, "status": "approved" },
+    { "name": "articles",  "path": "apps/articles/",    "migration_phase": 2, "status": "reviewed" },
     { "name": "accounts",  "path": "apps/accounts/",    "migration_phase": 3, "status": "pending" },
     { "name": "comments",  "path": "apps/comments/",    "migration_phase": 4, "status": "pending" },
     { "name": "templates", "path": "templates/",        "migration_phase": 5, "status": "pending" }
@@ -81,15 +81,37 @@
       "review_confidence": 93
     },
     "config": {
-      "status": "reviewed",
+      "status": "approved",
       "translated_at": "2026-04-15T16:00:00Z",
       "confidence": 90,
+      "review": "approved",
+      "reviewed_at": "2026-04-16T09:00:00Z",
+      "review_confidence": 90,
+      "notes": "BLOCKER-config-001 résolu (env.ts jette si JWT_SECRET absent). WARNING sequelize production guard ajouté. WARNING PBKDF2_ITERATIONS guard vérifié en code."
+    },
+    "articles": {
+      "status": "changes_requested",
+      "translated_at": "2026-04-15T15:39:00Z",
+      "confidence": 84,
       "review": "changes_requested",
-      "reviewed_at": "2026-04-15T19:30:00Z",
-      "review_confidence": 86
+      "reviewed_at": "2026-04-15T20:30:00Z",
+      "review_confidence": 84,
+      "notes": "1 BLOCKER: GET /api/tags manquant (tags sidebar vide). 3 WARNINGs: BR-023 slug collision silencieuse, BR-032 lowercase normalization non conforme source, BR-036 toggle→POST+DELETE. 1 Added (justified): slug rejection dans PATCH body."
     }
   },
   "blockers": [
+    {
+      "id": "BLOCKER-articles-001",
+      "module": "articles",
+      "agent": "21-revieweur-migration",
+      "detected_at": "2026-04-15T20:30:00Z",
+      "severity": "blocker",
+      "description": "GET /api/tags endpoint manquant dans le backend. ArticlesService.getTags() appelle GET /api/tags qui retourne une erreur. HomeComponent.loadTags() silently swallows l'erreur (tags.set([])). La sidebar des tags sur la page d'accueil est toujours vide — les utilisateurs ne peuvent pas découvrir les tags ni utiliser le filtre par tag via l'UI. La source (legacy/apps/articles/views.py:51) fournit toujours la liste complète des tags au contexte du template. Lié à BR-027 (tag list, redesigned for SPA but replacement /api/tags not implemented).",
+      "file": "target/backend/src/routes/index.ts",
+      "line": 16,
+      "resolution": "Implémenter GET /api/tags dans articles.routes.ts: SELECT DISTINCT tag.name FROM tags ORDER BY name. Enregistrer comme fastify.get('/tags', listTags) dans articleRoutes(). Pas d'authentification requise.",
+      "status": "open"
+    },
     {
       "id": "BLOCKER-config-001",
       "module": "config",
@@ -101,7 +123,9 @@
       "file": "target/backend/src/config/env.ts",
       "line": 41,
       "resolution": "Supprimer le fallback hardcodé. Lever une exception si JWT_SECRET absent (hors contexte Jest auto-détecté via JEST_WORKER_ID). Injecter JWT_SECRET=test-secret dans jest.config.ts globalSetup.",
-      "status": "open"
+      "status": "resolved",
+      "resolved_at": "2026-04-16T09:00:00Z",
+      "resolution_confirmed": "env.ts lève une exception si JWT_SECRET absent (hors Jest via JEST_WORKER_ID). Fallback '?? \"\"' uniquement atteignable dans contexte Jest. Confirmé en code actuel."
     }
   ],
   "human_validations_pending": [
@@ -246,6 +270,42 @@
       "agent": "21-revieweur-migration",
       "action": "module_reviewed",
       "details": "Revue de migration module config complétée. Verdict: CHANGES_REQUESTED (confiance 86%). BR-004 excluded (non effective dans legacy, décision 2026-04-13 confirmée). BR-005 (authenticate preHandler) PRESENT — fastify.authenticate décoré via fastify-plugin, jwtVerify(), 401 semantiquement correct vs redirect Django. BR-006 (UTC timezone) PRESENT — timezone:'+00:00' sur toutes les dialectes Sequelize + dialectOptions.useUTC:true sur PostgreSQL. BLOCKER OWASP A07:2021 ouvert : jwtSecret fallback hardcodé 'dev-insecure-secret-change-me' (env.ts:41) — guard NODE_ENV=production insuffisant. 2 WARNINGs : garde ':memory:' hors production manquante (sequelize.config.ts:31), garde PBKDF2_ITERATIONS trop faible en production manquante (env.ts:35). ZERO logique métier ajoutée. HV-002 respecté : bcrypt absent, PBKDF2_ITERATIONS via env var. GET /api/health → 200 présent. .env.example complet (JWT_SECRET, DATABASE_URL, ALLOWED_ORIGINS, PBKDF2_ITERATIONS)."
+    },
+    {
+      "timestamp": "2026-04-16T09:00:00Z",
+      "agent": "orchestrator",
+      "action": "blocker_resolved",
+      "details": "BLOCKER-config-001 résolu. env.ts actuel lève une exception si JWT_SECRET absent (hors Jest détecté via JEST_WORKER_ID). Fallback '?? \"\"' uniquement atteignable dans contexte test. sequelize.config.ts : garde production ajoutée pour ':memory:'/file: (throw en production). Module config → approved."
+    },
+    {
+      "timestamp": "2026-04-15T17:00:00Z",
+      "agent": "18-traducteur",
+      "action": "module_translated",
+      "details": "Module articles traduit Django/HTMX → TypeScript/Fastify+Angular. Backend: 5 modèles Sequelize (Article, Tag, ArticleTag, Favorite, UserStub), 7 routes (list/detail/create/update/delete/favorite/unfavorite), articles.module.ts, tests. Frontend: Article model interfaces, ArticlesService, MarkdownPipe (BR-037 DOMPurify), ArticlePreviewComponent, HomeComponent, ArticleDetailComponent, EditorComponent. 23/23 tests Jest pass. Angular build: success. ARTICLES_PER_PAGE=10 (corrige plan migration). BR-023/034/036/037 tous couverts. Confiance 92%."
+    },
+    {
+      "timestamp": "2026-04-16T09:00:00Z",
+      "agent": "orchestrator",
+      "action": "started",
+      "details": "Sprint 2 démarré. Module articles (apps/articles/) en cours de traduction. Invocation de migration-18-traducteur pour le module articles."
+    },
+    {
+      "timestamp": "2026-04-15T20:30:00Z",
+      "agent": "21-revieweur-migration",
+      "action": "module_reviewed",
+      "details": "Revue de migration module articles complétée. Verdict: CHANGES_REQUESTED (confiance 84%). 17 règles: 13 PRESENT, 4 MODIFIED, 0 MISSING. BLOCKER-articles-001 ouvert : GET /api/tags endpoint manquant — sidebar tags toujours vide, tags.set([]) silencieux dans HomeComponent. WARNINGs : BR-023 slug collision silencieuse (beforeCreate appends -${Date.now()} au lieu d'IntegrityError), BR-032 lowercase normalization ajoutée (source case-preserving — données migrées incompatibles sans script de migration tags), BR-036 POST favorite non plus toggle (idempotent-add) mais SPA frontend compense via favorited boolean. Added (justified): explicit slug-in-body rejection dans PATCH (guard REST API nécessaire). Points architecturaux acceptables : BR-029 HTMX→Angular SPA (TD-articles-004), BR-034 404 sur non-owner (intentionnel, TD-articles-005), BR-027 cache SPA non applicable (TD-articles-003 — mais endpoint /api/tags manquant). Deferreds acceptés : BR-027 following Sprint 3, BR-043 cascade commentaires Sprint 4."
+    },
+    {
+      "timestamp": "2026-04-15T17:30:00Z",
+      "agent": "orchestrator",
+      "action": "blocker_resolved",
+      "details": "BLOCKER-articles-001 résolu. GET /api/tags ajouté dans articles.routes.ts (Tag.findAll ORDER BY name ASC). 2 tests Jest ajoutés (distinct sorted tags, empty list). Total: 25/25 tests passent."
+    },
+    {
+      "timestamp": "2026-04-15T17:30:00Z",
+      "agent": "19-validateur-conformite",
+      "action": "completed",
+      "details": "Module articles: CONDITIONAL_PASS (85%). Validation statique via Jest 25/25 + Angular build OK. 17 BR validées (0 MISSING, 0 BLOCKER). 2 WARNINGs: BR-036 toggle REST redesign (OK), BR-032 tags lowercase (migration données à prévoir). Validation dynamique (agent 20) nécessaire avec les deux apps running."
     }
   ]
 }

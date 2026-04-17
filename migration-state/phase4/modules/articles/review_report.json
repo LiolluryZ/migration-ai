@@ -1,0 +1,190 @@
+{
+  "generated_at": "2026-04-15T20:30:00Z",
+  "agent": "21-revieweur-migration",
+  "module": "articles",
+  "confidence": 84,
+  "verdict": "changes_requested",
+
+  "summary": {
+    "rules_present": 13,
+    "rules_modified": 4,
+    "rules_missing": 0,
+    "added_functionality": 1,
+    "total_rules_for_module": 17
+  },
+
+  "rules_status": [
+    {
+      "rule_id": "BR-022",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/models.py", "line": 30 },
+      "target_location": { "file": "target/backend/src/modules/articles/models/article.model.ts", "line": 68 },
+      "notes": "title: STRING(150), allowNull:false, unique:true. summary/content: allowNull:false, defaultValue:''. Semantically equivalent to Django CharField(max_length=150, unique=True) + TextField(blank=True).",
+      "confidence": 95
+    },
+    {
+      "rule_id": "BR-023",
+      "status": "modified",
+      "source_location": { "file": "legacy/apps/articles/models.py", "line": 43 },
+      "target_location": { "file": "target/backend/src/modules/articles/models/article.model.ts", "line": 107 },
+      "notes": "Slug generated on CREATE only via beforeCreate hook ✓. HOWEVER: edge case changed. Source: two titles producing the same slug → IntegrityError (unique constraint). Target: silently appends `-${Date.now()}` to avoid collision. The article gets a different slug than expected with no error surfaced to the caller. This changes the edge case defined in BR-023: 'Titres différents produisant le même slug → IntegrityError car slug est unique'.",
+      "confidence": 80
+    },
+    {
+      "rule_id": "BR-024",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/models.py", "line": 35 },
+      "target_location": { "file": "target/backend/src/modules/articles/models/article.model.ts", "line": 112 },
+      "notes": "Sequelize manages createdAt and updatedAt automatically. createdAt is indexed via { fields: ['createdAt'] }. Field names changed from Django created/updated to Sequelize convention createdAt/updatedAt — functionally equivalent.",
+      "confidence": 98
+    },
+    {
+      "rule_id": "BR-025",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/models.py", "line": 13 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 31 },
+      "notes": "favoritesCount = favoriteRecords.length (loaded association). favorited = favoriteRecords.some(f => f.userId === currentUserId) OR false for null user. Semantically equivalent to Django COUNT + EXISTS annotations. Re-queried after toggle (BR-036).",
+      "confidence": 95
+    },
+    {
+      "rule_id": "BR-026",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 18 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 100 },
+      "notes": "Three feed tabs implemented: global (default), following (deferred to Sprint 3 — returns empty set with 401 for unauthenticated instead of legacy 302 redirect, REST API convention), tag filter. Edge case: unauthenticated feed=following → 401 (equivalent to legacy redirect to /login). Tag filter implementation functional. Following data deferred is documented in translation_log.",
+      "confidence": 85
+    },
+    {
+      "rule_id": "BR-027",
+      "status": "modified",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 51 },
+      "target_location": { "file": "target/frontend/src/app/pages/home/home.ts", "line": 89 },
+      "notes": "BLOCKER: 5-minute tag cache is not applicable to SPA (documented in TD-articles-003). The replacement is to fetch tags via GET /api/tags on each page load. However, the /api/tags backend endpoint does NOT exist (no handler in articles.routes.ts or routes/index.ts). The HomeComponent.loadTags() calls articlesService.getTags() which returns HTTP 404/connection error, and the error handler silently sets tags=[]. Result: the tags sidebar is always empty. Users cannot discover or click tags. Tag-based filtering is completely non-functional from the UI. Note: the translation_log erroneously attributes BR-027 deferral to 'following/followers relationship' — that is actually BR-026. BR-027 (tag cache) was redesigned but the replacement (/api/tags endpoint) was never implemented.",
+      "confidence": 70
+    },
+    {
+      "rule_id": "BR-028",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 14 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 12 },
+      "notes": "ARTICLES_PER_PAGE = 10. order: [['createdAt', 'DESC']]. offset = (page-1) * ARTICLES_PER_PAGE. Full match. TD-articles-001 correctly notes this fixes migration plan which incorrectly stated 20.",
+      "confidence": 98
+    },
+    {
+      "rule_id": "BR-029",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 60 },
+      "target_location": { "file": "target/frontend/src/app/pages/home/home.ts", "line": 69 },
+      "notes": "HTMX partial responses not applicable to REST+SPA architecture. Angular signals handle reactive feed switching natively. Documented in TD-articles-004. HomeComponent.setTab() and setTagFilter() reload articles via HTTP calls without full page reload — preserves the user experience of instant tab switching.",
+      "confidence": 90
+    },
+    {
+      "rule_id": "BR-030",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 71 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 188 },
+      "notes": "Unknown slug → reply.code(404).send({ errors: { slug: ['Article not found'] } }) ✓. HTML detail_404.html with slug context → JSON 404 REST response (architectural redesign). Comment ordering by -created is deferred to Sprint 4 (comments module). ArticleDetailComponent does not currently display comments.",
+      "confidence": 92
+    },
+    {
+      "rule_id": "BR-031",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 93 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 240 },
+      "notes": "Field mapping preserved throughout: form.description → article.summary → API response.description; form.body → article.content → API response.body. Mapping applied consistently in createArticle, updateArticle, and formatArticle.",
+      "confidence": 98
+    },
+    {
+      "rule_id": "BR-032",
+      "status": "modified",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 98 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 415 },
+      "notes": "Clear + re-add semantics preserved (ArticleTag.destroy then findOrCreate) ✓. Empty tags string → all tags cleared ✓. HOWEVER: target forces lowercase normalization: `raw.trim().toLowerCase()`. Source: `tag_name.strip()` without lowercasing. Django's default TaggableManager preserves original case. This means 'Python' stored in legacy becomes 'python' in target. Tags are also queried with toLowerCase() in listArticles. This is a data behavior change that could affect tag filtering compatibility with existing data. The comment '// BR-026: lowercase normalisation' is an incorrect rule reference — BR-026 is about feed tabs, not tag casing.",
+      "confidence": 85
+    },
+    {
+      "rule_id": "BR-033",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 108 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 462 },
+      "notes": "POST /api/articles protected by fastify.authenticate preHandler ✓. authorId = currentUser.id ✓. Returns 201 with article JSON on success (equivalent to redirect to article detail).",
+      "confidence": 98
+    },
+    {
+      "rule_id": "BR-034",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 118 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 298 },
+      "notes": "Article.findOne({ where: { slug, authorId: currentUser.id } }) → null → 404. Exact semantic match with get_object_or_404(Article, slug=slug, author=request.user). Non-owner gets 404, not 403 (security by obscurity, intentional per TD-articles-005).",
+      "confidence": 98
+    },
+    {
+      "rule_id": "BR-035",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 131 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 353 },
+      "notes": "DELETE /api/articles/:slug requires authenticate preHandler ✓. Non-owner → 404 ✓. article.destroy() ✓. Redirect to home → HTTP 204 No Content (REST convention). Cascade for comments pending Sprint 4 (noted in code comment).",
+      "confidence": 92
+    },
+    {
+      "rule_id": "BR-036",
+      "status": "modified",
+      "source_location": { "file": "legacy/apps/articles/views.py", "line": 138 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 374 },
+      "notes": "Source: POST is a true toggle — if favorited → remove, else → add. A double POST switches state twice. Target: POST /favorite = idempotent add (if not exists, create), DELETE /favorite = remove. A double POST in the target is a no-op on the second call. The SPA frontend controls which HTTP method to use based on the `favorited` boolean in the response, so the user-visible behavior is equivalent. However, the API contract for POST has changed semantics: it is no longer a toggle. This could affect consumers relying on POST-toggle behavior.",
+      "confidence": 80
+    },
+    {
+      "rule_id": "BR-037",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/templatetags/markdown_filter.py", "line": 9 },
+      "target_location": { "file": "target/frontend/src/app/shared/pipes/markdown.pipe.ts", "line": 33 },
+      "notes": "marked.parse(value) (equivalent to md.markdown with 'extra' features) then DOMPurify.sanitize(rawHtml, { ALLOWED_TAGS, ALLOWED_ATTR }) (equivalent to nh3.clean()) then bypassSecurityTrustHtml (equivalent to mark_safe). DOMPurify is an industry-standard XSS sanitizer. The ALLOWED_TAGS list is explicit and does not include script/iframe/object/embed. XSS prevention semantically equivalent.",
+      "confidence": 95
+    },
+    {
+      "rule_id": "BR-038",
+      "status": "present",
+      "source_location": { "file": "legacy/apps/articles/models.py", "line": 38 },
+      "target_location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 415 },
+      "notes": "Tags are optional. syncTags() called with empty array clears all tags. tagList defaults to [] in createArticle. If tagList is undefined in updateArticle, tags are not modified (preserves existing). Semantically equivalent to TaggableManager(blank=True).",
+      "confidence": 98
+    }
+  ],
+
+  "added_functionality": [
+    {
+      "location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 292 },
+      "description": "PATCH /api/articles/:slug explicitly rejects requests that include a 'slug' field in the body with HTTP 422. The Django source has no equivalent — the form-based edit never exposes a slug field to the user. In a REST API, this guard is necessary to prevent clients from attempting to change the slug via the request body.",
+      "severity": "warning",
+      "recommendation": "Keep this validation — it is a necessary REST API safety guard. Document it explicitly in the API contract as a known addition to prevent confusion during integration testing."
+    }
+  ],
+
+  "changes_requested": [
+    {
+      "location": { "file": "target/backend/src/routes/index.ts", "line": 16 },
+      "issue": "BLOCKER — GET /api/tags endpoint is missing. ArticlesService.getTags() in the frontend calls GET /api/tags which returns 404 or a connection error. HomeComponent.loadTags() silently swallows the error (sets tags=[]). The tags sidebar on the home page is always empty. Users cannot discover tags or use the tag filter via the UI. The source (legacy/apps/articles/views.py:51) always provides all tags to the home template context.",
+      "suggestion": "Implement GET /api/tags in articles.routes.ts: SELECT DISTINCT tag.name FROM tags JOIN article_tags ON ... ORDER BY name. Register the route in articles.routes.ts as fastify.get('/tags', listTags) and expose it in articleRoutes(). This endpoint does not need authentication.",
+      "linked_rule": "BR-027"
+    },
+    {
+      "location": { "file": "target/backend/src/modules/articles/models/article.model.ts", "line": 112 },
+      "issue": "BR-023 edge case changed: source behavior is IntegrityError when two different titles produce the same slug. Target silently appends `-${Date.now()}` and creates the article with a different slug. This means the caller receives a 201 with a slug that differs from slugify(title), with no indication that a disambiguation occurred. Edge case from BR-023: 'Titres différents produisant le même slug → IntegrityError car slug est unique'.",
+      "suggestion": "Remove the timestamp disambiguation. Let the UniqueConstraintError propagate to the catch block in createArticle and surface it as HTTP 422 { errors: { slug: ['already in use'] } }. This matches the source behavior and makes the collision visible to the caller. If silent disambiguation is intentionally desired, it needs explicit human approval and documentation.",
+      "linked_rule": "BR-023"
+    },
+    {
+      "location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 415 },
+      "issue": "BR-032 behavior modified: target normalizes all tag names to lowercase via .toLowerCase() before storage. Source: article.tags.add(tag_name.strip()) preserves original case. Django TaggableManager (default) is case-preserving. A tag 'Python' in the legacy becomes 'python' in the target. This also means the tag filter query uses .toLowerCase() on the incoming tag — tags stored with original case in the legacy will not be found in the target system if not migrated.",
+      "suggestion": "Either (a) confirm that lowercase normalization is intentionally part of the migration scope for tags and document it as a data migration decision, or (b) remove .toLowerCase() from syncTags() to preserve original case. If (a), a data migration script must also lowercase all existing tags in the database during cutover. Also fix the incorrect rule reference in the comment from '// BR-026' to '// BR-032'.",
+      "linked_rule": "BR-032"
+    },
+    {
+      "location": { "file": "target/backend/src/modules/articles/articles.routes.ts", "line": 374 },
+      "issue": "BR-036 toggle semantics changed. Source: POST /favorite always toggles (add if not favorited, remove if favorited). Target: POST /favorite = idempotent add (no-op if already favorited); DELETE /favorite = remove. Two consecutive POSTs in the legacy cycle favorite state off-then-on; in the target, the second POST is a no-op. The API contract for POST has changed from toggle to idempotent-add. The SPA frontend mitigates this by sending POST vs DELETE based on current state, but external consumers or curl-based tests relying on toggle semantics will observe different behavior.",
+      "suggestion": "Acceptable if documented explicitly in the API contract. Add a comment in articles.routes.ts and articles.service.ts clarifying that the API follows RealWorld REST semantics (POST=add, DELETE=remove) rather than the legacy toggle. The SPA correctly handles this via the `favorited` boolean. Mark this as an intentional architectural decision in translation_log.",
+      "linked_rule": "BR-036"
+    }
+  ]
+}
