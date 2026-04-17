@@ -1,2 +1,85 @@
-<!-- Stub — full implementation in future sprint -->
-<p>Settings — coming Sprint 3</p>
+<!-- Translated from: templates/accounts/settings.html -->
+<div class="settings-page">
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-6 offset-md-3 col-xs-12">
+        <h1 class="text-xs-center">Your Settings</h1>
+
+        @if (getErrors('body').length > 0) {
+          <ul class="error-messages">
+            @for (err of getErrors('body'); track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        }
+
+        <form (ngSubmit)="submit()" novalidate>
+          <fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control"
+                type="url"
+                placeholder="URL of profile picture"
+                [(ngModel)]="image"
+                name="image"
+              />
+            </fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="text"
+                placeholder="Username"
+                [(ngModel)]="username"
+                name="username"
+              />
+              @for (err of getErrors('username'); track err) {
+                <p class="error-messages">{{ err }}</p>
+              }
+            </fieldset>
+            <fieldset class="form-group">
+              <textarea
+                class="form-control form-control-lg"
+                rows="8"
+                placeholder="Short bio about you"
+                [(ngModel)]="bio"
+                name="bio"
+              ></textarea>
+            </fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="email"
+                placeholder="Email"
+                [(ngModel)]="email"
+                name="email"
+              />
+              @for (err of getErrors('email'); track err) {
+                <p class="error-messages">{{ err }}</p>
+              }
+            </fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="password"
+                placeholder="New Password"
+                [(ngModel)]="password"
+                name="password"
+              />
+            </fieldset>
+            <button
+              class="btn btn-lg btn-primary pull-xs-right"
+              type="submit"
+              [disabled]="loading()"
+            >
+              Update Settings
+            </button>
+          </fieldset>
+        </form>
+        <hr />
+        <button type="button" class="btn btn-outline-danger" (click)="logout()">
+          Or click here to logout.
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

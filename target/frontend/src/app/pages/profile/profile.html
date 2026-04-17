@@ -1,2 +1,99 @@
-<!-- Stub — full implementation in future sprint -->
-<p>Profile — coming Sprint 3</p>
+<!-- Translated from: templates/accounts/profile.html -->
+@if (profileNotFound()) {
+  <div class="profile-page">
+    <div class="container page">
+      <h4>Profile not found: <strong>{{ username }}</strong></h4>
+    </div>
+  </div>
+} @else {
+  <div class="profile-page">
+    <div class="user-info">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12 col-md-10 offset-md-1">
+            @if (profile(); as p) {
+              <img
+                [src]="p.image ?? 'https://api.realworld.io/images/smiley-cyrus.jpg'"
+                class="user-img"
+                [alt]="p.username"
+              />
+              <h4>{{ p.username }}</h4>
+              <p>{{ p.bio }}</p>
+
+              @if (isSelf()) {
+                <a routerLink="/settings" class="btn btn-sm btn-outline-secondary action-btn">
+                  <i class="ion-gear-a"></i>&nbsp;Edit Profile Settings
+                </a>
+              } @else {
+                <button
+                  class="btn btn-sm action-btn"
+                  [class.btn-outline-secondary]="!p.following"
+                  [class.btn-secondary]="p.following"
+                  (click)="toggleFollow()"
+                  [disabled]="followLoading()"
+                >
+                  <i class="ion-plus-round"></i>
+                  &nbsp;{{ p.following ? 'Unfollow' : 'Follow' }} {{ p.username }}
+                </button>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-md-10 offset-md-1">
+          <div class="articles-toggle">
+            <ul class="nav nav-pills outline-active">
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  [class.active]="tab === 'my'"
+                  (click)="setTab('my')"
+                >
+                  My Articles
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  [class.active]="tab === 'favorites'"
+                  (click)="setTab('favorites')"
+                >
+                  Favorited Articles
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          @if (loading()) {
+            <div class="article-preview"><p>Loading articles...</p></div>
+          } @else if (articles().length === 0) {
+            <div class="article-preview"><p>No articles are here... yet.</p></div>
+          } @else {
+            @for (article of articles(); track article.slug) {
+              <app-article-preview
+                [article]="article"
+                (favoriteChanged)="onFavoriteChanged($event)"
+              />
+            }
+          }
+
+          @if (totalPages.length > 1) {
+            <nav>
+              <ul class="pagination">
+                @for (p of totalPages; track p) {
+                  <li class="page-item" [class.active]="p === page">
+                    <button class="page-link" (click)="setPage(p)">{{ p }}</button>
+                  </li>
+                }
+              </ul>
+            </nav>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

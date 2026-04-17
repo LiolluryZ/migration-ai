@@ -38,6 +38,7 @@ export async function buildApp() {
         ? true
         : env.allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     // SameSite=Strict is set on Set-Cookie responses in the accounts module.
   });
 

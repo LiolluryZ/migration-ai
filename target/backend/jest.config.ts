@@ -13,6 +13,9 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**/*.ts', '!src/server.ts'],
+  // Run test suites sequentially — Sequelize uses a singleton connection (SQLite
+  // :memory:) and parallel workers would share the same in-process DB state.
+  maxWorkers: 1,
 };
 
 export default config;

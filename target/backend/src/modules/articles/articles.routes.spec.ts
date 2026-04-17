@@ -11,7 +11,17 @@ import { ARTICLES_PER_PAGE } from './articles.routes';
 // ─── Test helpers ─────────────────────────────────────────────────────────
 
 async function createUser(username: string, id?: number): Promise<UserStub> {
-  return UserStub.create({ ...(id ? { id } : {}), username, bio: null, image: null });
+  // Sprint 3: UserStub is now the real User model (accounts_user table).
+  // email and password are required fields — provide test-safe values.
+  return UserStub.create({
+    ...(id ? { id } : {}),
+    username,
+    bio: '',
+    image: null,
+    email: `${username}@test.example.com`,
+    // Dummy PBKDF2 hash — valid format so column NOT NULL constraint is satisfied.
+    password: 'pbkdf2_sha256$1$testsalt$dGVzdGhhc2g=',
+  });
 }
 
 async function createArticleForUser(
