@@ -13,7 +13,7 @@
           <div class="col-xs-12 col-md-10 offset-md-1">
             @if (profile(); as p) {
               <img
-                [src]="p.image ?? 'https://api.realworld.io/images/smiley-cyrus.jpg'"
+                [src]="p.image ?? 'assets/images/default-avatar.svg'"
                 class="user-img"
                 [alt]="p.username"
               />
@@ -24,7 +24,7 @@
                 <a routerLink="/settings" class="btn btn-sm btn-outline-secondary action-btn">
                   <i class="ion-gear-a"></i>&nbsp;Edit Profile Settings
                 </a>
-              } @else {
+              } @else if (auth.isAuthenticated()) {
                 <button
                   class="btn btn-sm action-btn"
                   [class.btn-outline-secondary]="!p.following"

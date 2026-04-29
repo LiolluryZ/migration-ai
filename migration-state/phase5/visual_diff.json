@@ -1,0 +1,639 @@
+{
+  "generated_at": "2026-04-29T10:30:00.000Z",
+  "agent": "14-comparateur-visuel",
+  "confidence": 88,
+  "mode": "global",
+  "module": null,
+  "method": "static-structural",
+  "verdict": "WARN",
+  "note": "Comparaison statique (DOM/template analysis). Playwright non disponible. Angular templates comparés aux Django templates + partials. 51 screenshots baseline référencés, aucun nouveau screenshot capturé.",
+  "summary": {
+    "total_screens_compared": 17,
+    "identical": 0,
+    "acceptable": 7,
+    "warnings": 8,
+    "regressions": 2,
+    "overall_similarity_score": 0.83
+  },
+  "per_screen": [
+    {
+      "screen_id": "SCR-001",
+      "screen_slug": "home__default__anonymous__desktop",
+      "name": "Home - Global Feed (anonymous)",
+      "route": "/",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/home__default__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "similarity_estimate": 0.84,
+      "differences": [
+        {
+          "zone": "header .navbar-brand",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Logo Angular = texte 'conduit' (.navbar-brand text). Legacy = <img src='conduit-logo.svg' height=1.5rem>. Rendu visuellement proche grâce à la police Lora/logo-font.",
+          "likely_cause": "Décision de migration : logo SVG remplacé par texte stylé (RealWorld SPA convention)",
+          "linked_rules": []
+        },
+        {
+          "zone": "footer .container a",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Footer logo identique au header : texte 'conduit' vs SVG.",
+          "likely_cause": "Même décision de migration",
+          "linked_rules": []
+        },
+        {
+          "zone": ".home-page .banner h1",
+          "category": "style",
+          "severity": "warning",
+          "description": "Bannière anonymous : Angular utilise <h1 class='logo-font'>conduit</h1>, legacy utilise <h1><img src='conduit-logo.svg' height=3.5rem></h1>. Rendu visuellement différent (texte fonté vs image SVG plus grande).",
+          "likely_cause": "Migration SSR→SPA, assets non copiés / convention RealWorld",
+          "linked_rules": []
+        },
+        {
+          "zone": ".feed-toggle .nav-item",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Onglets feed : <button class='nav-link'> (Angular) au lieu de <a class='nav-link'> (Django+HTMX). Rendu CSS identique avec nav-link, comportement clic différent (JS event vs navigation).",
+          "likely_cause": "Paradigme SPA : navigation in-page vs liens HTMX",
+          "linked_rules": ["BR-026"]
+        },
+        {
+          "zone": ".article-preview .article-meta button (favorite)",
+          "category": "content",
+          "severity": "warning",
+          "description": "Bouton favori dans les cartes article : Angular affiche seulement icône cœur + compteur (ex: ♥ 5). Legacy affiche texte 'Favorite (5)' ou 'Unfavorite (5)'. Perte d'information textuelle.",
+          "likely_cause": "Choix de design du composant article-preview Angular (icon-only pour compacité)",
+          "linked_rules": ["BR-036"]
+        }
+      ],
+      "semantic_analysis": "Structure globale conforme (home-page, banner pour anonymous, col-md-9/col-md-3, sidebar tags, pagination). Fonctionnalités métier présentes. Divergences visuelles mineures sur logo et boutons favouris."
+    },
+    {
+      "screen_id": "SCR-002",
+      "screen_slug": "home_tag__tag_filter__anonymous__desktop",
+      "name": "Home - Tag 'intelligence-artificielle'",
+      "route": "/tag/intelligence-artificielle",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.83,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/home_tag__tag_filter__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer/banner",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Mêmes différences logo que SCR-001.",
+          "likely_cause": "Idem SCR-001",
+          "linked_rules": []
+        },
+        {
+          "zone": ".feed-toggle .nav-item (tag tab)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Onglet tag actif : Angular utilise <button class='nav-link active'>, legacy utilise <a>. CSS identique.",
+          "likely_cause": "Paradigme SPA",
+          "linked_rules": ["BR-026"]
+        },
+        {
+          "zone": ".article-preview favorite button",
+          "category": "content",
+          "severity": "warning",
+          "description": "Idem SCR-001 : bouton favori icon-only vs texte.",
+          "likely_cause": "Design composant article-preview",
+          "linked_rules": ["BR-036"]
+        }
+      ],
+      "semantic_analysis": "Filtrage par tag fonctionnel. Icône # devant le nom de tag dans l'onglet actif : présente dans Angular (ion-pound), absente dans le legacy. Structure conforme."
+    },
+    {
+      "screen_id": "SCR-003",
+      "screen_slug": "article_detail__default__anonymous__desktop",
+      "name": "Article Detail (anonymous)",
+      "route": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.80,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/article_detail__default__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": ".article-actions (after article body)",
+          "category": "missing",
+          "severity": "acceptable",
+          "description": "Legacy inclut une 2e section <div class='article-actions'> avec article-meta après le contenu de l'article. Pour les anonymes les boutons sont conditionnels (user.is_authenticated false) donc section visible mais vide. Angular n'a pas ce bloc. Impact visuel mineur (espace vide seulement).",
+          "likely_cause": "Non-traduction de la double inclusion de article_meta.html dans detail.html",
+          "linked_rules": []
+        },
+        {
+          "zone": ".comment-auth-prompt",
+          "category": "content",
+          "severity": "acceptable",
+          "description": "Auth prompt commentaires : Legacy 'Sign in or sign up' (lien unique vers register). Angular 'Sign in' (→/login) + 'sign up' (→/register) séparés. Contenu légèrement différent mais intentions identiques.",
+          "likely_cause": "Traduction explicite avec distinction login/register",
+          "linked_rules": ["BR-040"]
+        },
+        {
+          "zone": ".article-meta .date",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Format date : Angular utilise pipe date:'MMMM d, y' (ex: 'January 5, 2025'). Legacy utilise date:'F j, Y' (même format Django). Résultat identique.",
+          "likely_cause": "Différence de syntaxe filtre date (Angular vs Django), même output",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Page article bien structurée. Titre, auteur, body markdown, tags, commentaires tous présents. La double article-meta du legacy est absente mais non critique pour les anonymes. Fonctionnalités conformes."
+    },
+    {
+      "screen_id": "SCR-004",
+      "screen_slug": "article_detail__404__anonymous__desktop",
+      "name": "Article Detail - 404",
+      "route": "/article/this-article-does-not-exist-404",
+      "status": "regression",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.40,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/article_detail__404__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "full page layout",
+          "category": "layout",
+          "severity": "regression",
+          "description": "Legacy : div.article-page > div.banner > h1 'Article not found' + container.page > col-md-12 > ul.error-messages > li. Bannière stylée (fond sombre) avec titre dans le banner. Angular : div.container.page > h2 'Article not found' + p > a 'Go back to home'. Pas de .article-page wrapper, pas de bannière, heading level différent (h1→h2), message dans un paragraphe simple au lieu de ul.error-messages.",
+          "likely_cause": "Template 404 legacy (detail_404.html) non traduit fidèlement. Angular utilise un message inline dans le composant unique.",
+          "linked_rules": ["BR-030"]
+        },
+        {
+          "zone": ".banner",
+          "category": "missing",
+          "severity": "regression",
+          "description": "Bannière stylée absente dans Angular 404. Legacy affiche 'Article not found' dans un banner avec fond sombre (cohérent avec la page article normal). Angular affiche juste un texte plat.",
+          "likely_cause": "Le template Angular article-detail gère le 404 inline sans reproduire le wrapper .article-page complet.",
+          "linked_rules": ["BR-030"]
+        },
+        {
+          "zone": "ul.error-messages",
+          "category": "missing",
+          "severity": "warning",
+          "description": "Legacy utilise <ul class='error-messages'><li>Article 'slug' was not found.</li></ul>. Angular utilise <h2> + <p> sans styling d'erreur.",
+          "likely_cause": "Composant Angular génère un message minimal sans reproduire le pattern error-messages",
+          "linked_rules": ["BR-030"]
+        },
+        {
+          "zone": "navigation link",
+          "category": "added",
+          "severity": "acceptable",
+          "description": "Angular ajoute un lien 'Go back to home' absent dans le legacy. Amélioration UX.",
+          "likely_cause": "Ajout UX Angular (non présent dans legacy → ghost feature potentielle mineure)",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "REGRESSION SIGNIFICATIVE. La page 404 article Angular ne reproduit pas la structure visuelle de la page legacy. L'absence du wrapper .article-page et du banner change complètement l'apparence de la page (mise en page plate vs page stylée cohérente avec le reste du site). Doit être corrigé."
+    },
+    {
+      "screen_id": "SCR-005",
+      "screen_slug": "login__default__anonymous__desktop",
+      "name": "Login",
+      "route": "/login",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.97,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/login__default__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer logo",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Logo texte vs SVG (pattern global). CSS identique pour le reste.",
+          "likely_cause": "Global — idem SCR-001",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Structure quasi-identique. auth-page, container, col-md-6 offset-md-3, h1 'Sign in', lien register, champs email+password, bouton Submit. Comportement BR-001/BR-002 conservé."
+    },
+    {
+      "screen_id": "SCR-006",
+      "screen_slug": "login__error__anonymous__desktop",
+      "name": "Login - Credentials invalides",
+      "route": "/login",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.96,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/login__error__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer logo",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Messages d'erreur affichés dans ul.error-messages. Structure identique à login défaut + erreurs. BR-001 (credentials invalides) correctement traité."
+    },
+    {
+      "screen_id": "SCR-007",
+      "screen_slug": "register__default__anonymous__desktop",
+      "name": "Register - Formulaire d'inscription",
+      "route": "/register",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.96,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/register__default__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer logo",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Structure identique : auth-page, h1 'Sign up', 3 champs (username/email/password), bouton Sign up. Validation per-field angular conforme au legacy (BR-005, BR-007, BR-010)."
+    },
+    {
+      "screen_id": "SCR-008",
+      "screen_slug": "profile__default__anonymous__desktop",
+      "name": "Profile - admin (anonymous)",
+      "route": "/profile/admin",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.78,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/profile__default__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": ".user-info .action-btn (follow button)",
+          "category": "added",
+          "severity": "warning",
+          "description": "Angular affiche le bouton 'Follow admin' pour les utilisateurs anonymes (désactivé ou redirige au clic). Legacy n'affiche AUCUN bouton pour les anonymes (follow_button.html : {% if user.is_authenticated and user != profile_user %}). Un bouton non attendu est visible dans la cible.",
+          "likely_cause": "Angular profile.html ne gère pas la condition 'authenticated seulement pour le follow'. Le bouton est toujours rendu et simplement désactivé pour les anonymes.",
+          "linked_rules": ["BR-033", "BR-034"]
+        },
+        {
+          "zone": ".user-img (default avatar)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Avatar par défaut : Angular profile page utilise 'https://api.realworld.io/images/smiley-cyrus.jpg'. Legacy utilise '/static/images/default-avatar.svg'. Image différente si l'utilisateur n'a pas d'avatar.",
+          "likely_cause": "URL hardcodée dans profile.html Angular sans utiliser l'asset local",
+          "linked_rules": []
+        },
+        {
+          "zone": "header/footer",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Le bouton Follow visible pour les anonymes représente une divergence comportementale et visuelle par rapport au legacy. Doit être corrigé (masquer le bouton ou au moins le conditionner à l'authentification comme le legacy)."
+    },
+    {
+      "screen_id": "SCR-009",
+      "screen_slug": "profile_favorites__default__anonymous__desktop",
+      "name": "Profile Favorites - admin",
+      "route": "/profile/admin/favorites",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.78,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/profile_favorites__default__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": ".user-info .action-btn",
+          "category": "added",
+          "severity": "warning",
+          "description": "Même différence que SCR-008 : bouton Follow visible pour anonyme dans Angular.",
+          "likely_cause": "Même cause que SCR-008",
+          "linked_rules": ["BR-033"]
+        },
+        {
+          "zone": ".articles-toggle (tab 'Favorited Articles')",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Tab 'Favorited Articles' actif : button (Angular) vs a (Django). Rendu visuel identique.",
+          "likely_cause": "Paradigme SPA",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Même structure que profile (SCR-008) avec tab favorites actif. Articles favoris listés via l'API. Divergence follow button pour anonymes identique à SCR-008."
+    },
+    {
+      "screen_id": "SCR-010",
+      "screen_slug": "settings__redirect_unauthenticated__anonymous__desktop",
+      "name": "Settings - Redirect (non authentifié)",
+      "route": "/settings → redirect /login",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.95,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/settings__redirect_unauthenticated__anonymous__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "URL de redirection",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Legacy redirige vers /login?next=/settings (avec paramètre next). Angular authGuard redirige vers /login sans paramètre next. Page login identique visuellement.",
+          "likely_cause": "Angular authGuard simplifié (next= non implémenté). Pas d'impact visuel sur la page résultante.",
+          "linked_rules": ["BR-005"]
+        }
+      ],
+      "semantic_analysis": "Fonctionnellement conforme : accès settings sans auth → page login. Visuellement identique à la page login. Légère différence sur la gestion du paramètre next (non critique visuellement)."
+    },
+    {
+      "screen_id": "SCR-011",
+      "screen_slug": "home__default__user__desktop",
+      "name": "Home - Global Feed (authentifié)",
+      "route": "/",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.85,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/home__default__user__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header nav (authenticated)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Navigation authentifiée : liens New Article, Settings, profil. Identique structurellement. Logo texte vs SVG (pattern global).",
+          "likely_cause": "Pattern global",
+          "linked_rules": []
+        },
+        {
+          "zone": ".feed-toggle (onglets feed)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Onglets 'Your Feed' + 'Global Feed' présents et fonctionnels. Buttons vs anchors. Rendu identique.",
+          "likely_cause": "Paradigme SPA",
+          "linked_rules": ["BR-026"]
+        },
+        {
+          "zone": ".article-preview favorite button",
+          "category": "content",
+          "severity": "warning",
+          "description": "Bouton favori : icon+count only vs texte 'Favorite/Unfavorite (N)'. Même différence que SCR-001.",
+          "likely_cause": "Design composant article-preview Angular",
+          "linked_rules": ["BR-036"]
+        }
+      ],
+      "semantic_analysis": "Pas de bannière (correct pour utilisateur authentifié). Onglets Your Feed + Global Feed corrects. Articles chargés depuis l'API. Structure globale conforme."
+    },
+    {
+      "screen_id": "SCR-012",
+      "screen_slug": "home_following__following_feed__user__desktop",
+      "name": "Home - Your Feed (following)",
+      "route": "/?feed=following",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.85,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/home_following__following_feed__user__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": ".feed-toggle (onglet 'Your Feed' actif)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Onglet Your Feed actif. Buttons vs anchors. Sinon identique.",
+          "likely_cause": "Paradigme SPA",
+          "linked_rules": ["BR-026"]
+        },
+        {
+          "zone": ".article-preview favorite button",
+          "category": "content",
+          "severity": "warning",
+          "description": "Idem SCR-001/011.",
+          "likely_cause": "Design composant article-preview",
+          "linked_rules": ["BR-036"]
+        }
+      ],
+      "semantic_analysis": "Feed following correct. Si vide (aucun suivi): message 'Your feed is empty' présent dans Angular. Structure conforme."
+    },
+    {
+      "screen_id": "SCR-013",
+      "screen_slug": "article_detail__default__user__desktop",
+      "name": "Article Detail (propriétaire)",
+      "route": "/article/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": "regression",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.72,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/article_detail__default__user__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": ".article-actions (after article body)",
+          "category": "missing",
+          "severity": "regression",
+          "description": "Legacy inclut une 2e section <div class='article-actions'>{% include 'partials/article_meta.html' %}</div> APRÈS le contenu de l'article. Pour le propriétaire, cette section contient les boutons 'Edit Article' et 'Delete Article'. Angular NE reproduit PAS cette section — les boutons Edit/Delete n'apparaissent QUE dans la bannière en haut. Sur un article long, l'utilisateur doit scroller jusqu'en haut pour trouver ces actions.",
+          "likely_cause": "Lors de la traduction de detail.html, la double inclusion d'article_meta.html (bannière + article-actions) n'a pas été reproduite.",
+          "linked_rules": ["BR-029", "BR-044"]
+        },
+        {
+          "zone": ".article-meta .favorite-button (in banner)",
+          "category": "content",
+          "severity": "acceptable",
+          "description": "Bouton favori dans le banner : Angular 'Favorite Article (N)' vs legacy favorite_button.html 'Favorite (N)'. Texte légèrement différent.",
+          "likely_cause": "Traduction littérale avec 'Article' ajouté",
+          "linked_rules": ["BR-036"]
+        },
+        {
+          "zone": "header/footer",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "REGRESSION. La section .article-actions en bas de page est manquante pour le propriétaire. Les boutons Edit/Delete ne sont accessibles que depuis le banner haut. Sur un article long, cette divergence est significative en termes d'UX et doit être corrigée. BR-029 (edit) et BR-044 (delete) restent techniquement disponibles mais seulement en haut de page."
+    },
+    {
+      "screen_id": "SCR-014",
+      "screen_slug": "editor__create__user__desktop",
+      "name": "Editor - Créer un article",
+      "route": "/editor",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.95,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/editor__create__user__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Structure quasi-identique : editor-page, col-md-10, 4 champs (title/description/body/tags), tag pills, bouton 'Publish Article'. Tag input via keydown Enter/virgule. Conforme BR-031, BR-032."
+    },
+    {
+      "screen_id": "SCR-015",
+      "screen_slug": "editor_edit__edit__user__desktop",
+      "name": "Editor - Modifier un article",
+      "route": "/editor/teletravail-bilan-et-nouvelles-frontieres-du-travail-a-distance",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.94,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/editor_edit__edit__user__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        },
+        {
+          "zone": "fieldset [disabled]",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Angular désactive tout le fieldset pendant le submit ([disabled]='loading()'). Legacy n'a pas ce comportement. Invisible en état statique.",
+          "likely_cause": "UX improvement Angular",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Champs pré-remplis avec titre, description, body, tags de l'article existant. Bouton 'Publish Article'. Slug non envoyé à l'édition (BR-023 respecté)."
+    },
+    {
+      "screen_id": "SCR-016",
+      "screen_slug": "settings__default__user__desktop",
+      "name": "Settings",
+      "route": "/settings",
+      "status": "acceptable",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.96,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/settings__default__user__desktop/screenshot_normalized.png",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": "header/footer",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Pattern global logos.",
+          "likely_cause": "Global",
+          "linked_rules": []
+        },
+        {
+          "zone": "logout button",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Angular : <button type='button' (click)='logout()'>. Legacy : <form method='post' action='/logout'><button type='submit'>. Rendu visuel identique (même texte, même classe CSS btn-outline-danger).",
+          "likely_cause": "Migration SSR→SPA : logout via JWT (sans form POST CSRF)",
+          "linked_rules": ["BR-015"]
+        }
+      ],
+      "semantic_analysis": "Structure identique : settings-page, 5 champs (image/username/bio/email/password), bouton Update Settings, séparateur hr, bouton logout. Conforme à BR-015, BR-016, BR-017."
+    },
+    {
+      "screen_id": "SCR-017",
+      "screen_slug": "profile__default__user__desktop",
+      "name": "Profile - admin (self)",
+      "route": "/profile/admin",
+      "status": "warning",
+      "pixel_diff_percentage": null,
+      "similarity_estimate": 0.82,
+      "before_screenshot": "migration-state/phase2/visual_baseline/screens/profile__default__user__desktop/metadata.json",
+      "after_screenshot": null,
+      "diff_image": null,
+      "differences": [
+        {
+          "zone": ".user-info .action-btn (self)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Lien 'Edit Profile Settings' présent dans les deux (isSelf correct). Rendu quasi-identique.",
+          "likely_cause": "Traduction correcte",
+          "linked_rules": ["BR-024"]
+        },
+        {
+          "zone": ".user-img (avatar)",
+          "category": "style",
+          "severity": "warning",
+          "description": "Avatar par défaut : Angular profile utilise 'https://api.realworld.io/images/smiley-cyrus.jpg'. Legacy '/static/images/default-avatar.svg'. Image visiblement différente (smiley photo vs icône SVG).",
+          "likely_cause": "URL hardcodée dans profile.html Angular. Les article-preview utilisent l'asset local 'assets/images/default-avatar.svg' (cohérence absente).",
+          "linked_rules": []
+        },
+        {
+          "zone": ".articles-toggle (My Articles tab)",
+          "category": "style",
+          "severity": "acceptable",
+          "description": "Tab My Articles actif. Button vs anchor. Rendu identique.",
+          "likely_cause": "Paradigme SPA",
+          "linked_rules": []
+        }
+      ],
+      "semantic_analysis": "Self-view profile correct. Bouton 'Edit Profile Settings' présent. Articles de l'utilisateur listés. Divergence principale : image avatar par défaut différente (URL externe vs asset local) et incohérente avec le reste de l'application Angular."
+    }
+  ],
+  "accepted_differences": [
+    {
+      "id": "ACCEPT-001",
+      "scope": "global",
+      "description": "Logo navbar brand et footer : texte 'conduit' au lieu de SVG logo. Convention RealWorld SPA acceptée. Impact visuel mineur si la font Lora est chargée.",
+      "affects_screens": ["SCR-001","SCR-002","SCR-003","SCR-004","SCR-005","SCR-006","SCR-007","SCR-008","SCR-009","SCR-010","SCR-011","SCR-012","SCR-013","SCR-014","SCR-015","SCR-016","SCR-017"]
+    },
+    {
+      "id": "ACCEPT-002",
+      "scope": "global",
+      "description": "Onglets de navigation feed/profil : <button class='nav-link'> au lieu de <a class='nav-link hx-*'>. Rendu CSS identique, paradigme SPA vs HTMX.",
+      "affects_screens": ["SCR-001","SCR-002","SCR-008","SCR-009","SCR-011","SCR-012"]
+    },
+    {
+      "id": "ACCEPT-003",
+      "scope": "global",
+      "description": "Format date : Angular pipe date:'MMMM d, y' est visuellement identique au filtre Django date:'F j, Y'.",
+      "affects_screens": ["SCR-001","SCR-002","SCR-003","SCR-011","SCR-012","SCR-013"]
+    }
+  ],
+  "blockers": [
+    {
+      "id": "VIS-BLOCK-001",
+      "screen_id": "SCR-004",
+      "severity": "regression",
+      "description": "Page 404 Article structurellement différente du legacy. Manque .article-page wrapper et bannière stylée. Corriger article-detail.html pour utiliser la structure complète en mode notFound.",
+      "fix_suggestion": "Dans article-detail.html, wrapper le bloc notFound dans <div class='article-page'><div class='banner'><div class='container'><h1>Article not found</h1></div></div><div class='container page'>...</div></div>"
+    },
+    {
+      "id": "VIS-BLOCK-002",
+      "screen_id": "SCR-013",
+      "severity": "regression",
+      "description": "Section .article-actions manquante après le body de l'article pour les utilisateurs authentifiés (propriétaire). Les boutons Edit/Delete n'apparaissent qu'en haut (banner).",
+      "fix_suggestion": "Ajouter après <hr /> et avant la section commentaires dans article-detail.html un bloc .article-actions reproduisant l'article-meta avec les boutons conditionnels (isOwner: Edit/Delete, sinon: Follow+Favourite)."
+    },
+    {
+      "id": "VIS-BLOCK-003",
+      "screen_id": "SCR-008",
+      "screen_also": "SCR-009",
+      "severity": "warning",
+      "description": "Bouton Follow visible pour les utilisateurs anonymes sur la page profil. Legacy masquait complètement le bouton pour les anonymes. Angular l'affiche (désactivé).",
+      "fix_suggestion": "Dans profile.html, conditionner le bouton Follow à @if (!isSelf() && auth.isAuthenticated()) pour masquer complètement le bouton pour les anonymes, comme dans le legacy."
+    }
+  ]
+}

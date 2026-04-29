@@ -6,10 +6,22 @@
 @if (loading()) {
   <div class="container page"><p>Loading...</p></div>
 } @else if (notFound()) {
-  <!-- BR-030: non-existent article → 404 message with slug -->
-  <div class="container page">
-    <h2>Article not found</h2>
-    <p><a routerLink="/">Go back to home</a></p>
+  <!-- BR-030: non-existent article → 404 message with slug (mirrors detail_404.html) -->
+  <div class="article-page">
+    <div class="banner">
+      <div class="container">
+        <h1>Article not found</h1>
+      </div>
+    </div>
+    <div class="container page">
+      <div class="row article-content">
+        <div class="col-md-12">
+          <ul class="error-messages">
+            <li>Article was not found.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 } @else if (article(); as a) {
   <div class="article-page">
@@ -70,6 +82,44 @@
       }
 
       <hr />
+
+      <!-- Article actions repeated below content — mirrors .article-actions in detail.html -->
+      <div class="article-actions">
+        <div class="article-meta">
+          <a [routerLink]="['/profile', a.author.username]">
+            <img [src]="a.author.image ?? 'assets/images/default-avatar.svg'" [alt]="a.author.username" />
+          </a>
+          <div class="info">
+            <a [routerLink]="['/profile', a.author.username]" class="author">{{ a.author.username }}</a>
+            <span class="date">{{ a.createdAt | date:'MMMM d, y' }}</span>
+          </div>
+
+          @if (isOwner) {
+            <a [routerLink]="['/editor', a.slug]" class="btn btn-sm btn-outline-secondary">
+              <i class="ion-edit"></i> Edit Article
+            </a>
+            &nbsp;
+            <button
+              class="btn btn-sm btn-outline-danger"
+              [disabled]="deleteLoading()"
+              (click)="deleteArticle()"
+            >
+              <i class="ion-trash-a"></i> Delete Article
+            </button>
+          } @else {
+            <button
+              class="btn btn-sm"
+              [class.btn-secondary]="!a.favorited"
+              [class.btn-primary]="a.favorited"
+              [disabled]="favoriteLoading() || !auth.isAuthenticated()"
+              (click)="toggleFavorite()"
+            >
+              <i class="ion-heart"></i> {{ a.favorited ? 'Unfavorite' : 'Favorite' }} Article
+              <span class="counter">({{ a.favoritesCount }})</span>
+            </button>
+          }
+        </div>
+      </div>
 
       <!-- Comments section — BR-039/040/041/043 -->
       <div class="row">

@@ -52,6 +52,7 @@
               }
             ],
             "styles": [
+              "src/assets/conduit-theme.css",
               "src/styles.scss"
             ]
           },
