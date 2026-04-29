@@ -71,16 +71,13 @@
 
       <hr />
 
-      <!-- Comments section — stub until Sprint 4 (comments module) -->
+      <!-- Comments section — BR-039/040/041/043 -->
       <div class="row">
         <div class="col-xs-12 col-md-8 offset-md-2">
-          @if (auth.isAuthenticated()) {
-            <p><em>Comments coming in Sprint 4.</em></p>
-          } @else {
-            <p class="comment-auth-prompt">
-              <a routerLink="/register">Sign in or sign up</a> to add comments on this article.
-            </p>
-          }
+          <app-comment-list
+            [slug]="a.slug"
+            [articleAuthorUsername]="a.author.username"
+          />
         </div>
       </div>
     </div>

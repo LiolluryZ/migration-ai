@@ -1,0 +1,203 @@
+{
+  "generated_at": "2026-04-29T00:00:00Z",
+  "agent": "21-revieweur-migration",
+  "module": "comments",
+  "confidence": 92,
+  "verdict": "APPROVED",
+
+  "summary": {
+    "rules_present": 4,
+    "rules_modified": 2,
+    "rules_missing": 0,
+    "added_functionality": 1,
+    "total_rules_for_module": 6
+  },
+
+  "rules_status": [
+    {
+      "rule_id": "BR-039",
+      "title": "Corps du commentaire requis et non vide",
+      "status": "modified",
+      "severity": "warning",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "line": 15,
+        "snippet": "body = request.POST.get('body', '').strip()\nif body:\n    Comment.objects.create(...)"
+      },
+      "target_location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 84,
+        "snippet": "const body = (request.body as { comment?: { body?: string } })?.comment?.body?.trim();\nif (!body) {\n  reply.code(422).send({ errors: { body: [\"can't be blank\"] } });\n  return;\n}"
+      },
+      "notes": "BEHAVIORAL CHANGE — Source: POST avec body vide => silently skip (aucun commentaire créé, aucune erreur retournée, code 200/redirect HTMX). Target: POST avec body vide => HTTP 422 { errors: { body: [\"can't be blank\"] } }. La règle métier (ne pas créer de commentaires vides) est RESPECTÉE dans les deux cas. La différence réside dans la communication de l'erreur. ACCEPTABLE POUR REST : (1) le frontend Angular a déjà un guard `if (!body || this.submitting()) return` (comment-list.ts:70) qui empêche l'appel API avec corps vide — le 422 n'est jamais déclenché en usage normal ; (2) le RealWorld spec exige 422 pour les validations ; (3) documenté comme pattern TM-004 (form validation → JSON 422) en Phase 3. Les deux edge cases (whitespace-only, body absent) sont couverts et testés (comments.routes.spec.ts lignes 213-232).",
+      "confidence": 95
+    },
+    {
+      "rule_id": "BR-040",
+      "title": "Authentification requise pour créer ou supprimer un commentaire",
+      "status": "present",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "line": 10,
+        "snippet": "@login_required\n@require_POST\ndef comment_create_view(request, slug): ..."
+      },
+      "target_location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 177,
+        "snippet": "fastify.post('/articles/:slug/comments',\n  { preHandler: [fastify.authenticate] },\n  createComment,\n);\nfastify.delete('/articles/:slug/comments/:id',\n  { preHandler: [fastify.authenticate] },\n  deleteComment,\n);"
+      },
+      "notes": "PRESENT. @login_required Django → fastify.authenticate preHandler. Identique sémantiquement : requête sans token valide → 401 Unauthorized (vs 302 redirect Django, adaptation REST justifiée). L'auteur est automatiquement positionné à currentUser.id (line 93 : authorId: currentUser.id). Testé : POST sans auth → 401 (spec line 168), DELETE sans auth → 401 (spec line 240).",
+      "confidence": 99
+    },
+    {
+      "rule_id": "BR-041",
+      "title": "CRITICAL — Suppression autorisée si auteur du commentaire OU auteur de l'article ; 403 sinon",
+      "status": "present",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "line": 30,
+        "snippet": "if comment.author != request.user and article.author != request.user:\n    return HttpResponseForbidden()"
+      },
+      "target_location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 151,
+        "snippet": "if (comment.authorId !== currentUser.id && article.authorId !== currentUser.id) {\n  reply.code(403).send({ errors: { auth: ['Forbidden'] } });\n  return;\n}"
+      },
+      "notes": "PRESENT. Logique duale préservée : la condition De Morgan est identique (NOT A AND NOT B). Comparaison par ID numériques (comment.authorId vs comment.author object en Django) — sémantiquement équivalent car les deux comparent l'identité de l'utilisateur. article.authorId est un champ direct du modèle Article (ForeignKey<number>), disponible sans JOIN. COUVERTURE TEST COMPLÈTE (3 cas, spec lignes 255-337) : (1) auteur du commentaire peut supprimer → 204 ✓, (2) auteur de l'article peut supprimer (même si pas auteur du commentaire) → 204 ✓, (3) tiers → 403 ✓. Frontend (comment-list.ts:57-64) : canDelete() reflète la même logique pour l'affichage du bouton de suppression.",
+      "confidence": 99
+    },
+    {
+      "rule_id": "BR-042",
+      "title": "Réponse HTMX (partial comment_list) ou redirect vers article_detail",
+      "status": "modified",
+      "severity": "approved_deviation",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "line": 18,
+        "snippet": "if is_htmx(request):\n    comments = article.comment_set.select_related('author').order_by('-created')\n    return render(request, 'partials/comment_list.html', {'comments': comments, 'article': article})\nreturn redirect('article_detail', slug=slug)"
+      },
+      "target_location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 101,
+        "snippet": "reply.code(201).send({ comment: formatComment(full!) }); // POST\n// ...\nawait comment.destroy();\nreply.code(204).send(); // DELETE"
+      },
+      "notes": "ARCHITECTURAL REDESIGN — Source SSR/HTMX : después create/delete, renvoie un partial HTML mis à jour ou redirect. Target REST/SPA : POST → 201 + JSON du commentaire créé ; DELETE → 204. Le résultat métier (liste de commentaires affichée à l'utilisateur) est préservé via l'Angular frontend qui : (a) prepend le nouveau commentaire en local après 201 (comment-list.ts:75 : this.comments.update(list => [res.comment, ...list])) ; (b) filtre le commentaire supprimé en local après 204 (comment-list.ts:89). Pattern documenté Phase 3 tech_mapping.json TM-003/TM-026 (HTMX partial → Angular réactif). APPROVED_DEVIATION obligatoire pour toute migration SSR→SPA.",
+      "confidence": 97
+    },
+    {
+      "rule_id": "BR-043",
+      "title": "FK CASCADE — suppression d'un article supprime tous ses commentaires",
+      "status": "present",
+      "source_location": {
+        "file": "apps/comments/models.py",
+        "line": 6,
+        "snippet": "article = models.ForeignKey(Article, on_delete=models.CASCADE)\nauthor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)"
+      },
+      "target_location": {
+        "file": "target/backend/src/modules/comments/models/index.ts",
+        "line": 28,
+        "snippet": "Article.hasMany(Comment, {\n  foreignKey: 'articleId',\n  as: 'comments',\n  onDelete: 'CASCADE',\n  hooks: true,      // ← trigger Sequelize JS-level cascade on article.destroy()\n});"
+      },
+      "notes": "PRESENT. Cascade article→commentaires : onDelete: 'CASCADE' + hooks: true garantit la suppression Sequelize au niveau JS quand article.destroy() est appelé (nécessaire car les APIs articles/delete appellent article.destroy() et non une suppression SQL brute). Cascade auteur→commentaires : UserStub.hasMany(Comment) dans models/index.ts. COUVERTURE TESTS CASCADE (spec lignes 343-398) : 2 tests dédiés — (1) suppression article via API DELETE → commentaire cascade ✓ ; (2) suppression article avec 3 commentaires → tous supprimés ✓.",
+      "confidence": 98
+    },
+    {
+      "rule_id": "BR-044",
+      "title": "Suppression requiert authentification + commentaire appartient à l'article (404 sinon)",
+      "status": "present",
+      "source_location": {
+        "file": "apps/comments/views.py",
+        "line": 25,
+        "snippet": "@login_required\n@require_POST\ndef comment_delete_view(request, slug, comment_id):\n    article = get_object_or_404(Article, slug=slug)\n    comment = get_object_or_404(Comment, id=comment_id, article=article)"
+      },
+      "target_location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 129,
+        "snippet": "const article = await Article.findOne({ where: { slug } });\nif (!article) { reply.code(404)... }\n\nconst comment = await Comment.findOne({ where: { id: commentId, articleId: article.id } });\nif (!comment) { reply.code(404)... }"
+      },
+      "notes": "PRESENT. Double 404 garanti : (1) article non trouvé par slug → 404 ; (2) commentaire avec l'ID donné n'appartenant pas à cet article → 404. La condition WHERE { id: commentId, articleId: article.id } est l'équivalent exact de get_object_or_404(Comment, id=comment_id, article=article). Edge case couvert : commentId valide mais d'un autre article → 404 (spec line 328). Parsing entier de l'id URL avec isFinite() guard (line 122).",
+      "confidence": 97
+    }
+  ],
+
+  "added_functionality": [
+    {
+      "location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 173
+      },
+      "description": "GET /api/articles/:slug/comments — Nouvel endpoint public de lecture des commentaires. Absent de la source (les commentaires étaient rendus côté serveur dans article_detail_view, non exposés via un endpoint REST dédié).",
+      "severity": "info",
+      "recommendation": "JUSTIFIED — Endpoint obligatoire pour le frontend Angular SPA. La page article-detail Angular doit charger les commentaires via HTTP. Documenté en Phase 3 comme transformation architecturale SSR→SPA (TM-003). Inclut correctement l'ordre anti-chronologique (BR-043 ordering : ORDER BY createdAt DESC)."
+    }
+  ],
+
+  "approved_deviations": [
+    {
+      "id": "AD-comments-001",
+      "rule_id": "BR-039",
+      "description": "POST body vide/whitespace → 422 Unprocessable Entity au lieu de silent skip (source returns 200/redirect without creating).",
+      "justification": "Adaptation REST standard. Le frontend Angular guard empêche l'appel API avec corps vide (comment-list.ts:70). Le RealWorld spec exige 422 pour les validations. L'intention métier (ne pas créer de commentaires vides) est préservée. Documenté Phase 3 TM-004."
+    },
+    {
+      "id": "AD-comments-002",
+      "rule_id": "BR-042",
+      "description": "Réponse HTMX partial HTML → REST JSON 201/204. Refresh de la liste commentaires via Angular réactif au lieu d'un re-render serveur.",
+      "justification": "Changement architectural obligatoire SSR→SPA. Documenté Phase 3 tech_mapping.json TM-003/TM-026. Résultat métier (commentaire affiché/retiré) identique du point de vue utilisateur."
+    },
+    {
+      "id": "AD-comments-003",
+      "description": "GET /api/articles/:slug/comments — endpoint public de lecture ajouté (absent dans le legacy SSR).",
+      "justification": "Obligatoire pour SPA Angular. La source n'avait pas d'endpoint REST pour les commentaires car ils étaient rendus dans le template article_detail. Documenté Phase 3 comme transformation SSR→SPA."
+    }
+  ],
+
+  "warnings": [
+    {
+      "id": "W-comments-001",
+      "rule_id": "BR-039",
+      "location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 84
+      },
+      "description": "Changement comportement body vide : source = silent skip, target = HTTP 422.",
+      "recommendation": "Comportement acceptable. S'assurer que le frontend Angular maintient son guard `if (!body) return` (comment-list.ts:70) pour éviter tout appel API avec corps vide visible utilisateur."
+    },
+    {
+      "id": "W-comments-002",
+      "description": "Le champ `following` dans l'author shape des commentaires est toujours `false` (hardcodé, comment.routes.ts:32).",
+      "location": {
+        "file": "target/backend/src/modules/comments/comments.routes.ts",
+        "line": 32
+      },
+      "recommendation": "Même pattern que le module articles (BR-026 deferred). Acceptable tant que le module accounts/follow est intégré. À résoudre en Phase 5 (audit final)."
+    }
+  ],
+
+  "changes_requested": [],
+
+  "findings": [
+    {
+      "type": "info",
+      "rule_id": "BR-041",
+      "description": "BR-041 CRITICAL correctement implémenté. La condition duale (auteur commentaire OR auteur article) est une De Morgan exacte du source. Test coverage: 3 cas (comment_author, article_owner, third_party) tous couverts avec assertions de DB side-effects."
+    },
+    {
+      "type": "info",
+      "rule_id": "BR-043",
+      "description": "FR-043 CASCADE correctement implémenté via hooks:true. Les 2 tests de cascade vérifient le comportement DB réel (Comment.findByPk après article.destroy() via API)."
+    },
+    {
+      "type": "info",
+      "description": "Test suite complète : 17 tests dans comments.routes.spec.ts. Couverture : GET (4 tests), POST (4 tests), DELETE (6 tests), CASCADE (2 tests), BR-043 ordering (1 test)."
+    },
+    {
+      "type": "info",
+      "description": "Frontend comment-list.ts : `canDelete()` reproduit la logique BR-041 pour l'affichage du bouton delete. Limitation : compare par username (string) et non par ID — correct car `user.username === comment.author.username` est unique (contrainte DB). Cohérent avec articles."
+    },
+    {
+      "type": "info",
+      "description": "tableName: 'comments_comment' dans comment.model.ts — rétro-compatibilité DB maintenue avec la table Django existante."
+    }
+  ]
+}

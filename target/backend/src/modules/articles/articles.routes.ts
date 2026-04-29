@@ -3,6 +3,7 @@ import { Op, fn, col, literal } from 'sequelize';
 import { UniqueConstraintError } from 'sequelize';
 // Import from barrel to ensure associations are wired before first query.
 import { Article, Tag, ArticleTag, Favorite, UserStub } from './models';
+import { Follower } from '../accounts/models/follower.model';
 import { parseSequelizeError } from '../../shared/errors';
 
 // ARTICLES_PER_PAGE — translates apps/articles/views.py :: ARTICLES_PER_PAGE = 10
@@ -22,10 +23,12 @@ export const ARTICLES_PER_PAGE = 10;
  *
  * BR-025: favoritesCount = real-time COUNT (no cache on counter).
  * BR-031: summary → description, content → body in API response.
+ * BR-026: following = true if currentUser follows the article author.
  */
 function formatArticle(
   article: Article,
   currentUserId: number | null,
+  followingSet: Set<number> = new Set(),
 ): object {
   const tagList = (article.tags ?? []).map((t: Tag) => t.name).sort();
   const favoritesCount = (article.favoriteRecords ?? []).length;
@@ -49,9 +52,8 @@ function formatArticle(
           username: author.username,
           bio: author.bio ?? null,
           image: author.image ?? null,
-          // BR-026 (following): deferred to Sprint 3 (accounts module).
-          // The accounts module will add a UserFollow table and resolve this.
-          following: false,
+          // BR-026: following — true if currentUser follows this author.
+          following: author.id !== undefined ? followingSet.has(author.id) : false,
         }
       : null,
   };
@@ -68,6 +70,23 @@ function articleIncludes(currentUserId: number | null) {
       ...(currentUserId !== null ? {} : { where: undefined }),
     },
   ];
+}
+
+/**
+ * Returns the set of author IDs that currentUser follows, intersected with
+ * the provided candidateAuthorIds.
+ * BR-026: following field in author shape.
+ */
+async function buildFollowingSet(
+  currentUserId: number | null,
+  candidateAuthorIds: number[],
+): Promise<Set<number>> {
+  if (!currentUserId || candidateAuthorIds.length === 0) return new Set();
+  const rows = await Follower.findAll({
+    where: { fromUserId: currentUserId, toUserId: { [Op.in]: candidateAuthorIds } },
+    attributes: ['toUserId'],
+  });
+  return new Set(rows.map((r) => r.toUserId));
 }
 
 /** Extract optional authenticated user from the JWT (does not throw). */
@@ -119,8 +138,12 @@ async function listArticles(request: FastifyRequest, reply: FastifyReply): Promi
       reply.code(401).send({ errors: { auth: ['Authentication required'] } });
       return;
     }
-    // Sprint 3: replace with actual followed-user IDs from UserFollow table.
-    authorFilter = [];
+    // BR-026: populate from Follower table.
+    const followedRows = await Follower.findAll({
+      where: { fromUserId: currentUser.id },
+      attributes: ['toUserId'],
+    });
+    authorFilter = followedRows.map((r) => r.toUserId);
   }
 
   // Filter by tag
@@ -176,8 +199,12 @@ async function listArticles(request: FastifyRequest, reply: FastifyReply): Promi
     offset,
   });
 
+  const authorIds = rows
+    .map((a) => (a.author as UserStub | undefined)?.id)
+    .filter((id): id is number => id !== undefined);
+  const followingSet = await buildFollowingSet(currentUserId, authorIds);
   reply.send({
-    articles: rows.map((a) => formatArticle(a, currentUserId)),
+    articles: rows.map((a) => formatArticle(a, currentUserId, followingSet)),
     articlesCount: total,
   });
 }
@@ -203,7 +230,9 @@ async function getArticle(request: FastifyRequest, reply: FastifyReply): Promise
     return;
   }
 
-  reply.send({ article: formatArticle(article, currentUserId) });
+  const authorId = (article.author as UserStub | undefined)?.id;
+  const followingSet = await buildFollowingSet(currentUserId, authorId !== undefined ? [authorId] : []);
+  reply.send({ article: formatArticle(article, currentUserId, followingSet) });
 }
 
 /**
@@ -254,7 +283,8 @@ async function createArticle(request: FastifyRequest, reply: FastifyReply): Prom
       include: articleIncludes(currentUser.id) as never,
     });
 
-    reply.code(201).send({ article: formatArticle(full!, currentUser.id) });
+    // Author is the current user — self-following not supported → empty set.
+    reply.code(201).send({ article: formatArticle(full!, currentUser.id, new Set()) });
   } catch (err) {
     const field = parseSequelizeError(err);
     if (field === 'title') {
@@ -340,7 +370,8 @@ async function updateArticle(request: FastifyRequest, reply: FastifyReply): Prom
     include: articleIncludes(currentUser.id) as never,
   });
 
-  reply.send({ article: formatArticle(full!, currentUser.id) });
+  // Author is the current user — self-following not supported → empty set.
+  reply.send({ article: formatArticle(full!, currentUser.id, new Set()) });
 }
 
 /**
@@ -405,7 +436,12 @@ async function toggleFavorite(request: FastifyRequest, reply: FastifyReply): Pro
     include: articleIncludes(currentUser.id) as never,
   });
 
-  reply.send({ article: formatArticle(full!, currentUser.id) });
+  const favAuthorId = (full!.author as UserStub | undefined)?.id;
+  const followingSetFav = await buildFollowingSet(
+    currentUser.id,
+    favAuthorId !== undefined ? [favAuthorId] : [],
+  );
+  reply.send({ article: formatArticle(full!, currentUser.id, followingSetFav) });
 }
 
 // ─── Tag sync helper ─────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ArticlesService } from '../../core/services/articles.service';
 import { AuthService } from '../../core/services/auth.service';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
+import { CommentListComponent } from '../../shared/components/comment-list/comment-list';
 import type { Article } from '../../core/models/article.model';
 
 /**
@@ -18,7 +19,7 @@ import type { Article } from '../../core/models/article.model';
 @Component({
   selector: 'app-article-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, MarkdownPipe],
+  imports: [CommonModule, RouterLink, DatePipe, MarkdownPipe, CommentListComponent],
   templateUrl: './article-detail.html',
   styleUrl: './article-detail.scss',
 })

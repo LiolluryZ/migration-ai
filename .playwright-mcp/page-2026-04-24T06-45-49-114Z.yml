@@ -1,0 +1,329 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region
+    - generic [ref=e3]:
+      - link "Skip to content" [ref=e4] [cursor=pointer]:
+        - /url: "#start-of-content"
+      - banner [ref=e6]:
+        - heading "Navigation Menu" [level=2] [ref=e7]
+        - generic [ref=e8]:
+          - link "Homepage" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - img [ref=e11]
+          - generic [ref=e13]:
+            - navigation "Global" [ref=e16]:
+              - list [ref=e17]:
+                - listitem [ref=e18]:
+                  - button "Platform" [ref=e20] [cursor=pointer]:
+                    - text: Platform
+                    - img [ref=e21]
+                - listitem [ref=e23]:
+                  - button "Solutions" [ref=e25] [cursor=pointer]:
+                    - text: Solutions
+                    - img [ref=e26]
+                - listitem [ref=e28]:
+                  - button "Resources" [ref=e30] [cursor=pointer]:
+                    - text: Resources
+                    - img [ref=e31]
+                - listitem [ref=e33]:
+                  - button "Open Source" [ref=e35] [cursor=pointer]:
+                    - text: Open Source
+                    - img [ref=e36]
+                - listitem [ref=e38]:
+                  - button "Enterprise" [ref=e40] [cursor=pointer]:
+                    - text: Enterprise
+                    - img [ref=e41]
+                - listitem [ref=e43]:
+                  - link "Pricing" [ref=e44] [cursor=pointer]:
+                    - /url: https://github.com/pricing
+                    - generic [ref=e45]: Pricing
+            - generic [ref=e46]:
+              - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+                - img [ref=e51]
+              - link "Sign in" [ref=e54] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FZenika-Training%2Fai-driven-dev-labs%2Ftree%2Fdemo-start%2Fdocs%2Ftech
+              - link "Sign up" [ref=e55] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Ffiles%2Fdisambiguate&source=header-repo&source_repo=Zenika-Training%2Fai-driven-dev-labs
+              - button "Appearance settings" [ref=e58] [cursor=pointer]:
+                - img
+    - main [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e66]:
+            - img [ref=e67]
+            - link "Zenika-Training" [ref=e70] [cursor=pointer]:
+              - /url: /Zenika-Training
+            - generic [ref=e71]: /
+            - strong [ref=e72]:
+              - link "ai-driven-dev-labs" [ref=e73] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs
+            - generic [ref=e74]: Public
+          - generic [ref=e75]:
+            - list:
+              - listitem [ref=e76]:
+                - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                  - /url: /login?return_to=%2FZenika-Training%2Fai-driven-dev-labs
+                  - img [ref=e78]
+                  - text: Notifications
+              - listitem [ref=e80]:
+                - link "Fork 2" [ref=e81] [cursor=pointer]:
+                  - /url: /login?return_to=%2FZenika-Training%2Fai-driven-dev-labs
+                  - img [ref=e82]
+                  - text: Fork
+                  - generic "2" [ref=e84]
+              - listitem [ref=e85]:
+                - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                  - /url: /login?return_to=%2FZenika-Training%2Fai-driven-dev-labs
+                  - img [ref=e88]
+                  - text: Star
+                  - generic "3 users starred this repository" [ref=e90]: "3"
+        - navigation "Repository" [ref=e91]:
+          - list [ref=e92]:
+            - listitem [ref=e93]:
+              - link "Code" [ref=e94] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs
+                - img [ref=e95]
+                - generic [ref=e97]: Code
+            - listitem [ref=e98]:
+              - link "Issues" [ref=e99] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs/issues
+                - img [ref=e100]
+                - generic [ref=e103]: Issues
+            - listitem [ref=e104]:
+              - link "Pull requests" [ref=e105] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs/pulls
+                - img [ref=e106]
+                - generic [ref=e108]: Pull requests
+            - listitem [ref=e109]:
+              - link "Actions" [ref=e110] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs/actions
+                - img [ref=e111]
+                - generic [ref=e113]: Actions
+            - listitem [ref=e114]:
+              - link "Projects" [ref=e115] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs/projects
+                - img [ref=e116]
+                - generic [ref=e118]: Projects
+            - listitem [ref=e119]:
+              - link "Security and quality" [ref=e120] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs/security
+                - img [ref=e121]
+                - generic [ref=e123]: Security and quality
+            - listitem [ref=e124]:
+              - link "Insights" [ref=e125] [cursor=pointer]:
+                - /url: /Zenika-Training/ai-driven-dev-labs/pulse
+                - img [ref=e126]
+                - generic [ref=e128]: Insights
+      - generic [ref=e136]:
+        - generic [ref=e138]:
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - heading "Collapse file tree" [level=2] [ref=e144]:
+                  - button "Collapse file tree" [expanded] [ref=e145] [cursor=pointer]:
+                    - img [ref=e146]
+                - heading "Files" [level=2] [ref=e149]
+              - generic [ref=e150]:
+                - button "demo-start branch" [ref=e152] [cursor=pointer]:
+                  - generic [ref=e153]:
+                    - generic [ref=e155]:
+                      - img [ref=e157]
+                      - generic [ref=e160]: demo-start
+                    - generic:
+                      - img
+                - button "Search this repository (forward slash)" [ref=e162] [cursor=pointer]:
+                  - img [ref=e163]
+            - generic [ref=e166]:
+              - img [ref=e168]
+              - combobox "Go to file" [ref=e170]
+            - navigation "File Tree Navigation" [ref=e176]:
+              - tree "Files" [ref=e178]:
+                - treeitem ".github" [level=1] [ref=e179]:
+                  - generic [ref=e180] [cursor=pointer]:
+                    - img [ref=e182]
+                    - generic [ref=e184]:
+                      - img [ref=e188]
+                      - generic [ref=e190]: .github
+                - treeitem ".idea" [level=1] [ref=e191]:
+                  - generic [ref=e192] [cursor=pointer]:
+                    - img [ref=e194]
+                    - generic [ref=e196]:
+                      - img [ref=e200]
+                      - generic [ref=e202]: .idea
+                - treeitem ".vscode" [level=1] [ref=e203]:
+                  - generic [ref=e204] [cursor=pointer]:
+                    - img [ref=e206]
+                    - generic [ref=e208]:
+                      - img [ref=e212]
+                      - generic [ref=e214]: .vscode
+                - treeitem "brownfield-backend" [level=1] [ref=e215]:
+                  - generic [ref=e216] [cursor=pointer]:
+                    - img [ref=e218]
+                    - generic [ref=e220]:
+                      - img [ref=e224]
+                      - generic [ref=e226]: brownfield-backend
+                - treeitem "brownfield-frontend" [level=1] [ref=e227]:
+                  - generic [ref=e228] [cursor=pointer]:
+                    - img [ref=e230]
+                    - generic [ref=e232]:
+                      - img [ref=e236]
+                      - generic [ref=e238]: brownfield-frontend
+                - treeitem "docs" [expanded] [level=1] [ref=e239]:
+                  - generic [ref=e240] [cursor=pointer]:
+                    - img [ref=e242]
+                    - generic [ref=e244]:
+                      - img [ref=e248]
+                      - generic [ref=e250]: docs
+                  - group "docs" [ref=e251]:
+                    - treeitem "product-management" [level=2] [ref=e252]:
+                      - generic [ref=e253] [cursor=pointer]:
+                        - img [ref=e258]
+                        - generic [ref=e260]:
+                          - img [ref=e264]
+                          - generic [ref=e266]: product-management
+                    - treeitem "tech" [expanded] [level=2] [ref=e267]:
+                      - generic [ref=e268] [cursor=pointer]:
+                        - img [ref=e273]
+                        - generic [ref=e275]:
+                          - img [ref=e279]
+                          - generic [ref=e281]: tech
+                      - group "tech" [ref=e282]:
+                        - treeitem "architecture-backend.md" [level=3] [ref=e283]:
+                          - generic [ref=e289] [cursor=pointer]:
+                            - img [ref=e292]
+                            - generic [ref=e294]: architecture-backend.md
+                        - treeitem "architecture-frontend.md" [level=3] [ref=e295]:
+                          - generic [ref=e301] [cursor=pointer]:
+                            - img [ref=e304]
+                            - generic [ref=e306]: architecture-frontend.md
+                    - treeitem "user-guide" [level=2] [ref=e307]:
+                      - generic [ref=e308] [cursor=pointer]:
+                        - img [ref=e313]
+                        - generic [ref=e315]:
+                          - img [ref=e319]
+                          - generic [ref=e321]: user-guide
+                    - treeitem "execution-plan-user-story-02.md" [level=2] [ref=e322]:
+                      - generic [ref=e327] [cursor=pointer]:
+                        - img [ref=e330]
+                        - generic [ref=e332]: execution-plan-user-story-02.md
+                - treeitem "greenfield-backend" [level=1] [ref=e333]:
+                  - generic [ref=e334] [cursor=pointer]:
+                    - img [ref=e336]
+                    - generic [ref=e338]:
+                      - img [ref=e342]
+                      - generic [ref=e344]: greenfield-backend
+                - treeitem "greenfield-frontend" [level=1] [ref=e345]:
+                  - generic [ref=e346] [cursor=pointer]:
+                    - img [ref=e348]
+                    - generic [ref=e350]:
+                      - img [ref=e354]
+                      - generic [ref=e356]: greenfield-frontend
+                - treeitem ".gitignore" [level=1] [ref=e357]:
+                  - generic [ref=e359] [cursor=pointer]:
+                    - img [ref=e362]
+                    - generic [ref=e364]: .gitignore
+                - treeitem "Claude.md" [level=1] [ref=e365]:
+                  - generic [ref=e367] [cursor=pointer]:
+                    - img [ref=e370]
+                    - generic [ref=e372]: Claude.md
+                - treeitem "README.md" [level=1] [ref=e373]:
+                  - generic [ref=e375] [cursor=pointer]:
+                    - img [ref=e378]
+                    - generic [ref=e380]: README.md
+          - slider "Draggable pane splitter" [ref=e382]
+        - generic [ref=e385]:
+          - generic [ref=e389]:
+            - generic [ref=e391]:
+              - navigation "Breadcrumbs" [ref=e392]:
+                - heading "Breadcrumbs" [level=2] [ref=e393]
+                - list [ref=e394]:
+                  - listitem [ref=e395]:
+                    - link "ai-driven-dev-labs" [ref=e396] [cursor=pointer]:
+                      - /url: /Zenika-Training/ai-driven-dev-labs/tree/demo-start
+                  - listitem [ref=e397]:
+                    - text: /
+                    - link "docs" [ref=e398] [cursor=pointer]:
+                      - /url: /Zenika-Training/ai-driven-dev-labs/tree/demo-start/docs
+              - generic [ref=e399]:
+                - text: /
+                - heading "tech" [level=1] [ref=e400]
+                - text: /
+              - button "Copy path" [ref=e401] [cursor=pointer]:
+                - img [ref=e402]
+            - generic [ref=e407]:
+              - heading "Directory actions" [level=2] [ref=e408]
+              - heading "More options" [level=2] [ref=e409]
+              - button "More options" [ref=e410] [cursor=pointer]:
+                - img [ref=e411]
+          - generic [ref=e413]:
+            - generic [ref=e415]:
+              - heading "Latest commit" [level=2] [ref=e416]
+              - generic [ref=e417]:
+                - generic [ref=e419]:
+                  - link "michaelisvy" [ref=e420] [cursor=pointer]:
+                    - /url: /michaelisvy
+                    - img "michaelisvy" [ref=e421]
+                  - link "commits by michaelisvy" [ref=e422] [cursor=pointer]:
+                    - /url: /Zenika-Training/ai-driven-dev-labs/commits?author=michaelisvy
+                    - text: michaelisvy
+                - link "Add architecture-frontend.md changes from features/adding-agent-support" [ref=e426] [cursor=pointer]:
+                  - /url: /Zenika-Training/ai-driven-dev-labs/commit/afc48db8de2216bcca675814c5b11e84f669ed26
+              - generic [ref=e427]:
+                - generic [ref=e429]:
+                  - link "Commit afc48db" [ref=e430] [cursor=pointer]:
+                    - /url: /Zenika-Training/ai-driven-dev-labs/commit/afc48db8de2216bcca675814c5b11e84f669ed26
+                    - text: afc48db
+                  - text: ·
+                  - generic "Apr 5, 2026, 2:10 PM GMT+2" [ref=e431]: Apr 5, 20263 weeks ago
+                - generic [ref=e432]:
+                  - heading "History" [level=2] [ref=e433]
+                  - link "History" [ref=e434] [cursor=pointer]:
+                    - /url: /Zenika-Training/ai-driven-dev-labs/commits/demo-start/docs/tech
+                    - generic [ref=e435]:
+                      - generic:
+                        - img
+                      - generic [ref=e436]: History
+            - generic [ref=e438]:
+              - heading "Folders and files" [level=2] [ref=e439]
+              - table "Folders and files" [ref=e440]:
+                - rowgroup [ref=e441]:
+                  - row "Name Last commit message Last commit date" [ref=e442]:
+                    - columnheader "Name" [ref=e443]
+                    - columnheader "Last commit message" [ref=e444]:
+                      - generic "Last commit message" [ref=e445]
+                    - columnheader "Last commit date" [ref=e446]:
+                      - generic "Last commit date" [ref=e447]
+                - rowgroup [ref=e448]:
+                  - row "parent directory Parent directory" [ref=e449]:
+                    - cell "parent directory Parent directory" [ref=e450]:
+                      - heading "parent directory" [level=3] [ref=e451]
+                      - link "Parent directory" [ref=e452] [cursor=pointer]:
+                        - /url: /Zenika-Training/ai-driven-dev-labs/tree/demo-start/docs
+                        - generic [ref=e453]:
+                          - img [ref=e454]
+                          - text: ..
+                  - row "architecture-backend.md, (File) added more coverate for Unit test Apr 4, 20263 weeks ago" [ref=e456]:
+                    - cell "architecture-backend.md, (File)" [ref=e457]:
+                      - generic [ref=e458]:
+                        - img [ref=e459]
+                        - link "architecture-backend.md, (File)" [ref=e464] [cursor=pointer]:
+                          - /url: /Zenika-Training/ai-driven-dev-labs/blob/demo-start/docs/tech/architecture-backend.md
+                          - text: architecture-backend.md
+                    - cell "added more coverate for Unit test" [ref=e465]:
+                      - link "added more coverate for Unit test" [ref=e468] [cursor=pointer]:
+                        - /url: /Zenika-Training/ai-driven-dev-labs/commit/a73796f48488bb00485d5086ba3d283645dbb425
+                    - cell "Apr 4, 20263 weeks ago" [ref=e469]:
+                      - generic [ref=e470]: Apr 4, 20263 weeks ago
+                  - row "architecture-frontend.md, (File) Add architecture-frontend.md changes from features/adding-agent-support Apr 5, 20263 weeks ago" [ref=e471]:
+                    - cell "architecture-frontend.md, (File)" [ref=e472]:
+                      - generic [ref=e473]:
+                        - img [ref=e474]
+                        - link "architecture-frontend.md, (File)" [ref=e479] [cursor=pointer]:
+                          - /url: /Zenika-Training/ai-driven-dev-labs/blob/demo-start/docs/tech/architecture-frontend.md
+                          - text: architecture-frontend.md
+                    - cell "Add architecture-frontend.md changes from features/adding-agent-support" [ref=e480]:
+                      - link "Add architecture-frontend.md changes from features/adding-agent-support" [ref=e483] [cursor=pointer]:
+                        - /url: /Zenika-Training/ai-driven-dev-labs/commit/afc48db8de2216bcca675814c5b11e84f669ed26
+                    - cell "Apr 5, 20263 weeks ago" [ref=e484]:
+                      - generic [ref=e485]: Apr 5, 20263 weeks ago
+  - alert [ref=e489]

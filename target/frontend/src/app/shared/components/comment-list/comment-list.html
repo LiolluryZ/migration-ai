@@ -1,0 +1,74 @@
+@if (auth.isAuthenticated()) {
+  <!-- Comment form — BR-040: authenticated users only -->
+  <form class="card comment-form" (ngSubmit)="submitComment()">
+    <div class="card-block">
+      <textarea
+        class="form-control"
+        placeholder="Write a comment..."
+        rows="3"
+        name="body"
+        [ngModel]="newBody()"
+        (ngModelChange)="newBody.set($event)"
+      ></textarea>
+    </div>
+    <div class="card-footer">
+      @if (auth.currentUser()?.image) {
+        <img [src]="auth.currentUser()!.image!" class="comment-author-img" alt="" />
+      }
+      <button
+        type="submit"
+        class="btn btn-sm btn-primary"
+        [disabled]="submitting() || !newBody().trim()"
+      >
+        Post Comment
+      </button>
+    </div>
+    @if (submitError()) {
+      <p class="error-messages">{{ submitError() }}</p>
+    }
+  </form>
+} @else {
+  <!-- BR-040: prompt unauthenticated users -->
+  <p class="comment-auth-prompt">
+    <a routerLink="/login">Sign in</a> or <a routerLink="/register">sign up</a> to add comments on this article.
+  </p>
+}
+
+<!-- Comment list — BR-043: ordered most-recent-first by server -->
+@if (loadingComments()) {
+  <p>Loading comments...</p>
+} @else {
+  @for (comment of comments(); track comment.id) {
+    <div class="card">
+      <div class="card-block">
+        <p class="card-text">{{ comment.body }}</p>
+      </div>
+      <div class="card-footer">
+        <a
+          [routerLink]="['/profile', comment.author.username]"
+          class="comment-author"
+        >
+          @if (comment.author.image) {
+            <img [src]="comment.author.image" class="comment-author-img" alt="" />
+          }
+        </a>
+        &nbsp;
+        <a
+          [routerLink]="['/profile', comment.author.username]"
+          class="comment-author"
+        >
+          {{ comment.author.username }}
+        </a>
+        <span class="date-posted">{{ comment.createdAt | date:'MMMM d, y' }}</span>
+        @if (canDelete(comment)) {
+          <!-- BR-041: show delete button to comment author OR article author -->
+          <span class="mod-options">
+            <i class="ion-trash-a" (click)="deleteComment(comment)" style="cursor:pointer" title="Delete comment"></i>
+          </span>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p>No comments yet. Be the first to comment!</p>
+  }
+}

@@ -1,0 +1,362 @@
+{
+  "generated_at": "2026-04-29T10:00:00Z",
+  "agent": "24-comparateur-surface-api",
+  "dynamic_comparison": false,
+  "note": "Comparaison statique uniquement — apps non démarrées. Sources analysées: legacy/apps/*/urls.py + legacy/apps/*/views.py + target/backend/src/modules/*/routes.ts",
+  "confidence": 91,
+  "verdict": "compatible",
+
+  "summary": {
+    "legacy_endpoints": 18,
+    "target_endpoints": 19,
+    "matched": 17,
+    "missing": 1,
+    "added": 5,
+    "modified": 0,
+    "notes": "Toutes les différences de chemin/verbe sont des transformations SSR→REST attendues (Strangler Fig). Verdict 'compatible' car la seule route absente (POST /logout) est intentionnellement omise par l'architecture JWT — le client SPA gère la déconnexion en supprimant le token. 0 breaking change détecté."
+  },
+
+  "matched": [
+    {
+      "id": "M-01",
+      "legacy_method": "POST",
+      "legacy_path": "/login",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "login_view" },
+      "target_method": "POST",
+      "target_path": "/api/users/login",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "loginHandler" },
+      "path_changed": true,
+      "method_changed": false,
+      "body_format_changed": "form-encoded → JSON { user: { email, password } }",
+      "response_format_changed": "HTML redirect → JSON { user: { email, token, username, bio, image } }",
+      "classification": "compatible",
+      "notes": "Transformation SSR→REST attendue. BR-011 (message générique invalide) et BR-006 (JWT) correctement implémentés."
+    },
+    {
+      "id": "M-02",
+      "legacy_method": "POST",
+      "legacy_path": "/register",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "register_view" },
+      "target_method": "POST",
+      "target_path": "/api/users",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "registerHandler" },
+      "path_changed": true,
+      "method_changed": false,
+      "body_format_changed": "form-encoded → JSON { user: { username, email, password } }",
+      "response_format_changed": "HTML redirect + cookie session → JSON { user: { email, token, username, bio, image } } + 201",
+      "classification": "compatible",
+      "notes": "BR-013 (unicité email/username), BR-014 (auto-login→JWT) correctement implémentés."
+    },
+    {
+      "id": "M-03",
+      "legacy_method": "GET",
+      "legacy_path": "/settings",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "settings_view (GET branch)" },
+      "target_method": "GET",
+      "target_path": "/api/user",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "getCurrentUserHandler" },
+      "path_changed": true,
+      "method_changed": false,
+      "response_format_changed": "HTML settings form → JSON { user: { email, token, username, bio, image } }",
+      "classification": "compatible",
+      "notes": "Auth: session cookie → JWT Bearer. BR-005 (auth required) implémenté."
+    },
+    {
+      "id": "M-04",
+      "legacy_method": "POST",
+      "legacy_path": "/settings",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "settings_view (POST branch)" },
+      "target_method": "PUT",
+      "target_path": "/api/user",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "updateUserHandler" },
+      "path_changed": true,
+      "method_changed": true,
+      "method_change_detail": "POST → PUT (REST convention pour update complet)",
+      "body_format_changed": "form-encoded SettingsForm → JSON { user: { email?, username?, bio?, image?, password? } }",
+      "response_format_changed": "HTML redirect profile → JSON { user: { ... } } + fresh JWT",
+      "classification": "compatible",
+      "notes": "BR-015 (champs optionnels, re-hash mot de passe, refresh JWT) correctement implémenté. Changement de verbe POST→PUT est une normalisation REST standard."
+    },
+    {
+      "id": "M-05",
+      "legacy_method": "GET",
+      "legacy_path": "/profile/:username",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "profile_view" },
+      "target_method": "GET",
+      "target_path": "/api/profiles/:username",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "getProfileHandler" },
+      "path_changed": true,
+      "method_changed": false,
+      "response_format_changed": "HTML page (profile + articles list) → JSON { profile: { username, bio, image, following } }",
+      "classification": "compatible",
+      "notes": "La liste des articles du profil est séparée en GET /api/articles?author=:username (SPA Angular). BR-010 (following asymétrique) correctement implémenté."
+    },
+    {
+      "id": "M-06",
+      "legacy_method": "GET",
+      "legacy_path": "/profile/:username/favorites",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "profile_favorites_view" },
+      "target_method": "GET",
+      "target_path": "/api/articles?favorited=:username",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "listArticles (favorited filter)" },
+      "path_changed": true,
+      "method_changed": false,
+      "restructuring": "Sous-page profile/favorites → query param de la liste articles principale",
+      "classification": "compatible",
+      "notes": "Couverture fonctionnelle identique via filtre ?favorited=. L'Angular ProfileComponent effectue GET /api/articles?favorited=:username pour l'onglet 'favoris'. Aucune perte de donnée."
+    },
+    {
+      "id": "M-07",
+      "legacy_method": "POST",
+      "legacy_path": "/profile/:username/follow",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "follow_view (toggle)" },
+      "target_method": "POST",
+      "target_path": "/api/profiles/:username/follow",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "followHandler" },
+      "path_changed": true,
+      "method_changed": false,
+      "behavior_change": "Toggle unique (follow si pas suivi, unfollow si suivi) → POST=follow explicite + DELETE=unfollow explicite (voir entrée ADDED A-02)",
+      "classification": "compatible",
+      "notes": "Split du toggle en deux verbes REST est une amélioration de clarté. BR-010 (idempotent) respecté. Le frontend Angular détermine le verbe selon l'état `following`. Auto-follow silencieux préservé (following=false sans insert)."
+    },
+    {
+      "id": "M-08",
+      "legacy_method": "GET",
+      "legacy_path": "/",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "home_view" },
+      "target_method": "GET",
+      "target_path": "/api/articles",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "listArticles" },
+      "path_changed": true,
+      "method_changed": false,
+      "response_format_changed": "HTML page → JSON { articles: [...], articlesCount: N }",
+      "classification": "compatible",
+      "notes": "Supporte les mêmes filtres: ?feed=following, ?tag=, ?author=, page. BR-026 (tabs), BR-028 (pagination 10/page, DESC) correctement implémentés."
+    },
+    {
+      "id": "M-09",
+      "legacy_method": "GET",
+      "legacy_path": "/tag/:tag",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "tag_view" },
+      "target_method": "GET",
+      "target_path": "/api/articles?tag=:tag",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "listArticles (tag filter)" },
+      "path_changed": true,
+      "method_changed": false,
+      "restructuring": "Route dédiée /tag/:tag → query param ?tag= de la liste articles",
+      "classification": "compatible",
+      "notes": "Couverture fonctionnelle identique. BR-026 (filtre tag) implémenté. La normalisation des tags en lowercase (BR-026) gérée dans syncTags."
+    },
+    {
+      "id": "M-10",
+      "legacy_method": "POST",
+      "legacy_path": "/editor",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "article_create_view (POST branch)" },
+      "target_method": "POST",
+      "target_path": "/api/articles",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "createArticle" },
+      "path_changed": true,
+      "method_changed": false,
+      "body_format_changed": "form-encoded ArticleForm → JSON { article: { title, description, body, tagList } }",
+      "response_format_changed": "HTML redirect → JSON { article: { slug, title, description, body, tagList, ... } } + 201",
+      "classification": "compatible",
+      "notes": "BR-022 (titre obligatoire), BR-023 (slug auto-généré unique à la création), BR-033 (auth required) correctement implémentés."
+    },
+    {
+      "id": "M-11",
+      "legacy_method": "GET",
+      "legacy_path": "/editor/:slug",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "article_edit_view (GET branch)" },
+      "target_method": "GET",
+      "target_path": "/api/articles/:slug",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "getArticle" },
+      "path_changed": true,
+      "method_changed": false,
+      "response_format_changed": "HTML editor form (instance=article) → JSON { article: { ... } }",
+      "classification": "compatible",
+      "notes": "GET /api/articles/:slug retourne les données de l'article nécessaires à l'EditorComponent. BR-030 (404 si non trouvé) correctement implémenté."
+    },
+    {
+      "id": "M-12",
+      "legacy_method": "POST",
+      "legacy_path": "/editor/:slug",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "article_edit_view (POST branch)" },
+      "target_method": "PATCH",
+      "target_path": "/api/articles/:slug",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "updateArticle" },
+      "path_changed": true,
+      "method_changed": true,
+      "method_change_detail": "POST → PATCH (REST convention pour mise à jour partielle)",
+      "body_format_changed": "form-encoded ArticleForm → JSON { article: { title?, description?, body?, tagList? } }",
+      "response_format_changed": "HTML redirect → JSON { article: { ... } }",
+      "classification": "compatible",
+      "notes": "BR-023 CRITICAL (slug immuable) explicitement enforced: rejet 422 si 'slug' présent dans le body. BR-034 (non-owner → 404) correctement implémenté."
+    },
+    {
+      "id": "M-13",
+      "legacy_method": "GET",
+      "legacy_path": "/article/:slug",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "article_detail_view" },
+      "target_method": "GET",
+      "target_path": "/api/articles/:slug",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "getArticle" },
+      "path_changed": true,
+      "method_changed": false,
+      "response_format_changed": "HTML page (article + comments embedded) → JSON { article: { ... } } — comments séparés en GET /api/articles/:slug/comments",
+      "classification": "compatible",
+      "notes": "La séparation article/comments est obligatoire pour l'architecture SPA. Les deux endpoints ensemble couvrent le contenu de l'ancienne page article_detail. BR-030 (404) implémenté."
+    },
+    {
+      "id": "M-14",
+      "legacy_method": "POST",
+      "legacy_path": "/article/:slug/delete",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "article_delete_view" },
+      "target_method": "DELETE",
+      "target_path": "/api/articles/:slug",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "deleteArticle" },
+      "path_changed": true,
+      "method_changed": true,
+      "method_change_detail": "POST /article/:slug/delete → DELETE /api/articles/:slug (REST convention)",
+      "response_format_changed": "HTML redirect home → 204 No Content",
+      "classification": "compatible",
+      "notes": "BR-035 (auth + owner check, 404 non-owner) correctement implémenté. CASCADE commentaires configuré (Article.hasMany(Comment, { hooks:true }))."
+    },
+    {
+      "id": "M-15",
+      "legacy_method": "POST",
+      "legacy_path": "/article/:slug/favorite",
+      "legacy_handler": { "file": "apps/articles/views.py", "function": "article_favorite_view (toggle)" },
+      "target_method": "POST",
+      "target_path": "/api/articles/:slug/favorite",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "toggleFavorite (POST branch)" },
+      "path_changed": true,
+      "method_changed": false,
+      "behavior_change": "Toggle unique → POST=add favorite + DELETE=remove favorite (voir entrée ADDED A-01)",
+      "response_format_changed": "HTML partial HTMX / redirect → JSON { article: { ... } }",
+      "classification": "compatible",
+      "notes": "BR-036 (toggle → split POST/DELETE) approuvé review cycle. BR-025 (favoritesCount recalculé depuis DB, sans cache) correctement implémenté. L'Angular frontend gère le verbe selon `article.favorited`."
+    },
+    {
+      "id": "M-16",
+      "legacy_method": "POST",
+      "legacy_path": "/article/:slug/comment",
+      "legacy_handler": { "file": "apps/comments/views.py", "function": "comment_create_view" },
+      "target_method": "POST",
+      "target_path": "/api/articles/:slug/comments",
+      "target_handler": { "file": "target/backend/src/modules/comments/comments.routes.ts", "function": "createComment" },
+      "path_changed": true,
+      "method_changed": false,
+      "body_format_changed": "form-encoded { body } → JSON { comment: { body } }",
+      "response_format_changed": "HTML partial HTMX / redirect → JSON { comment: { id, createdAt, updatedAt, body, author } } + 201",
+      "classification": "compatible",
+      "notes": "BR-039 (body non vide, 422 si vide — adaptation REST acceptée vs silent-skip legacy). BR-040 (auth required) implémenté."
+    },
+    {
+      "id": "M-17",
+      "legacy_method": "POST",
+      "legacy_path": "/article/:slug/comment/:id/delete",
+      "legacy_handler": { "file": "apps/comments/views.py", "function": "comment_delete_view" },
+      "target_method": "DELETE",
+      "target_path": "/api/articles/:slug/comments/:id",
+      "target_handler": { "file": "target/backend/src/modules/comments/comments.routes.ts", "function": "deleteComment" },
+      "path_changed": true,
+      "method_changed": true,
+      "method_change_detail": "POST /article/:slug/comment/:id/delete → DELETE /api/articles/:slug/comments/:id (REST convention)",
+      "response_format_changed": "HTML partial HTMX / redirect → 204 No Content",
+      "classification": "compatible",
+      "notes": "BR-041 CRITICAL (double auth: auteur commentaire OU auteur article → 403) correctement implémenté avec De Morgan exact. 3 tests dédiés validés."
+    }
+  ],
+
+  "missing": [
+    {
+      "id": "MISS-01",
+      "legacy_method": "POST",
+      "legacy_path": "/logout",
+      "legacy_handler": { "file": "apps/accounts/views.py", "function": "logout_view" },
+      "severity": "info",
+      "breaking": false,
+      "justification": "Architecture JWT sans session serveur. La déconnexion est gérée côté client SPA (suppression du token Bearer en mémoire / localStorage). Il n'y a pas de session à invalider côté serveur sauf si une blacklist JWT est souhaitée.",
+      "recommendation": "ACCEPTABLE pour l'architecture SPA/JWT. Si une blacklist JWT est requise (ex: tokens long-lived, exigence sécurité), prévoir un endpoint POST /api/users/logout + table token_blacklist.",
+      "action_required": false
+    }
+  ],
+
+  "added": [
+    {
+      "id": "ADD-01",
+      "target_method": "DELETE",
+      "target_path": "/api/articles/:slug/favorite",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "toggleFavorite (DELETE branch)" },
+      "reason": "Split du toggle Django POST /article/:slug/favorite en deux verbes REST explicites. Nécessaire pour l'architecture SPA : le client doit pouvoir dispatcher POST (add) vs DELETE (remove) selon l'état `article.favorited`.",
+      "legacy_coverage": "Couvre la branche 'remove favorite' de l'ancien toggle",
+      "agent_23_referral": true,
+      "notes": "Non-breaking — fonctionnellement équivalent au toggle legacy. Approuvé en review cycle (agent 21)."
+    },
+    {
+      "id": "ADD-02",
+      "target_method": "DELETE",
+      "target_path": "/api/profiles/:username/follow",
+      "target_handler": { "file": "target/backend/src/modules/accounts/accounts.routes.ts", "function": "unfollowHandler" },
+      "reason": "Split du toggle Django POST /profile/:username/follow en POST/DELETE REST. Couvre la branche 'unfollow' de l'ancien unique toggle.",
+      "legacy_coverage": "Couvre la branche 'unfollow' de l'ancien toggle follow_view",
+      "agent_23_referral": true,
+      "notes": "Non-breaking. BR-010 (idempotent) respecté pour les deux verbes."
+    },
+    {
+      "id": "ADD-03",
+      "target_method": "GET",
+      "target_path": "/api/articles/:slug/comments",
+      "target_handler": { "file": "target/backend/src/modules/comments/comments.routes.ts", "function": "listComments" },
+      "reason": "Endpoint obligatoire pour l'architecture SPA. Dans le legacy Django, les commentaires étaient chargés inline dans la vue SSR article_detail_view (embedded queryset). L'Angular ArticleDetailComponent doit les récupérer via un endpoint dédié.",
+      "legacy_coverage": "Couvre la liste des commentaires qui était embarquée dans GET /article/:slug (article_detail_view context['comments'])",
+      "agent_23_referral": false,
+      "notes": "Non-breaking — nouvel endpoint purement additionnel. BR-043 (ordre anti-chronologique) implémenté. Accès public (anonymous read)."
+    },
+    {
+      "id": "ADD-04",
+      "target_method": "GET",
+      "target_path": "/api/tags",
+      "target_handler": { "file": "target/backend/src/modules/articles/articles.routes.ts", "function": "inline handler in articleRoutes" },
+      "reason": "Dans le legacy, la liste des tags populaires était injectée dans le contexte de la vue SSR home_view via cache.get_or_set('all_tags', ...). Pour la SPA, un endpoint REST dédié est nécessaire pour alimenter la sidebar Angular.",
+      "legacy_coverage": "Couvre Tag.objects.all() qui était injecté dans le contexte Django home",
+      "agent_23_referral": false,
+      "notes": "Non-breaking. Tags triés alphabétiquement (vs 'tous les tags' non triés en legacy). Cache de 5 min supprimé côté API — la SPA peut implémenter son propre cache HTTP."
+    },
+    {
+      "id": "ADD-05",
+      "target_method": "GET",
+      "target_path": "/api/health",
+      "target_handler": { "file": "target/backend/src/routes/health.ts", "function": "healthRoutes" },
+      "reason": "Endpoint d'infrastructure requis par le plan de migration (migration_plan.json :: validation_checkpoint). Aucun équivalent dans le legacy Django. Utilisé par les probes liveness (Docker, Kubernetes, load balancer).",
+      "legacy_coverage": "Aucun équivalent legacy — infrastructure uniquement",
+      "agent_23_referral": false,
+      "notes": "Non-breaking. Infrastructure pure, hors périmètre fonctionnel métier."
+    }
+  ],
+
+  "modified": [],
+
+  "blocking_issues": [],
+
+  "conditions_for_compatible": [
+    "POST /logout absent : acceptable si l'architecture JWT ne nécessite pas de blacklist côté serveur. Si des tokens long-lived sont utilisés, envisager une blacklist JWT.",
+    "BR-039 (commentaire vide) : le legacy ignorait silencieusement un body vide ; la cible retourne 422. Le frontend Angular guard empêche la soumission d'un formulaire vide — comportement utilisateur identique.",
+    "Favoris / Follow toggle→split : le frontend Angular implémente la logique POST vs DELETE selon l'état local `favorited`/`following`. Si un client tiers utilisait le POST toggle legacy, il doit être mis à jour.",
+    "Tags : la liste est désormais triée alphabétiquement (vs non garanti en legacy). Pas d'impact UX négatif."
+  ],
+
+  "performance_summary": {
+    "note": "Comparaison dynamique non effectuée (apps non démarrées au moment de l'analyse).",
+    "routes_with_degradation": 0,
+    "avg_degradation_percent": 0,
+    "worst_route": null
+  },
+
+  "coverage_matrix": {
+    "total_legacy_functional_actions": 18,
+    "covered_in_target": 17,
+    "coverage_percent": 94.4,
+    "uncovered": ["POST /logout (intentionnel, architecture JWT)"]
+  }
+}

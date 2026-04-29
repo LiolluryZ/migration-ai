@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health';
 import articlesModule from '../modules/articles/articles.module';
 import accountsModule from '../modules/accounts/accounts.module';
+import commentsModule from '../modules/comments/comments.module';
 
 // Root API router — registers all route modules under the /api prefix.
 //
@@ -20,6 +21,6 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
   // Sprint 3: accounts module (login, register, user, profiles)
   fastify.register(accountsModule, { prefix: '/api' });
 
-  // TODO(sprint-4 / 18-traducteur comments): register comment routes
-  //   fastify.register(commentRoutes, { prefix: '/api' });
+  // Sprint 4: comments module
+  fastify.register(commentsModule, { prefix: '/api' });
 }
