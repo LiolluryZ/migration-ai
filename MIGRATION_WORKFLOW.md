@@ -6,6 +6,45 @@
 
 ---
 
+## Le projet fil rouge : Conduit RealWorld
+
+[Conduit](https://github.com/gothinkster/realworld) est l'application de référence du projet [RealWorld](https://codebase.show/projects/realworld) — une spécification de blog fullstack (type Medium) implémentée dans des dizaines de stacks différentes. Elle est conçue précisément pour comparer des technologies : la spécification fonctionnelle est identique d'une implémentation à l'autre, ce qui en fait un cas de migration idéal.
+
+### L'application legacy
+
+L'implémentation source est une application **Django 5.2 / Python 3.12** avec rendu côté serveur et interactions dynamiques via **HTMX 2.x**. Elle suit l'architecture Django classique : vues function-based, formulaires Django, templates Jinja2, base SQLite3.
+
+| Composant | Technologie |
+|-----------|------------|
+| Framework backend | Django 5.2 |
+| Langage | Python 3.12 |
+| Base de données | SQLite3 (PostgreSQL en prod) |
+| Interactions dynamiques | HTMX 2.x (échanges de fragments HTML) |
+| Gestion des tags | django-taggit |
+| Rendu Markdown | markdown + nh3 (sanitization) |
+| Authentification | Sessions Django (cookie httpOnly) |
+| Tests | pytest-django |
+
+L'application expose **6 modules** (`helpers`, `config`, `accounts`, `articles`, `comments`, `templates`).
+
+### La migration souhaitée
+
+L'objectif est de remplacer l'architecture SSR+HTMX par une architecture moderne découplée :
+
+| | Legacy | Cible |
+|--|--------|-------|
+| **Backend** | Django monolithique (HTML + logique) | **Fastify 4.x** — API JSON pure (REST) |
+| **Frontend** | Templates Jinja2 + HTMX | **Angular 21** — SPA standalone avec signals |
+| **Authentification** | Session cookie Django | **JWT Bearer** (7 jours) |
+| **ORM** | Django ORM | **Sequelize 6.x** + sequelize-typescript |
+| **Langage** | Python 3.12 | **TypeScript 5.x** (backend + frontend) |
+| **Tests** | pytest-django | **Jest** (backend) + **Playwright** (E2E) |
+| **Sécurité XSS** | nh3 côté serveur | **DOMPurify + marked** côté client |
+
+Cette migration est représentative d'un cas réel : changement de paradigme complet (SSR → SPA), changement de langage (Python → TypeScript), changement d'architecture d'authentification, et incompatibilités de données (hashes de mots de passe, format des tags). Tous les défis habituels d'une migration legacy se concentrent ici.
+
+---
+
 ## Table des matières
 
 1. [Le problème réel des migrations](#1-le-problème-réel-des-migrations)
@@ -257,18 +296,18 @@ L'indice d'instabilité $I = \frac{C_e}{C_a + C_e}$ classe les modules par risqu
 
 | Valeur de I | Nature du module | Ordre de migration |
 |-------------|------------------|--------------------|
-| I ≈ 0 | Stable, très dépendant d'autres | **Migrer en premier** (fondations) |
+| I ≈ 0 | Stable, très indépendant d'autres | **Migrer en premier** (fondations) |
 | I ≈ 0.5 | Couplé dans les deux sens | Migrer avec adaptateurs de coexistence |
-| I ≈ 1 | Instable, peu de dépendants | **Migrer en dernier** (feuilles) |
+| I ≈ 1 | Instable, très dépendants | **Migrer en dernier** (feuilles) |
 
 Sur la migration Conduit, cela a produit l'ordre suivant :
 
 ```mermaid
 graph LR
-    H["helpers\nI=0.0 — low"] --> A["articles\nI=0.25 — high"]
-    A --> AC["accounts\nI=0.5 — high"]
-    AC --> CO["comments\nI=0.67 — low"]
-    CO --> T["templates\nI=1.0 — very_high"]
+    H["helpers<br/>I=0.0 — low"] --> A["articles<br/>I=0.25 — high"]
+    A --> AC["accounts<br/>I=0.5 — high"]
+    AC --> CO["comments<br/>I=0.67 — low"]
+    CO --> T["templates<br/>I=1.0 — very_high"]
     
     style H fill:#22c55e,color:#fff
     style A fill:#84cc16,color:#fff
@@ -338,12 +377,12 @@ stateDiagram-v2
     [*] --> INIT : Utilisateur ouvre l'éditeur
     INIT --> FORM_DISPLAYED : GET /editor
     FORM_DISPLAYED --> VALIDATING : POST /editor (soumission)
-    VALIDATING --> FORM_DISPLAYED : Données invalides\n(titre vide, slug dupliqué)
+    VALIDATING --> FORM_DISPLAYED : Données invalides<br/>(titre vide, slug dupliqué)
     VALIDATING --> SLUG_GENERATED : Données valides
     SLUG_GENERATED --> SAVED : INSERT article en base
     SAVED --> REDIRECT : 302 vers /article/:slug
     REDIRECT --> ARTICLE_VISIBLE : GET /article/:slug
-    SAVED --> ERROR_409 : Contrainte UNIQUE slug\n(titre déjà utilisé)
+    SAVED --> ERROR_409 : Contrainte UNIQUE slug<br/>(titre déjà utilisé)
     ERROR_409 --> FORM_DISPLAYED : Message d'erreur affiché
     FORM_DISPLAYED --> [*] : Utilisateur abandonne
 ```
@@ -359,7 +398,7 @@ graph TD
     subgraph m["Matrice RBAC — extrait"]
         direction LR
         E2["DELETE /articles/:slug/comments/:id"] -->|anonymous| D4["401 Unauthorized"]
-        E2 -->|authenticated tiers| D5["403 Forbidden\nBR-041 double condition"]
+        E2 -->|authenticated tiers| D5["403 Forbidden<br/>BR-041 double condition"]
         E2 -->|auteur du commentaire| D6["204 No Content"]
         E2 -->|auteur de l'article| D7["204 No Content — BR-041"]
     end
@@ -375,7 +414,7 @@ C'est la phase qui rend la migration **réversible et vérifiable**. Elle produi
 
 ```mermaid
 mindmap
-  root((Harnais de tests\nPhase 2))
+  root((Harnais de tests<br/>Phase 2))
     Tests API
       Fichiers .http par endpoint
       Toutes combinaisons rôle x méthode
@@ -440,13 +479,14 @@ La comparaison est **field-by-field**, pas string-match — ce qui tolère les d
 ### La comparaison visuelle structurelle
 
 L'agent de diff visuel (14) n'effectue pas un diff pixel-à-pixel (trop fragile aux variations de rendu de police). Il analyse la présence des éléments DOM et des classes CSS critiques.
+En cas de changement massif de la structure du DOM, une comparaison par `vision` peut-être faite par l'agent.
 
 ```mermaid
 flowchart LR
-    S1[Screenshot legacy\nbaseline Phase 2] --> A14[Agent 14\nComparateur visuel]
-    S2[Screenshot cible\npost-migration] --> A14
-    A14 --> R1{Structure DOM\nidentique ?}
-    R1 -->|OUI| R2{Classes CSS\ncritiques présentes ?}
+    S1[Screenshot legacy<br/>baseline Phase 2] --> A14[Agent 14<br/>Comparateur visuel]
+    S2[Screenshot cible<br/>post-migration] --> A14
+    A14 --> R1{Structure DOM<br/>identique ?}
+    R1 -->|OUI| R2{Classes CSS<br/>critiques présentes ?}
     R1 -->|NON| BLOCK[REGRESSION BLOQUANTE]
     R2 -->|OUI| OK[PASS]
     R2 -->|NON| WARN[WARNING]
@@ -489,21 +529,21 @@ quadrantChart
     title Patterns technologiques — Effort vs Risque
     x-axis Faible effort --> Fort effort
     y-axis Faible risque --> Fort risque
-    
+
     quadrant-1 Surveiller
     quadrant-2 Prioriser
-    quadrant-3 Déléguer
+    quadrant-3 Deleguer
     quadrant-4 Automatiser
 
-    HTMX partials vs Angular: [0.6, 0.4]
-    urlpatterns vs Fastify routes: [0.7, 0.8]
-    Session cookie vs JWT: [0.8, 0.9]
-    django-taggit vs Tag tables: [0.7, 0.7]
-    slugify vs toLowerCase: [0.1, 0.1]
-    uuid4 vs randomUUID: [0.1, 0.1]
-    login_required vs preHandler: [0.4, 0.3]
-    paginator vs LIMIT OFFSET: [0.3, 0.2]
-    PBKDF2 vs bcrypt: [0.9, 1.0]
+    HTMX vers Angular: [0.6, 0.4]
+    URL routing redesign: [0.7, 0.8]
+    Session vers JWT: [0.8, 0.9]
+    TaggableManager vers tables: [0.7, 0.7]
+    slugify direct: [0.1, 0.1]
+    uuid direct: [0.1, 0.1]
+    Auth decorator vers preHandler: [0.4, 0.3]
+    Paginator vers LIMIT OFFSET: [0.3, 0.2]
+    PBKDF2 vers bcrypt: [0.9, 0.97]
 ```
 
 Les patterns dans le quadrant **haut-droit** (fort effort, fort risque) requièrent une **VALIDATION HUMAINE** avant de commencer la migration du module concerné.
@@ -566,22 +606,22 @@ La Phase 4 est la seule phase d'écriture de code. Elle s'appuie sur toutes les 
 
 ```mermaid
 flowchart TD
-    START([Module sélectionné\nselon le plan Phase 3]) --> T18[Agent 18\nTraducteur]
-    T18 --> CODE[Code cible produit\nbackend + frontend]
-    CODE --> P1[Agent 19\nValidateur conformité]
-    CODE --> P2[Agent 21\nReviewer migration]
+    START([Module sélectionné<br/>selon le plan Phase 3]) --> T18[Agent 18<br/>Traducteur]
+    T18 --> CODE[Code cible produit<br/>backend + frontend]
+    CODE --> P1[Agent 19<br/>Validateur conformité]
+    CODE --> P2[Agent 21<br/>Reviewer migration]
     P1 --> REPORT1{Rapport conformité}
     P2 --> REPORT2{Rapport review}
-    REPORT1 -->|MISSING ou BLOCKER| FIX[Corrections requises\nretour Agent 18]
+    REPORT1 -->|MISSING ou BLOCKER| FIX[Corrections requises<br/>retour Agent 18]
     REPORT2 -->|CHANGES_REQUESTED + BLOCKER| FIX
     FIX --> T18
-    REPORT1 -->|PASS| AGG{Tous les rapports\nnomalement positifs ?}
+    REPORT1 -->|PASS| AGG{Tous les rapports<br/>nomalement positifs ?}
     REPORT2 -->|APPROVED| AGG
     AGG -->|NON| FIX
-    AGG -->|OUI| T20[Agent 20\nComparateur shadow mode]
+    AGG -->|OUI| T20[Agent 20<br/>Comparateur shadow mode]
     T20 --> SHADOW{Diff shadow mode}
     SHADOW -->|Diff significatif non justifié| FIX
-    SHADOW -->|Diff acceptable ou nul| DONE([Module validé ✅\nstate.json mis à jour])
+    SHADOW -->|Diff acceptable ou nul| DONE([Module validé ✅<br/>state.json mis à jour])
 ```
 
 ### L'agent traducteur : traçabilité règle par règle
@@ -627,7 +667,7 @@ sequenceDiagram
             V->>V: ⚠️ Dette documentée dans state.json
         end
     end
-    V-->>R: Rapport conformité\nPASS / CONDITIONAL / BLOCKED
+    V-->>R: Rapport conformité<br/>PASS / CONDITIONAL / BLOCKED
 ```
 
 **Une seule règle MISSING sans justification documentée = migration bloquée.** Ce n'est pas optionnel.
@@ -651,14 +691,14 @@ L'agent 20 rejoue le trafic HTTP enregistré en Phase 2 sur les deux application
 
 ```mermaid
 flowchart LR
-    R["Trafic enregistré\nPhase 2\n133 captures"] --> LB[Replayer parallèle]
-    LB --> LEG[Legacy\nsource]
-    LB --> TGT[Cible\nmigration]
-    LEG --> DIFF[Agent 20\nComparateur]
+    R["Trafic enregistré<br/>Phase 2<br/>133 captures"] --> LB[Replayer parallèle]
+    LB --> LEG[Legacy<br/>source]
+    LB --> TGT[Cible<br/>migration]
+    LEG --> DIFF[Agent 20<br/>Comparateur]
     TGT --> DIFF
-    DIFF --> OK["✅ Identique\naprès normalisation"]
-    DIFF --> DEV["⚠️ Déviation documentée\ndiff attendu et justifié"]
-    DIFF --> REG["❌ Régression\ndiff inattendu — BLOCKER"]
+    DIFF --> OK["✅ Identique<br/>après normalisation"]
+    DIFF --> DEV["⚠️ Déviation documentée<br/>diff attendu et justifié"]
+    DIFF --> REG["❌ Régression<br/>diff inattendu — BLOCKER"]
     
     style REG fill:#ef4444,color:#fff
     style OK fill:#22c55e,color:#fff
@@ -675,15 +715,15 @@ La certification n'est pas binaire. Elle produit un verdict gradué avec justifi
 stateDiagram-v2
     [*] --> AUDIT : Agents 22 + 23 + 24 lancés en parallèle
 
-    AUDIT --> CERTIFIED : confiance ≥ 95%\n0 règle MISSING\n0 OWASP CRITICAL\n0 breaking change API
-    AUDIT --> CONDITIONAL : confiance 80-95%\nconditions résolvables\ndélai défini
-    AUDIT --> FAILED : confiance < 80%\nou règle MISSING bloquante\nou faille sécurité CRITICAL
+    AUDIT --> CERTIFIED : confiance ≥ 95%<br/>0 règle MISSING<br/>0 OWASP CRITICAL<br/>0 breaking change API
+    AUDIT --> CONDITIONAL : confiance 80-95%<br/>conditions résolvables<br/>délai défini
+    AUDIT --> FAILED : confiance < 80%<br/>ou règle MISSING bloquante<br/>ou faille sécurité CRITICAL
 
     CONDITIONAL --> CERTIFIED : conditions résolues + re-audit
     CONDITIONAL --> FAILED : conditions non résolues
 
-    CERTIFIED --> DEPLOY[Déploiement Strangler Fig\nautorisé]
-    FAILED --> P4[Retour Phase 4\nmodule défaillant]
+    CERTIFIED --> DEPLOY : Déploiement Strangler Fig<br/>autorisé
+    FAILED --> P4 : Retour Phase 4<br/>module défaillant
 ```
 
 ### Les trois vérifications en parallèle
@@ -722,19 +762,19 @@ La confiance dans le résultat final ne repose pas sur un seul test ou une seule
 
 ```mermaid
 flowchart TD
-    P0["Phase 0\nCode source analysé\nDépendances cartographiées\nMétriques calculées"]
-    P1["Phase 1\n54 règles formalisées\nLocalisées dans le code source\nConfiance mesurée — seuil 80%"]
-    P2["Phase 2\n98.1% règles couvertes\nCapturés sur le legacy vivant\nGolden files = vérité de référence"]
-    P3["Phase 3\n32 patterns documentés\nIncompatibilités identifiées\nDécisions humaines actées"]
-    P4["Phase 4\nTraduction règle par règle\nValidation mécanique PRESENT/MISSING\nReview fidélité + shadow mode"]
-    P5["Phase 5\nAudit multi-dimensionnel\nCertificat traçable\nCERTIFIED / CONDITIONAL / FAILED"]
+    P0["Phase 0<br/>Code source analysé<br/>Dépendances cartographiées<br/>Métriques calculées"]
+    P1["Phase 1<br/>54 règles formalisées<br/>Localisées dans le code source<br/>Confiance mesurée — seuil 80%"]
+    P2["Phase 2<br/>98.1% règles couvertes<br/>Capturés sur le legacy vivant<br/>Golden files = vérité de référence"]
+    P3["Phase 3<br/>32 patterns documentés<br/>Incompatibilités identifiées<br/>Décisions humaines actées"]
+    P4["Phase 4<br/>Traduction règle par règle<br/>Validation mécanique PRESENT/MISSING<br/>Review fidélité + shadow mode"]
+    P5["Phase 5<br/>Audit multi-dimensionnel<br/>Certificat traçable<br/>CERTIFIED / CONDITIONAL / FAILED"]
 
-    P0 -->|"dépendances contraignent\nl'ordre de migration"| P3
-    P1 -->|"règles alimentent\nla génération de tests"| P2
-    P2 -->|"golden files =\nvérité de référence"| P4
-    P1 -->|"règles =\nchecklist de validation"| P4
-    P3 -->|"patterns orientent\nla traduction"| P4
-    P4 -->|"conformity reports\nalimentent l'audit"| P5
+    P0 -->|"dépendances contraignent<br/>l'ordre de migration"| P3
+    P1 -->|"règles alimentent<br/>la génération de tests"| P2
+    P2 -->|"golden files =<br/>vérité de référence"| P4
+    P1 -->|"règles =<br/>checklist de validation"| P4
+    P3 -->|"patterns orientent<br/>la traduction"| P4
+    P4 -->|"conformity reports<br/>alimentent l'audit"| P5
 
     style P5 fill:#22c55e,color:#fff
     style P0 fill:#3b82f6,color:#fff
@@ -744,17 +784,27 @@ flowchart TD
 
 ### La traçabilité complète d'une règle métier
 
-Chaque règle est traçable de bout en bout, de sa source dans le legacy jusqu'à son test en production :
+Chaque règle est traçable de bout en bout, de sa source dans le legacy jusqu'à son test en production. Ici pour la règle BR-041 (double autorisation de suppression d'un commentaire) :
 
-```
-Audit CERTIFIED 97%
-  └── BR-041 PRESENT  (couverture vérifiée)
-        └── comments.routes.ts:deleteComment:L87
-              └── "if (!isCommentAuthor && !isArticleAuthor)"
-                    └── traduit depuis apps/comments/views.py:35
-                          └── capturé dans golden file endpoint/comments-delete/
-                                └── testé par comments.spec.ts:59 → PASS
-                                      └── matrice RBAC : tiers → 403 confirmé
+```mermaid
+flowchart TD
+    A["🏅 Audit CERTIFIED 97%"]
+    B["BR-041 PRESENT<br/>couverture vérifiée"]
+    C["comments.routes.ts<br/>deleteComment — L87"]
+    D["if not isCommentAuthor<br/>and not isArticleAuthor"]
+    E["Traduit depuis<br/>apps/comments/views.py:35"]
+    F["Capturé dans<br/>golden file comments-delete/"]
+    G["comments.spec.ts:59<br/>→ PASS"]
+    H["Matrice RBAC<br/>tiers → 403 confirmé"]
+
+    A --> B --> C --> D --> E
+    D --> F --> G
+    D --> H
+
+    style A fill:#22c55e,color:#fff
+    style B fill:#3b82f6,color:#fff
+    style G fill:#22c55e,color:#fff
+    style H fill:#22c55e,color:#fff
 ```
 
 Ce niveau de traçabilité permet de répondre à n'importe quelle question de conformité métier des mois après le déploiement.
@@ -767,12 +817,12 @@ La méthode de déploiement est aussi rigoureuse que la méthode de migration. L
 
 ```mermaid
 flowchart TD
-    U[Utilisateurs en production] --> PROXY[Proxy HTTP\nnginx / API Gateway]
+    U[Utilisateurs en production] --> PROXY[Proxy HTTP<br/>nginx / API Gateway]
     
     subgraph stage1["Étape 1 — Shadow (0% trafic visible)"]
         direction LR
         LEG1[Legacy 100%]
-        TGT1["Cible shadow\n0% trafic utilisateur\nmais reçoit une copie"]
+        TGT1["Cible shadow<br/>0% trafic utilisateur<br/>mais reçoit une copie"]
     end
     
     subgraph stage2["Étape 2 — Canary (10%)"]
@@ -790,7 +840,7 @@ flowchart TD
     subgraph stage4["Étape 4 — Full (100%)"]
         direction LR
         TGT4[Cible 100%]
-        LEG4["Legacy standby\n(rollback immédiat si incident)"]
+        LEG4["Legacy standby<br/>(rollback immédiat si incident)"]
     end
     
     PROXY --> stage1
@@ -798,9 +848,9 @@ flowchart TD
     stage2 -->|"0 incident canary"| stage3
     stage3 -->|"métriques stables 48h"| stage4
     
-    TGT2 -.->|"rollback nginx\nen 30 secondes"| PROXY
-    TGT3 -.->|"rollback nginx\nen 30 secondes"| PROXY
-    TGT4 -.->|"legacy conservé\n14 jours"| LEG4
+    TGT2 -.->|"rollback nginx<br/>en 30 secondes"| PROXY
+    TGT3 -.->|"rollback nginx<br/>en 30 secondes"| PROXY
+    TGT4 -.->|"legacy conservé<br/>14 jours"| LEG4
 ```
 
 ### Les adaptateurs de coexistence
